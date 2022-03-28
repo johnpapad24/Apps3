@@ -607,14 +607,11 @@ function generatebeamsdropdownmenu(terrainobjects){
 }
 
 function clearselectedbeam(viewer,terrainobjects){
-  alert(terrainobjects.getCurrentbeamInTerrain);
   if(terrainobjects.getCurrentbeamInTerrain==null){
     return;
   }
   for(var i=0;i<terrainobjects.getCurrentbeamInTerrain.getData.length;i++){
     var str=terrainobjects.getCurrentbeamInTerrain.getName+"_element_"+i;
-    alert(str);
-
     viewer.entities.removeById(str);
   }
 
@@ -628,7 +625,7 @@ function checkandtargetedspotbeaminterrain(viewer,terrainobjects){
   document.getElementById("targetedspotbeamlatitude").setCustomValidity('');
   document.getElementById("targetedspotbeammingain").setCustomValidity('');
   document.getElementById("targetedspotbeammaxgain").setCustomValidity('');
-  document.getElementById("targetedspotbeamsemimajoraxis").setCustomValidity('');
+  document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").setCustomValidity('');
   document.getElementById("targetedspotbeameccentricity").setCustomValidity('');
   document.getElementById("targetedspotbeamstep").setCustomValidity('');
   document.getElementById("targetedspotbeamtightness").setCustomValidity('');
@@ -639,7 +636,7 @@ function checkandtargetedspotbeaminterrain(viewer,terrainobjects){
   document.getElementById("targetedspotbeamlatitudeerror").innerHTML='';
   document.getElementById("targetedspotbeammingainerror").innerHTML='';
   document.getElementById("targetedspotbeammaxgainerror").innerHTML='';
-  document.getElementById("targetedspotbeamsemimajoraxiserror").innerHTML='';
+  document.getElementById("targetedspotbeamsemimajoraxisonmaxgainerror").innerHTML='';
   document.getElementById("targetedspotbeameccentricityerror").innerHTML='';
   document.getElementById("targetedspotbeamsteperror").innerHTML='';
   document.getElementById("targetedspotbeamtightnesserror").innerHTML='';
@@ -652,13 +649,11 @@ function checkandtargetedspotbeaminterrain(viewer,terrainobjects){
       var latitude=document.getElementById("targetedspotbeamlatitude").value;
       var mingain=document.getElementById("targetedspotbeammingain").value;
       var maxgain=document.getElementById("targetedspotbeammaxgain").value;
-      var semimajoraxis=document.getElementById("targetedspotbeamsemimajoraxis").value;
+      var semimajoraxisonmaxgain=document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value;
       var eccentricity=document.getElementById("targetedspotbeameccentricity").value;
       var step=document.getElementById("targetedspotbeamstep").value;
       var tightness=document.getElementById("targetedspotbeamtightness").value;
-
       var rot=document.getElementById("targetedspotbeamrot").value;
-
       var er=0;
 
       if(namestr.trim()==""){
@@ -733,15 +728,15 @@ function checkandtargetedspotbeaminterrain(viewer,terrainobjects){
         }
       }
 
-      if(semimajoraxis.trim()==""){
-        document.getElementById("targetedspotbeamsemimajoraxis").setCustomValidity('Semimajor Axis Gain is required.');
-        document.getElementById("targetedspotbeamsemimajoraxiserror").innerHTML='Semimajor Axis Gain is required.';
+      if(semimajoraxisonmaxgain.trim()==""){
+        document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").setCustomValidity('Semimajor Axis Gain is required.');
+        document.getElementById("targetedspotbeamsemimajoraxisonmaxgainerror").innerHTML='Semimajor Axis Gain is required.';
         er=1;
       }
       else{
-        if(!isNumber(semimajoraxis.trim()) || Number(semimajoraxis.trim())>Number(semimajoraxis.trim())){
-          document.getElementById("targetedspotbeamsemimajoraxis").setCustomValidity('Invalid Min Gain.');
-          document.getElementById("targetedspotbeamsemimajoraxiserror").innerHTML='Invalid Min Gain.';
+        if(!isNumber(semimajoraxisonmaxgain.trim()) || Number(semimajoraxisonmaxgain.trim())>Number(semimajoraxisonmaxgain.trim())){
+          document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").setCustomValidity('Invalid Min Gain.');
+          document.getElementById("targetedspotbeamsemimajoraxisonmaxgainerror").innerHTML='Invalid Min Gain.';
           er=1;
         }
       }
@@ -817,9 +812,10 @@ function checkandtargetedspotbeaminterrain(viewer,terrainobjects){
 
          var bandselect = document.getElementById('targetedspotbeamband');
          var band = bandselect.options[bandselect.selectedIndex].value;
+         semimajoraxisonmaxgain=semimajoraxisonmaxgain*1000;
 
 
-         TargetedSpotbeamGenerator(viewer,terrainobjects,namestr,usage,band,longitude,latitude,maxgain,mingain,semimajoraxis,eccentricity,step,tightness,rot);
+         TargetedSpotbeamGenerator(viewer,terrainobjects,namestr,usage,band,longitude,latitude,maxgain,mingain,semimajoraxisonmaxgain,eccentricity,step,tightness,rot);
 
       }
 }
@@ -853,18 +849,19 @@ function TargetedSpotbeamGenerator(viewer,terrainobjects,beamname,usage,band,loc
   var stepsrequired=Math.ceil((maxgain-mingain)/step)+1;
   var currentgain=maxgain;
   for(var i=0;i<stepsrequired;i++){
-    var semimajoraxis=semimajoraxismaxgain+ i*(semimajoraxismaxgain/tightness);
+    var semimajoraxis=Number(semimajoraxismaxgain)+ i*(Number(semimajoraxismaxgain)/Number(tightness));
     var semiminoraxis=semimajoraxis*Math.sqrt(1-(eccentricity*eccentricity));
+    alert(semimajoraxis);
+    alert(semiminoraxis);
     var idstr=beamname+"_element_"+i;
-    alert(idstr);
     var beamelement=viewer.entities.add({
       id: idstr,
       name: beamname,
       description: "Gain: "+ currentgain+unit,
       position: Cesium.Cartesian3.fromDegrees(locationx, locationy),
          ellipse : {
-          semiMinorAxis : semiminoraxis,
-          semiMajorAxis : semimajoraxis,
+          semiMinorAxis : Number(semiminoraxis),
+          semiMajorAxis : Number(semimajoraxis),
           rotation: Cesium.Math.toRadians(rotationangle),
           material : color,
           zIndex : -1-i
@@ -1636,12 +1633,12 @@ function changegainunit(occasion){
     if(occasion=='U'){
       document.getElementById("targetedspotbeammingainunit").innerHTML="dB/K";
       document.getElementById("targetedspotbeammaxgainunit").innerHTML="dB/K";
-      document.getElementById("targetedspotbeamsemimajoraxisunit").innerHTML="dB/K";
+      document.getElementById("targetedspotbeamsemimajoraxisonmaxgainunit").innerHTML="dB/K";
     }
     else if(occasion=='D'){
       document.getElementById("targetedspotbeammingainunit").innerHTML="dBW";
       document.getElementById("targetedspotbeammaxgainunit").innerHTML="dBW";
-      document.getElementById("targetedspotbeamsemimajoraxisunit").innerHTML="dBW";
+      document.getElementById("targetedspotbeamsemimajoraxisonmaxgainunit").innerHTML="dBW";
     }
 }
 
