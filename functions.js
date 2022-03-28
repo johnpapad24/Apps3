@@ -851,8 +851,7 @@ function TargetedSpotbeamGenerator(viewer,terrainobjects,beamname,usage,band,loc
   for(var i=0;i<stepsrequired;i++){
     var semimajoraxis=Number(semimajoraxismaxgain)+ i*(Number(semimajoraxismaxgain)/Number(tightness));
     var semiminoraxis=semimajoraxis*Math.sqrt(1-(eccentricity*eccentricity));
-    alert(semimajoraxis);
-    alert(semiminoraxis);
+    
     var idstr=beamname+"_element_"+i;
     var beamelement=viewer.entities.add({
       id: idstr,
