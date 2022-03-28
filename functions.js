@@ -612,7 +612,7 @@ function clearselectedbeam(viewer,terrainobjects){
     return;
   }
   for(var i=0;i<terrainobjects.getCurrentbeamInTerrain.getData.length;i++){
-    var str="'"+terrainobjects.getCurrentbeamInTerrain.getName+"_element_"+i+"'";
+    var str=terrainobjects.getCurrentbeamInTerrain.getName+"_element_"+i;
     alert(str);
 
     viewer.entities.removeById(str);
@@ -855,8 +855,10 @@ function TargetedSpotbeamGenerator(viewer,terrainobjects,beamname,usage,band,loc
   for(var i=0;i<stepsrequired;i++){
     var semimajoraxis=semimajoraxismaxgain+ i*(semimajoraxismaxgain/tightness);
     var semiminoraxis=semimajoraxis*Math.sqrt(1-(eccentricity*eccentricity));
+    var idstr=beamname+"_element_"+i;
+    alert(idstr);
     var beamelement=viewer.entities.add({
-      id: beamname+"_element_"+i,
+      id: idstr,
       name: beamname,
       description: "Gain: "+ currentgain+unit,
       position: Cesium.Cartesian3.fromDegrees(locationx, locationy),
