@@ -57,7 +57,7 @@
        switch($(this).attr("data-action")) {
         case "Add dish": var ttext=viewer.entities.getById('locationMarker').label.text.toString(); var etext=ttext.substring(1, ttext.length-1); strarr=etext.split(","); document.getElementById("adddishlongitude").value=strarr[0]; document.getElementById("adddishlatitude").value=strarr[1]; showadddishwindow();  break;
         case "Measure distance": alert("second"); break;
-        case "Get Temperature":  var ttext=viewer.entities.getById('locationMarker').label.text.toString(); var etext=ttext.substring(1, ttext.length-1); document.getElementById("weathersearchInput").value=etext; showweatherwindow();  break;
+        case "Get Temperature":  var ttext=viewer.entities.getById('locationMarker').label.text.toString(); var etext=ttext.substring(1, ttext.length-1); document.getElementById("weathersearchInput").value=etext; showweatherwindow(); getweather();  break;
    }$(".rightclickaction").hide(0);});
 
 
@@ -497,7 +497,7 @@
         </button>
         <ul id="communicationsdropdownmenu" class="dropdown-menu" style="margin-top: 10px;">
           <li><a href="" style="text-align:center;">db fix</a></li>
-          <li><a href="" style="text-align:center;">test1</a></li>
+          <li><a onclick="showweatherwindow();" style="text-align:center;">Show Weather</a></li>
           </ul>
         </div>
 
