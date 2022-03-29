@@ -513,7 +513,7 @@
             <div style="display:inline-block;">°C</div>
           <div style="display:inline-block; min-width:40px; text-align:left;">
           <label class="switch">
-            <input type="checkbox" id="tempunitswitch" onclick="toggletempunitonclick();">
+            <input type="checkbox" id="tempunitswitch" onclick="toggletempunitonclick(5);">
           <span class="slider round"></span>
           </label>
           </div>

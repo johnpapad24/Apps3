@@ -133,11 +133,46 @@ function toggleeciunitonclick(){
   settingssaver('eciunitswitch',document.getElementById("eciunitswitch").checked);
 
 }
-function toggletempunit(){
-  //tbi
+function toggletempunit(maxdays){
+  if(document.getElementById("weatherapp").style.display!="none"){
+    if(document.getElementById("tempunitswitch").checked){
+        liveconverttofarenheit(maxdays);
+      }
+    else{
+      liveconverttocelcius(maxdays);
+    }
+  }
 }
-function toggletempunitonclick(){
-  toggletempunit();
+
+function  liveconverttocelcius(maxdays){
+  var num = document.getElementById("ctempspan").innerHTML;
+  num=num.slice(0,num.length-2);
+  var converted=Math.round((Number(num)-32)/1.800);
+  document.getElementById("ctempspan").innerHTML=converted+"&degC"
+  for(var i=1;i<=maxdays;i++){
+    num=document.getElementById("day"+i+"tempspan").innerHTML;
+    num=num.slice(0,num.length-2);
+    converted=Math.round((Number(num)-32)/1.800);
+    document.getElementById("day"+i+"tempspan").innerHTML=converted+"&degC"
+
+  }
+}
+function liveconverttofarenheit(maxdays){
+  var num = document.getElementById("ctempspan").innerHTML;
+  num=num.slice(0,num.length-2);
+  var converted=Math.round(num*(9/5)+32);
+  document.getElementById("ctempspan").innerHTML=converted+"&degF"
+  for(var i=1;i<=maxdays;i++){
+    num=document.getElementById("day"+i+"tempspan").innerHTML;
+    num=num.slice(0,num.length-2);
+    converted=Math.round(num*(9/5)+32);
+    document.getElementById("day"+i+"tempspan").innerHTML=converted+"&degF"
+
+  }
+}
+
+function toggletempunitonclick(maxdays){
+  toggletempunit(maxdays);
   settingssaver('tempunitswitch',document.getElementById("tempunitswitch").checked);
 
 }
@@ -247,7 +282,7 @@ function loadsetting(setting,value){
   document.getElementById(setting).checked=value;
   switch (setting) {
     case 'tempunitswitch':
-      toggletempunit();
+      toggletempunit(5);
     break;
     case 'lengthunitswitch':
       togglelengthunit();
@@ -521,7 +556,7 @@ function addsatellitetoterrain(viewer,terrainobjects){
 
 
   var positionsOverTime = new Cesium.SampledPositionProperty();
-  for (var i = 0; i < 60*60*6; i+= 6) {
+  for (var i = 0; i < 60*60*600; i+= 6) {
           var time = Cesium.JulianDate.addSeconds(start, i, new Cesium.JulianDate());
           var jsDate = Cesium.JulianDate.toDate(time);
 
@@ -570,6 +605,7 @@ function addsatellitetoterrain(viewer,terrainobjects){
   constructmanagesatellitetable(terrainobjects);
   generatebeamsdropdownmenu(terrainobjects);
 }
+
 
 function generatebeamsdropdownmenu(terrainobjects){
   //clear beams
@@ -851,7 +887,7 @@ function TargetedSpotbeamGenerator(viewer,terrainobjects,beamname,usage,band,loc
   for(var i=0;i<stepsrequired;i++){
     var semimajoraxis=Number(semimajoraxismaxgain)+ i*(Number(semimajoraxismaxgain)/Number(tightness));
     var semiminoraxis=semimajoraxis*Math.sqrt(1-(eccentricity*eccentricity));
-    
+
     var idstr=beamname+"_element_"+i;
     var beamelement=viewer.entities.add({
       id: idstr,
