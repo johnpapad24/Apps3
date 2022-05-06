@@ -98,6 +98,9 @@ class beam{
     get getData(){
       return this.data;
     }
+    set setData(data){
+      this.data=data;
+    }
 }
 
 //functions
@@ -177,29 +180,74 @@ function toggletempunitonclick(maxdays){
 
 }
 
-function togglexaxis(){
-  //tbi
+function togglexaxis(viewer){
+  if(document.getElementById("xaxischeckbox").checked){
+    var pointsx =  Cesium.Cartesian3.fromDegreesArrayHeights([0.0, 0.0, 0.0, 0.0, 0.0, 8000000.0]);
+    viewer.entities.add({
+      id: "X axis",
+      name: "X axis",
+      polyline: {
+        positions: pointsx,
+        width: 20,
+        arcType: Cesium.ArcType.NONE,
+        material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.RED)
+      },
+    });
+  }
+  else{
+    viewer.entities.removeById("X axis");
+  }
 }
-function togglexaxisonclick(){
-  togglexaxis();
+function togglexaxisonclick(viewer){
+  togglexaxis(viewer);
   settingssaver('xaxischeckbox',document.getElementById("xaxischeckbox").checked);
 
 }
 
-function toggleyaxis(){
-  //tbi
+function toggleyaxis(viewer){
+  if(document.getElementById("yaxischeckbox").checked){
+    var pointsy =  Cesium.Cartesian3.fromDegreesArrayHeights([90.0, 0.0, 0.0, 90.0, 0.0, 8000000.0]);
+    viewer.entities.add({
+      id:"Y axis",
+      name: "Y axis",
+      polyline: {
+        positions: pointsy,
+        width: 20,
+        arcType: Cesium.ArcType.NONE,
+        material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.GREEN)
+      },
+    });
+  }
+  else{
+    viewer.entities.removeById("Y axis");
+  }
 }
-function toggleyaxisonclick(){
-  toggleyaxis();
+function toggleyaxisonclick(viewer){
+  toggleyaxis(viewer);
   settingssaver('yaxischeckbox',document.getElementById("yaxischeckbox").checked);
 
 }
 
-function togglezaxis(){
-  //tbi
+function togglezaxis(viewer){
+ if(document.getElementById("zaxischeckbox").checked){
+   var pointsz = Cesium.Cartesian3.fromDegreesArrayHeights([0.0, 90.0, 0.0, 0.0, 90.0, 8000000.0]);
+   viewer.entities.add({
+     id:"Z axis",
+     name: "Z axis",
+     polyline: {
+       positions: pointsz,
+       width: 20,
+       arcType: Cesium.ArcType.NONE,
+       material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.BLUE)
+     },
+   });
+ }
+ else{
+   viewer.entities.removeById("Z axis");
+ }
 }
 function togglezaxisonclick(){
-  togglezaxis();
+  togglezaxis(viewer);
   settingssaver('zaxischeckbox',document.getElementById("zaxischeckbox").checked);
 
 }
@@ -278,7 +326,7 @@ function loadsettings(){
   });
 }
 
-function loadsetting(setting,value){
+function loadsetting(setting,value,viewer){
   document.getElementById(setting).checked=value;
   switch (setting) {
     case 'tempunitswitch':
@@ -291,13 +339,13 @@ function loadsetting(setting,value){
       toggleeciunit();
     break;
     case 'xaxischeckbox':
-      togglexaxis();
+      togglexaxis(viewer);
     break;
     case 'yaxischeckbox':
-      toggleyaxis();
+      toggleyaxis(viewer);
     break;
     case 'zaxischeckbox':
-      togglezaxis();
+      togglezaxis(viewer);
     break;
     case 'darkmodeswitch':
       toggledarkmode();
@@ -305,7 +353,7 @@ function loadsetting(setting,value){
   }
 }
 
-function initializesettings(){
+function initializesettings(viewer){
     document.getElementById("tempunitswitch").checked = false;
     document.getElementById("lengthunitswitch").checked = false;
     document.getElementById("eciunitswitch").checked = false;
@@ -316,9 +364,9 @@ function initializesettings(){
     toggletempunit();
     togglelengthunit();
     toggleeciunit();
-    togglexaxis();
-    toggleyaxis();
-    togglezaxis();
+    togglexaxis(viewer);
+    toggleyaxis(viewer);
+    togglezaxis(viewer);
     toggledarkmode();
 }
 
@@ -338,12 +386,33 @@ function activatedarkmode(){
   if(document.getElementById("settingsdropdown").className.includes("open")){
     document.getElementById("settingsdropdown").className="dropdown dropdown-bubble dropdown-bubble-dark open";
     document.getElementById("settingsdropdownmenu").className="dropdown-menu dropdown-menu-dark";
-    return;
   }
   else{
   document.getElementById("settingsdropdown").className="dropdown dropdown-bubble dropdown-bubble-dark";
   document.getElementById("settingsdropdownmenu").className="dropdown-menu dropdown-menu-dark";
   }
+  var popupwindowcollection = document.getElementsByClassName("popupwindow_content");
+  for (var i=0;i<popupwindowcollection.length;i++){
+      popupwindowcollection[i].className="popupwindow_content popupwindow-dark";
+    }
+  var textinputs= document.querySelectorAll("input[type=text]");
+  for(var i=0;i<textinputs.length;i++){
+    textinputs[i].className="input-dark";
+  }
+  document.getElementById("projectbutton").className="btn btn-dark";
+  document.getElementById("satellitesbutton").className="btn btn-dark";
+  document.getElementById("antennasbutton").className="btn btn-dark";
+  document.getElementById("communicationsbutton").className="btn btn-dark";
+  document.getElementById("settingsbutton").className="btn btn-dark";
+  document.getElementById("beambutton").className="btn btn-dark";
+
+
+  document.getElementById("projecticon").className="projecticon icons-dark";
+  document.getElementById("satellitesicon").className="satellitesicon icons-dark";
+  document.getElementById("antennasicon").className="antennasicon icons-dark";
+  document.getElementById("communicationsicon").className="communicationsicon icons-dark";
+  document.getElementById("settingsicon").className="settingsicon icons-dark";
+
 
 }
 function deactivatedarkmode(){
@@ -367,6 +436,29 @@ function deactivatedarkmode(){
   document.getElementById("settingsdropdown").className="dropdown dropdown-bubble";
   document.getElementById("settingsdropdownmenu").className="dropdown-menu";
   }
+  var popupwindowcollection = document.getElementsByClassName("popupwindow-dark");
+  while(popupwindowcollection.length>0){
+    popupwindowcollection[0].className="popupwindow_content";
+  }
+  var textinputs= document.querySelectorAll("input[type=text]");
+  for(var i=0;i<textinputs.length;i++){
+    textinputs[i].className="";
+  }
+  document.getElementById("projectbutton").className="btn btn-light";
+  document.getElementById("satellitesbutton").className="btn btn-light";
+  document.getElementById("antennasbutton").className="btn btn-light";
+  document.getElementById("communicationsbutton").className="btn btn-light";
+  document.getElementById("settingsbutton").className="btn btn-light";
+  document.getElementById("beambutton").className="btn btn-light";
+
+
+  document.getElementById("projecticon").className="projecticon";
+  document.getElementById("satellitesicon").className="satellitesicon";
+  document.getElementById("antennasicon").className="antennasicon";
+  document.getElementById("communicationsicon").className="communicationsicon";
+  document.getElementById("settingsicon").className="settingsicon";
+
+
 }
 
 function testPos(positionCartographic){
@@ -616,9 +708,10 @@ function generatebeamsdropdownmenu(terrainobjects){
   var standard='<li><a onclick="clearselectedbeam(viewer,terrainobjs);" class="focus" style="text-align:center;">No beam selected</a></li>';
   var genbeam1='<li><a onclick="showgeneratetargetedspotbeamwindow('+"'";
   var genbeam2="'"+');" style="text-align:center;">Generate Targeted Spotbeam</a></li>';
-  var showbeam1='<li><a id="beam_';
-  var showbeam2='" onclick="showbeam(terrainobjs, ';
-  var showbeam3=') style="text-align:center;">';
+  var showbeam1='<li><a id="';
+  var showbeam2='" onclick="beamchooser(viewer,terrainobjs,';
+  var showbeam3=');" style="text-align:center;">';
+  var beamid='';
   document.getElementById("beamdropdownmenuli").innerHTML='';
   for (var i = 0; i<terrainobjects.getSatellitesInTerrain.length;i++){
     if (i==0){
@@ -628,7 +721,8 @@ function generatebeamsdropdownmenu(terrainobjects){
 
     if(terrainobjects.getSatellitesInTerrain[i].getBeams!=null){
       for(var j=0;j<terrainobjects.getSatellitesInTerrain[i].getBeams.length;j++){
-          innerhtml+=showbeam1+terrainobjects.getSatellitesInTerrain[i].getName+ "_"+terrainobjects.getSatellitesInTerrain[i].getBeams[j].name+showbeam2+terrainobjects.getSatellitesInTerrain[i]+'"'+terrainobjects.getSatellitesInTerrain[i].getBeams[j].name+'"'+showbeam3+terrainobjects.getSatellitesInTerrain[i].getBeams[j].name+enda+endli;
+          beamid="satname:_"+terrainobjects.getSatellitesInTerrain[i].getName+"beamname:_"+terrainobjects.getSatellitesInTerrain[i].getBeams[j].name;
+          innerhtml+=showbeam1+beamid+showbeam2+"'"+beamid+"'"+showbeam3+terrainobjects.getSatellitesInTerrain[i].getBeams[j].name+enda+endli;
       }
     }
   }
@@ -919,13 +1013,73 @@ function TargetedSpotbeamGenerator(viewer,terrainobjects,beamname,usage,band,loc
           terrainobjects.getSatellitesInTerrain[i].setBeams=new Array(newbeam);
         }
         else{
+          var t=0;
+          for(var j=0;j<terrainobjects.getSatellitesInTerrain[i].getBeams.length;j++){
+
+            if(terrainobjects.getSatellitesInTerrain[i].getBeams[j].getName==beamname){
+             terrainobjects.getSatellitesInTerrain[i].getBeams[j].setData=currentbeamelements;
+             t=1;
+             break;
+            }
+          }
+          if(t==0){
           terrainobjects.getSatellitesInTerrain[i].getBeams.push(newbeam);
+         }
         }
         break;
     }
   }
   generatebeamsdropdownmenu(terrainobjects);
+  var beamid="satname:_"+value+"beamname:_"+beamname;
+  selectedbeamhighligher(viewer,terrainobjects,beamid);
 }
+
+
+function selectedbeamhighligher(viewer,terrainobjs,beamid){
+  var as = document.getElementById('beamdropdownmenuli').getElementsByTagName('a');
+
+  for(var i=0;i<as.length;i++){
+    if(as[i].className.includes("focus")){
+      as[i].className="";
+    }
+    if(as[i].id==beamid){
+      as[i].className+="focus";
+    }
+  }
+}
+
+function beamchooser(viewer,terrainobjs,beamid){
+  clearselectedbeam(viewer,terrainobjs);
+
+  var as = document.getElementById('beamdropdownmenuli').getElementsByTagName('a');
+
+  for(var i=0;i<as.length;i++){
+    if(as[i].className.includes("focus")){
+      as[i].className="";
+    }
+    if(as[i].id==beamid){
+      as[i].className+="focus";
+      var beamdat=beamid.split("satname:_");
+      var beamdata=beamdat[1].split("beamname:_");
+      for(var j=0;j<terrainobjs.getSatellitesInTerrain.length;j++){
+        if(terrainobjs.getSatellitesInTerrain[j].getName==beamdata[0]){
+          for(var k=0;k<terrainobjs.getSatellitesInTerrain[j].getBeams.length;k++){
+            if(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getName==beamdata[1]){
+              terrainobjs.setCurrentBeamInTerrain=new beam(beamdata[1],terrainobjs.getSatellitesInTerrain[j].getBeams[k].data);
+              terrainobjs.currentbeam=new beam(beamdata[1],terrainobjs.getSatellitesInTerrain[j].getBeams[k].data);
+              for(var l=0; l<terrainobjs.getSatellitesInTerrain[j].getBeams[k].data.length;l++){
+                viewer.entities.add(terrainobjs.getSatellitesInTerrain[j].getBeams[k].data[l]);
+              }
+              break;
+            }
+          }
+          break;
+        }
+      }
+    }
+  }
+}
+
 
 
 function CSVToArray(str, strDelimiter ){
@@ -2111,6 +2265,54 @@ function showweatherwindow(){
   	      collapsedWidth      : undefined,
   });
     $("#weatherwindow").PopupWindow("open");
+}
+
+function showopenprojectwindow(){
+  $('#openprojectwindow').PopupWindow({
+          title: "Open Project",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 200,
+  	      width               : 400,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 200,
+  	      minWidth            : 400,
+  	      collapsedWidth      : undefined,
+  });
+    $("#openprojectwindow").PopupWindow("open");
+}
+
+function showsaveprojectwindow(){
+  $('#openprojectwindow').PopupWindow({
+          title: "Save Project as",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 200,
+  	      width               : 400,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 200,
+  	      minWidth            : 400,
+  	      collapsedWidth      : undefined,
+  });
+    $("#saveprojectwindow").PopupWindow("open");
+}
+
+function showerrorwindow(){
+  $('#errorwindow').PopupWindow({
+          title: "Error Window",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 200,
+  	      width               : 400,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 200,
+  	      minWidth            : 400,
+  	      collapsedWidth      : undefined,
+  });
+    $("#errorwindow").PopupWindow("open");
 }
 
 

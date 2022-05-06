@@ -93,6 +93,33 @@
 </div>
 </div>
 
+<div id="openprojectwindow" style="display:none;">
+  <div style="display: block; margin: auto; text-align:center;">
+    <span style="text-align:center;font-weight:bold; font-size:x-large; ">Open Project</span>
+  </div>
+  <div>
+    <input type="text" id="openfiledir" placeholder="No file chosen..."> <button type="button" class="btn btn-primary" onclick="browsefile();" >Browse...</button>
+    <input id="openfile" type="file" style="display: none;" />
+</div>
+<div style="margin-top:10px">
+  <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+  <button type="button" style="float:right;" class="btn btn-primary" onclick="openproject();" >Open</button>
+</div>
+</div>
+
+<div id="saveprojectwindow" style="display:none;">
+  <div style="display: block; margin: auto; text-align:center;">
+    <span style="text-align:center;font-weight:bold; font-size:x-large; ">Save Project as</span>
+    <input type="text" id="savefiledir"> <input type="file" id="savefile">
+</div>
+<div style="margin-top:10px">
+  <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+  <button type="button" style="float:right;" class="btn btn-primary" onclick="saveproject();" >Save</button>
+</div>
+</div>
+
+
+
 <div id="selectsatellitewindow" style="display: none;">
   <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="selectsatelliteloading">
     <div style="font-weight:bold; font-size:x-large; margin-bottom:10px;">Loading</div>
@@ -454,19 +481,21 @@
 
 <div id="divUpperLeft" style="position:absolute; background:rgba(0,0,0,0); left:10px; top:5px; z-index:2000;">
   <div id="projectdropdown" class="dropdown dropdown-bubble" style="display:inline;"style="display:inline;">
-    <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
-    <span class="projecticon"></span>
+    <button type="button" id="projectbutton" class="btn btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
+    <span class="projecticon" id="projecticon"></span>
     <span style="display:inline-block; height: 32px; vertical-align: middle;">Project</span>
     </button>
     <ul id="projectdropdownmenu" class="dropdown-menu" style="margin-top: 10px;">
-      <li><a href="" style="text-align:center;">Open project</a></li>
-      <li><a href="" style="text-align:center;">Save project</a></li>
+      <li><a onclick="showopenprojectwindow();" style="text-align:center;">Open project</a></li>
+      <li><a onclick="showsaveprojectwindow();" style="text-align:center;">Save project</a></li>
+      <li><a onclick="showsaveprojectwindow();" style="text-align:center;">Save as...</a></li>
+
       </ul>
     </div>
 
     <div id="satellitesdropdown" class="dropdown dropdown-bubble" style="display:inline;">
-      <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
-        <span class="satellitesicon"></span>
+      <button type="button" id="satellitesbutton" class="btn btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
+        <span class="satellitesicon" id="satellitesicon"></span>
         <span style="display:inline-block; height: 32px; vertical-align: middle;">Satellites</span>
       </button>
       <ul id="satellitesdropdownmenu" class="dropdown-menu" style="margin-top: 10px;">
@@ -479,8 +508,8 @@
       </div>
 
       <div id="antennasdropdown" class="dropdown dropdown-bubble" style="display:inline;">
-        <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
-          <span class="antennasicon"></span>
+        <button type="button" id="antennasbutton" class="btn btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
+          <span class="antennasicon" id="antennasicon"></span>
           <span style="display:inline-block; height: 32px; vertical-align: middle;">Antennas</span>
         </button>
         <ul id="antennasdropdownmenu" class="dropdown-menu" style="margin-top: 10px;">
@@ -491,8 +520,8 @@
         </div>
 
       <div id="communicationsdropdown" class="dropdown dropdown-bubble" style="display:inline;">
-        <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
-          <span class="communicationsicon"></span>
+        <button type="button" id="communicationsbutton" class="btn btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
+          <span class="communicationsicon" id="communicationsicon"></span>
           <span style="display:inline-block; height: 32px; vertical-align: middle;">Communications</span>
         </button>
         <ul id="communicationsdropdownmenu" class="dropdown-menu" style="margin-top: 10px;">
@@ -502,8 +531,8 @@
         </div>
 
       <div id="settingsdropdown" class="dropdown dropdown-bubble" style="display:inline;">
-        <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width:32px; height:32px;">
-        <span class="settingsicon"></span>
+        <button type="button" id="settingsbutton" class="btn btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width:32px; height:32px;">
+        <span class="settingsicon" style="margin:0px -2px 0px -3px;" id="settingsicon"></span>
         </button>
       <ul id="settingsdropdownmenu" class="dropdown-menu" style="margin-top: 10px; min-width: 250px;">
         <span style="text-align:center; font-weight:bold; width: 100%; display: block; font-size:18px; ">Settings:</span>
@@ -543,17 +572,17 @@
 
             <span>Show x:</span>
             <div class="md-checkbox" style="display:inline; margin-right: 1.5em;">
-              <input id="xaxischeckbox" type="checkbox" onclick="togglexaxisonclick();">
+              <input id="xaxischeckbox" type="checkbox" onclick="togglexaxisonclick(viewer);">
               <label for="xaxischeckbox"></label>
             </div>
             <span> Show y:</span>
             <div class="md-checkbox" style="display:inline; margin-right:1.5em;">
-              <input id="yaxischeckbox" type="checkbox" onclick="toggleyaxisonclick();">
+              <input id="yaxischeckbox" type="checkbox" onclick="toggleyaxisonclick(viewer);">
               <label for="yaxischeckbox"></label>
             </div>
             <span> Show z:</span>
             <div class="md-checkbox" style="display:inline; margin-left:0.2em">
-              <input id="zaxischeckbox" type="checkbox" onclick="togglezaxisonclick();">
+              <input id="zaxischeckbox" type="checkbox" onclick="togglezaxisonclick(viewer);">
               <label for="zaxischeckbox"></label>
                 </div>
             </div></div>
@@ -571,7 +600,7 @@
         <li><a style="text-align:center;" onclick="showlogwindow();">Show log</a></li>
         </ul>
         <div id="beamdropdown" class="dropdown dropdown-bubble" style="display:inline;">
-          <button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
+          <button type="button" id="beambutton" class="btn btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
             <span style="display:inline-block; height: 32px; vertical-align: middle;">Select Beam...</span>
           </button>
           <ul id="beamdropdownmenu" class="dropdown-menu" style="margin-top: 10px; width:auto; white-space:nowrap;">
@@ -593,7 +622,7 @@
         });
       </script>
       <script>
-      initializesettings();
+      initializesettings(viewer);
       loadsettings();
       </script>
 </div>

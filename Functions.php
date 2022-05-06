@@ -205,7 +205,7 @@ function settingsfileupdater($settingsfile,$setting,$value){
     return false;
   }
   $needle='loadsetting("'.$setting.'",';
-  $newline='loadsetting("'.$setting.'",'.$value.');'."\r\n";
+  $newline='loadsetting("'.$setting.'",'.$value.',viewer);'."\r\n";
   $replaced = false;
   while (!feof($reading)) {
   $line = fgets($reading);

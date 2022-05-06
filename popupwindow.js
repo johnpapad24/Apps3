@@ -452,12 +452,24 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         }
 
         // Content
+        if(document.getElementById("darkmodeswitch").checked==true){
+
+            var content = $("<div>", {
+                class   : "popupwindow_content popupwindow-dark"
+            })
+            .css(_css.content)
+            .appendTo(popupWindow);
+            originalTarget.show().appendTo(content);
+
+        }
+        else{
         var content = $("<div>", {
             class   : "popupwindow_content"
         })
         .css(_css.content)
         .appendTo(popupWindow);
         originalTarget.show().appendTo(content);
+      }
 
         // StatusBar
         if (settings.statusBar) {

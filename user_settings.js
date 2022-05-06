@@ -1,7 +1,7 @@
-loadsetting("tempunitswitch",false);
-loadsetting("lengthunitswitch",false);
-loadsetting("eciunitswitch",false);
-loadsetting("xaxischeckbox",true);
-loadsetting("yaxischeckbox",true);
-loadsetting("zaxischeckbox",true);
-loadsetting("darkmodeswitch",false);
+loadsetting("tempunitswitch",false,viewer);
+loadsetting("lengthunitswitch",false,viewer);
+loadsetting("eciunitswitch",false,viewer);
+loadsetting("xaxischeckbox",true,viewer);
+loadsetting("yaxischeckbox",false,viewer);
+loadsetting("zaxischeckbox",true,viewer);
+loadsetting("darkmodeswitch",true,viewer);
