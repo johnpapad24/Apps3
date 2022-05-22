@@ -120,8 +120,50 @@ function toggledarkmodeonclick(){
 }
 
 function togglelengthunit(){
-  //tbi
+    if(document.getElementById("lengthunitswitch").checked){
+        document.getElementById("distanceunit").innerHTML=" mi";
+        document.getElementById("targetedspotbeamlengthunit").innerHTML=" mi";
+        if(document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value!=""){
+          var smavtoconvert=document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value;
+          smavtoconvert=convertkmtomiles(smavtoconvert);
+          document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value=smavtoconvert;
+        }
+        var toconvert=document.getElementById("distancevalue").innerHTML;
+        toconvert=convertkmtomiles(toconvert);
+        document.getElementById("distancevalue").innerHTML=toconvert;
+
+
+      }
+    else{
+      document.getElementById("distanceunit").innerHTML=" km";
+      document.getElementById("targetedspotbeamlengthunit").innerHTML=" km";
+      if(document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value!=""){
+        var smavtoconvert=document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value;
+        smavtoconvert=convertmilestokm(smavtoconvert);
+        document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value=smavtoconvert;
+      }
+      var toconvert=document.getElementById("distancevalue").innerHTML;
+      toconvert=convertmilestokm(toconvert);
+      document.getElementById("distancevalue").innerHTML=toconvert;
+
+    }
+    for(i=0;i<rullerlocationsarray.length;i++){
+      var distancetext=showlengthinrespecttosettings(rullerlocationsarray[i].value);
+      var distancetexttrimmed=showtrimmedlengthinrespecttosettings(rullerlocationsarray[i].value);
+      rullerlocationsarray[i].label.text=distancetexttrimmed;
+      var description=rullerlocationsarray[i].description.toString();
+
+      var deslines = description.split("<br>");
+      var newdesline2="Distance: "+distancetext;
+      var newdescription=deslines[0]+"<br>"+newdesline2;
+      rullerlocationsarray[i].description=newdescription;
+
+    }
 }
+
+
+
+
 function togglelengthunitonclick(){
   togglelengthunit();
   settingssaver('lengthunitswitch',document.getElementById("lengthunitswitch").checked);
@@ -395,6 +437,7 @@ function activatedarkmode(){
   for (var i=0;i<popupwindowcollection.length;i++){
       popupwindowcollection[i].className="popupwindow_content popupwindow-dark";
     }
+  document.getElementById("rullersemiwindow").className="rullersemiwindow popupwindow-dark";
   var textinputs= document.querySelectorAll("input[type=text]");
   for(var i=0;i<textinputs.length;i++){
     textinputs[i].className="input-dark";
@@ -440,6 +483,7 @@ function deactivatedarkmode(){
   while(popupwindowcollection.length>0){
     popupwindowcollection[0].className="popupwindow_content";
   }
+  document.getElementById("rullersemiwindow").className="rullersemiwindow";
   var textinputs= document.querySelectorAll("input[type=text]");
   for(var i=0;i<textinputs.length;i++){
     textinputs[i].className="";
@@ -478,7 +522,7 @@ viewer.entities.removeById("locationMarker");
 viewer.pickTranslucentDepth = true;
 var locationMarker = viewer.entities.add({
   id : 'locationMarker',
-  name : 'location',
+  name : 'Location',
   position : Cesium.Cartesian3.fromDegrees(position.lng, position.lat, 0),
   point : {
     pixelSize : 5,
@@ -933,6 +977,9 @@ function checkandtargetedspotbeaminterrain(viewer,terrainobjects){
              val=radios[i].value;
            }
          }
+         if(document.getElementById("lengthunitswitch").checked){
+           semimajoraxisonmaxgain=convertmilestokm(semimajoraxisonmaxgain);
+         }
          if(val=="D"){
            usage="D";
          }
@@ -1253,14 +1300,23 @@ function constructmanagedishestable(terrainobjects){
   table.innerHTML = "";
   for(var i=0; i<terrainobjects.getDishesInTerrain.length;i++){
     var row = table.insertRow(i);
+    row.classList="newtr";
     var cell0 = row.insertCell(0);
     var cell1 = row.insertCell(1);
     var cell2 = row.insertCell(2);
     var cell3 = row.insertCell(3);
+    cell0.classList="newtd2";
+    cell1.classList="newtd2";
+    cell2.classList="newtd2";
+    cell3.classList="newtd2";
+    var tBody = table.getElementsByTagName('tbody')[0];
+    tBody.classList="newtbody";
+
     cell0.innerHTML=(i+1)+")";
     cell1.innerHTML='<img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABx0lEQVQ4y5WRP0hbURTGfzd5L7bVaKgl+KeoSLuVcEEEMxSxldIxQjeXLjqIiATFSnGogx3E4FB1kFIQoQop3apDoGlVKkppKEVQBxcVWn3+QU0b85LbJeojxqjfeM+5v++c7wgukSeoAHQg/vOZOFe3XQYAKoBpYNgTVF5PUNmvC9gGxoEd4C3wyhNUjusASgE/8BToA54Az1OrpQECxg0Cho+AoVleVwAv0A/0AkNAG+AC0NLcGoERd6426JtR3Ss9dRpv6tyAL3nr9vxe84cpTO4DcaAY2NMs7g6gSbcJvaYst+Pb59CDO0q9U0LkAI9t0Z33mHxMfUwChwDCAnABS3fz9eISp4OFjahy7q+NyrmXIbv572Y4HB7LFJA1AxOIFeXpLP35CyhxUFDRPNswWa2ESF6UsBVwJIQIxxJJjuJn/Spmdn6vHXhIwLBnB/gLVWWoa/73lqFUWtNhfnkT8DoT5BQgpcS5sVjl+vSCnINNBSROhgCOU+GlX+0sRCmlDnwFahKOvOi619+6W157D9gFvgA/8BeaGQFSSjfQArQDBSnXYWAiEonMkkUnI7mAemDZUqsGfgFXAqwCj6wrWU6bVf8BVq+PaiEcjLUAAAAASUVORK5CYII=">'+ terrainobjects.getDishesInTerrain[i].name;
     cell2.innerHTML='<div> <button onclick="loadeditdishwindow(terrainobjs,'+"'"+terrainobjects.getDishesInTerrain[i].id+"'"+'); showeditdishwindow();" class="btn btn-info" style="transition: all .3s ease;">Edit Dish</button>'
     cell3.innerHTML='<div> Action: <button id='+'"bid_'+terrainobjects.getDishesInTerrain[i].id+'"'+'onclick="changekeepremovebutton('+"'bid_"+terrainobjects.getDishesInTerrain[i].id+"'"+');" class="btn btn-info" style="transition: all .3s ease;">Keep</button></td>';
+
   }
   document.getElementById("mdishesloading").style.display="none";
   document.getElementById("managedishesnoselected").style.display="none";
@@ -1283,10 +1339,17 @@ function constructmanagesatellitetable(terrainobjects){
   table.innerHTML = "";
   for(var i=0; i<terrainobjects.getSatellitesInTerrain.length;i++){
     var row = table.insertRow(i);
+    row.classList="newrow";
     var cell0 = row.insertCell(0);
     var cell1 = row.insertCell(1);
     var cell2 = row.insertCell(2);
     var cell3 = row.insertCell(3);
+    cell0.classList="newtd2";
+    cell1.classList="newtd2";
+    cell2.classList="newtd2";
+    cell3.classList="newtd2";
+    var tBody = table.getElementsByTagName('tbody')[0];
+    tBody.classList="newtbody";
     cell0.innerHTML=(i+1)+")";
     cell1.innerHTML='<img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADJSURBVDhPnZHRDcMgEEMZjVEYpaNklIzSEfLfD4qNnXAJSFWfhO7w2Zc0Tf9QG2rXrEzSUeZLOGm47WoH95x3Hl3jEgilvDgsOQUTqsNl68ezEwn1vae6lceSEEYvvWNT/Rxc4CXQNGadho1NXoJ+9iaqc2xi2xbt23PJCDIB6TQjOC6Bho/sDy3fBQT8PrVhibU7yBFcEPaRxOoeTwbwByCOYf9VGp1BYI1BA+EeHhmfzKbBoJEQwn1yzUZtyspIQUha85MpkNIXB7GizqDEECsAAAAASUVORK5CYII=">'+ terrainobjects.getSatellitesInTerrain[i].name;
     cell2.innerHTML='  <div id="colordropdown" class="dropdown dropdown-bubble" style="display:inline;"> <button class="btn btn-light" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">  <span style="display:inline-block; height: 32px; vertical-align: top;">Color:</span>  <span class="dot" style="background-color:#8b00ff; margin-top:-4px; margin-left:3px;"></span>  </button> <ul id="colordropdownmenu" class="dropdown-menu" style="margin-top: 10px;"> <li><a href="" style="text-align:center;">Violet<span class="dot" style="background-color:#8b00ff; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Blue<span class="dot" style="background-color:#0000ff; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Aqua<span class="dot" style="background-color:#00ffff; margin-top:0px; margin-left:8px;"></span></a>   <li><a href="" style="text-align:center;">Green<span class="dot" style="background-color:#00ff00; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Yellow<span class="dot" style="background-color:#ffff00; margin-top:0px; margin-left:8px;"></span></a>  <li><a href="" style="text-align:center;">Orange<span class="dot" style="background-color:#ff7f00; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Red<span class="dot" style="background-color:#ff0000; margin-top:0px; margin-left:8px;"></span></a>  </ul>  </div>';
@@ -1822,12 +1885,10 @@ function changegainunit(occasion){
     if(occasion=='U'){
       document.getElementById("targetedspotbeammingainunit").innerHTML="dB/K";
       document.getElementById("targetedspotbeammaxgainunit").innerHTML="dB/K";
-      document.getElementById("targetedspotbeamsemimajoraxisonmaxgainunit").innerHTML="dB/K";
     }
     else if(occasion=='D'){
       document.getElementById("targetedspotbeammingainunit").innerHTML="dBW";
       document.getElementById("targetedspotbeammaxgainunit").innerHTML="dBW";
-      document.getElementById("targetedspotbeamsemimajoraxisonmaxgainunit").innerHTML="dBW";
     }
 }
 
@@ -2074,6 +2135,131 @@ function returnweathericon(weatherid){
 
 }
 
+function activaterullermode(viewer){
+  rullermode=true;
+  document.getElementById("rullersemiwindow").style.display="block";
+  document.getElementById("distancevalue").innerHTML="0.0";
+}
+
+function entitychartographic(entity){
+  var tempchartographic=Cesium.Ellipsoid.WGS84.cartesianToCartographic(entity.position.getValue());
+  return new Cesium.Cartographic(Cesium.Math.toDegrees(tempchartographic.longitude),Cesium.Math.toDegrees(tempchartographic.latitude),Cesium.Math.toDegrees(tempchartographic.height));
+}
+
+function deactivaterullermode(viewer){
+  document.getElementById("rullersemiwindow").style.display="none";
+  rullermode=false;
+  for(i=0;i<rullerlocationsarray.length;i++){
+    viewer.entities.removeById("connectline_"+(i+1));
+    viewer.entities.removeById("calculatedistancepoint_"+(i+1));
+  }
+  rullerlocationsarray=[];
+}
+
+function calculatedistance(startcartographic,endcartographic){
+  var geodesic = new Cesium.EllipsoidGeodesic();
+
+  var tmp1=new Cesium.Cartographic(Cesium.Math.toRadians(startcartographic.longitude),Cesium.Math.toRadians(startcartographic.latitude),Cesium.Math.toRadians(startcartographic.height));
+  var tmp2=new Cesium.Cartographic(Cesium.Math.toRadians(endcartographic.longitude),Cesium.Math.toRadians(endcartographic.latitude),Cesium.Math.toRadians(endcartographic.height));
+  geodesic.setEndPoints(tmp1,tmp2, Cesium.Ellipsoid.WGS84);
+  return geodesic.surfaceDistance/1000;
+}
+
+
+function convertkmtomiles(kmtoconvert){
+  return kmtoconvert*0.621371;
+}
+function convertmilestokm(milestoconvert){
+  return milestoconvert/0.621371;
+}
+function showlengthinrespecttosettings(length) {
+  if(document.getElementById("lengthunitswitch").checked){
+    return convertkmtomiles(length)+ " mi";
+  }
+    return length + " km";
+}
+
+function showtrimmedlengthinrespecttosettings(length) {
+  if(document.getElementById("lengthunitswitch").checked){
+    var converted=convertkmtomiles(length);
+    converted=converted.toFixed(1);
+    return converted + " mi";
+  }
+    var converted=length.toFixed(1);
+    return converted + " km";
+}
+function putpoint(viewer,selectedLocation){
+  var prevlocation;
+  if(rullerlocationsarray==0){
+    var marker=viewer.entities.getById('locationMarker');
+    prevlocation=entitychartographic(marker);
+  }
+  else{
+    prevlocation=entitychartographic(rullerlocationsarray[rullerlocationsarray.length-1]);
+  }
+  var locationchartograpic=new Cesium.Cartographic(selectedLocation.lng,selectedLocation.lat,0.0);
+  prevlocationdistance=calculatedistance(prevlocation,locationchartograpic);
+  var totaldistance=0;
+  if(rullerlocationsarray.length==0){
+    totaldistance=prevlocationdistance;
+  }
+  else{
+    totaldistance=prevlocationdistance+rullerlocationsarray[rullerlocationsarray.length-1].value;
+  }
+  var distancetext=showlengthinrespecttosettings(totaldistance);
+  var distancetexttrimmed=showtrimmedlengthinrespecttosettings(totaldistance);
+  var pointid="calculatedistancepoint_"+(rullerlocationsarray.length+1);
+  var pointname="Point "+(rullerlocationsarray.length+1);
+  var polylineid="connectline_"+(rullerlocationsarray.length+1);
+  var polylinename="Distance line "+(rullerlocationsarray.length+1);
+
+  var polylinepos=Cesium.Cartesian3.fromDegreesArray([prevlocation.longitude, prevlocation.latitude, locationchartograpic.longitude,locationchartograpic.latitude],Cesium.Ellipsoid.WGS84);
+
+
+  var polyline =  viewer.entities.add({
+    id: polylineid,
+    name: polylinename,
+    polyline: {
+
+        positions: polylinepos,
+        width: 1.5,
+        material: Cesium.Color.BLACK,
+      },
+  });
+
+  var newpoint = viewer.entities.add({
+    id : pointid,
+    name : pointname,
+    value : totaldistance,
+    description: "Location: ("+selectedLocation.lng+","+selectedLocation.lat+")<br>Distance: "+distancetext,
+    position : Cesium.Cartesian3.fromDegrees(selectedLocation.lng,selectedLocation.lat, 0.0),
+    point : {
+      pixelSize : 5,
+      color : Cesium.Color.BLUE,
+      outlineColor : Cesium.Color.WHITE,
+      outlineWidth : 2,
+      heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
+
+    },
+    label : {
+      text : distancetexttrimmed,
+      font : '14pt monospace',
+      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+      outlineWidth : 2,
+      verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
+      pixelOffset : new Cesium.Cartesian2(0, -9),
+      heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
+
+    }});
+    rullerlocationsarray.push(newpoint);
+
+    var distancetext=distancetext.slice(0,distancetext.length-2);
+    distancetext=distancetext.trim();
+    document.getElementById("distancevalue").innerHTML=distancetext;
+
+}
+
+
 //show windows
 
 function showlogwindow(){
@@ -2284,7 +2470,7 @@ function showopenprojectwindow(){
 }
 
 function showsaveprojectwindow(){
-  $('#openprojectwindow').PopupWindow({
+  $('#saveprojectwindow').PopupWindow({
           title: "Save Project as",
           autoOpen: false,
           nativeDrag: false,

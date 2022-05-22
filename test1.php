@@ -56,16 +56,16 @@
   $(".rightclickaction li").click(function(){
        switch($(this).attr("data-action")) {
         case "Add dish": var ttext=viewer.entities.getById('locationMarker').label.text.toString(); var etext=ttext.substring(1, ttext.length-1); strarr=etext.split(","); document.getElementById("adddishlongitude").value=strarr[0]; document.getElementById("adddishlatitude").value=strarr[1]; showadddishwindow();  break;
-        case "Measure distance": alert("second"); break;
+        case "Measure distance": activaterullermode(viewer); break;
         case "Get Temperature":  var ttext=viewer.entities.getById('locationMarker').label.text.toString(); var etext=ttext.substring(1, ttext.length-1); document.getElementById("weathersearchInput").value=etext; showweatherwindow(); getweather();  break;
    }$(".rightclickaction").hide(0);});
-
-
+  var rullermode=false;
+  var rullerlocationsarray=[];
   viewer.scene.canvas.addEventListener('contextmenu', (event) => {
     event.preventDefault();
     const mousePosition = new Cesium.Cartesian2(event.clientX, event.clientY);
     const selectedLocation = convertScreenPixelToLocation(viewer,mousePosition);
-    if(selectedLocation!=null){
+    if(selectedLocation!=null && rullermode==false){
       setMarkerInPos(viewer, selectedLocation);
       $(".rightclickaction").hide(0);
       $(".rightclickaction").finish().toggle(50).css({
@@ -73,8 +73,15 @@
                left: event.pageX + 4 + "px"
       });
    }
+   else if(selectedLocation!=null && rullermode==true){
+      var lineno=rullerlocationsarray.length+1;
+
+
+      putpoint(viewer, selectedLocation);
+
+   }
   }, false);
-  viewer.scene.canvas.addEventListener('click', (event) => {
+  document.addEventListener('click', (event) => {
     $(".rightclickaction").hide(0);
   }, false);
 
@@ -118,6 +125,12 @@
 </div>
 </div>
 
+<div id="browsefilewindow" style="display:none;">
+  <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefileloading">
+    <div style="font-weight:bold; font-size:x-large; margin-bottom:10px;">Loading</div>
+    <div class="lds-dual-ring"></div>
+  </div>
+</div>
 
 
 <div id="selectsatellitewindow" style="display: none;">
@@ -181,7 +194,7 @@
      <span style="font-weight:bold; font-size:x-large;">Selected Satellites</span>
    </div>
     <div style="margin:10px 10px 10px;" id="managesatellitewindowtablespan">
-    <table class="newtable" id="managesatellitetable" style="text-align:center; height: 270px; overflow-y: auto; display: block; overflow-x: auto;"></table>
+    <table class="newtable" id="managesatellitetable" class="newtable" style="text-align:center; height: 270px; overflow-y: auto; display: block; overflow-x: auto;"></table>
     <div style="max-height:20%;">
           <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
           <button type="button" style="float:right;" class="btn btn-primary" onclick="managesatelliteapplychanges(viewer,terrainobjs);" >Save changes</button>
@@ -282,7 +295,7 @@
      <span style="font-weight:bold; font-size:x-large;">Antennas</span>
    </div>
     <div style="margin:10px 10px 10px;" id="managedishestablespan">
-    <table id="managedishestable" style="text-align:center; height: 270px; overflow-y: auto; display: block; overflow-x: auto;"></table>
+    <table id="managedishestable" class="newtable" style="text-align:center; height: 270px; overflow-y: auto; display: block; overflow-x: auto;"></table>
     <div style="max-height:20%;">
           <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
           <button type="button" style="float:right;" class="btn btn-primary" onclick="managedishesapplychanges(viewer,terrainobjs);" >Save changes</button>
@@ -323,7 +336,7 @@
         <td class="weathertd" style="padding-left:5px; padding-right:5px;"><img id="cweathericon" style="vertical-align:middle;" src="Resources/WeatherIcons/cloudy_light_color_96dp.png" width="112" height="112"></td>
       </tr>
       <tr class="weathertr">
-        <td  class="weathertd" style="padding-left:5px; padding-right:5px; "><span style="font-weight:bold; font-size:xxx-large; text-align:center;" id="ctempspan">10</span></td>
+        <td  class="weathertd" style="padding-left:5px; padding-right:5px; "><span style="font-weight:bold; font-size:xxx-large; text-align:center;" id="ctempspan">10 &degC</span></td>
       </tr>
       <tr class="weathertr">
         <td class="weathertd" style="padding-left:5px; padding-right:5px;"><span id="cweatherdescription" style="font-weight:bold; font-size:large; text-align:center;">Heavy clouds</span></td>
@@ -349,7 +362,7 @@
               <td><img id="day1weathericon" style="vertical-align:middle;" src="Resources/WeatherIcons/cloudy_light_color_96dp.png" width="32" height="32"></td>
             </tr>
             <tr>
-              <td><span style="font-weight:bold; font-size:large; text-align:center;" id="day1tempspan">10</span></td>
+              <td><span style="font-weight:bold; font-size:large; text-align:center;" id="day1tempspan">10 &degC</span></td>
             </tr>
 
           </table>
@@ -364,7 +377,7 @@
             <td><img id="day2weathericon" style="vertical-align:middle;" src="Resources/WeatherIcons/cloudy_light_color_96dp.png" width="32" height="32"></td>
           </tr>
           <tr>
-            <td><span style="font-weight:bold; font-size:large; text-align:center;" id="day2tempspan">10</span></td>
+            <td><span style="font-weight:bold; font-size:large; text-align:center;" id="day2tempspan">10 &degC</span></td>
           </tr>
 
         </table>
@@ -379,7 +392,7 @@
             <td><img id="day3weathericon" style="vertical-align:middle;" src="Resources/WeatherIcons/cloudy_light_color_96dp.png" width="32" height="32"></td>
           </tr>
           <tr>
-            <td><span style="font-weight:bold; font-size:large; text-align:center;" id="day3tempspan">10</span></td>
+            <td><span style="font-weight:bold; font-size:large; text-align:center;" id="day3tempspan">10 &degC</span></td>
           </tr>
 
         </table>
@@ -394,7 +407,7 @@
              <td><img id="day4weathericon" style="vertical-align:middle;" src="Resources/WeatherIcons/cloudy_light_color_96dp.png" width="32" height="32"></td>
            </tr>
            <tr>
-             <td><span style="font-weight:bold; font-size:large; text-align:center;" id="day4tempspan">10</span></td>
+             <td><span style="font-weight:bold; font-size:large; text-align:center;" id="day4tempspan">10 &degC</span></td>
            </tr>
 
          </table>
@@ -409,7 +422,7 @@
             <td><img id="day5weathericon" style="vertical-align:middle;" src="Resources/WeatherIcons/cloudy_light_color_96dp.png" width="32" height="32"></td>
           </tr>
           <tr>
-            <td><span style="font-weight:bold; font-size:large; text-align:center;" id="day5tempspan">10</span></td>
+            <td><span style="font-weight:bold; font-size:large; text-align:center;" id="day5tempspan">10 &degC</span></td>
           </tr>
 
         </table>
@@ -460,7 +473,7 @@
   </select></div>
   <div style="text-align:center; margin-bottom:8px;">Max Gain: <input type="text" id="targetedspotbeammaxgain" placeholder="50.0"> <span id="targetedspotbeammaxgainunit">dbW</span>  <span id="targetedspotbeammaxgainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">Min Gain: <input type="text" id="targetedspotbeammingain" placeholder="40.0"> <span id="targetedspotbeammingainunit">dbW</span>  <span id="targetedspotbeammingainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
-  <div style="text-align:center; margin-bottom:8px;">Semimajor Axis size: <input type="text" id="targetedspotbeamsemimajoraxisonmaxgain" placeholder="45.0"> <span id="targetedspotbeamsemimajoraxisonmaxgainunit">Km</span>  <span id="targetedspotbeamsemimajoraxisonmaxgainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
+  <div style="text-align:center; margin-bottom:8px;">Semimajor Axis size: <input type="text" id="targetedspotbeamsemimajoraxisonmaxgain" placeholder="45.0"><span id="targetedspotbeamlengthunit"> km</span>  <span id="targetedspotbeamsemimajoraxisonmaxgainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">Eccentricity: <input type="text" id="targetedspotbeameccentricity" placeholder="0.5"> <span id="targetedspotbeameccentricityerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">Step: <input type="text" id="targetedspotbeamstep" placeholder="2"> <span id="targetedspotbeamsteperror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">Tightness: <input type="text" id="targetedspotbeamtightness" placeholder="1"> <span id="targetedspotbeamtightnesserror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
@@ -471,12 +484,14 @@
     <button type="button" style="float:right;" class="btn btn-primary" onclick="checkandtargetedspotbeaminterrain(viewer,terrainobjs);" >Generate Beam</button>
   </div>
 
+</div>
 
-
-
- </div>
-
-
+<div id="rullersemiwindow" class="rullersemiwindow" style="display:none;">
+  <button class="close-button-semiwindow" aria-label="Close" onclick="deactivaterullermode(viewer);"></button>
+  <div>Measure distance</div>
+  <div><span>Total distance: </span> <span id="distancevalue">0.0</span><span id="distanceunit"> km</span></div>
+  <div style="color:#A0A0A0;">(Use right click To add point, close window to cancel.)</div>
+</div>
 
 
 <div id="divUpperLeft" style="position:absolute; background:rgba(0,0,0,0); left:10px; top:5px; z-index:2000;">
@@ -485,7 +500,7 @@
     <span class="projecticon" id="projecticon"></span>
     <span style="display:inline-block; height: 32px; vertical-align: middle;">Project</span>
     </button>
-    <ul id="projectdropdownmenu" class="dropdown-menu" style="margin-top: 10px;">
+    <ul id="projectdropdownmenu" class="dropdown-menu" style="margin-top: 18px;">
       <li><a onclick="showopenprojectwindow();" style="text-align:center;">Open project</a></li>
       <li><a onclick="showsaveprojectwindow();" style="text-align:center;">Save project</a></li>
       <li><a onclick="showsaveprojectwindow();" style="text-align:center;">Save as...</a></li>
@@ -498,7 +513,7 @@
         <span class="satellitesicon" id="satellitesicon"></span>
         <span style="display:inline-block; height: 32px; vertical-align: middle;">Satellites</span>
       </button>
-      <ul id="satellitesdropdownmenu" class="dropdown-menu" style="margin-top: 10px;">
+      <ul id="satellitesdropdownmenu" class="dropdown-menu" style="margin-top: 18px;">
         <li><a onclick="constructmanagesatellitetable(terrainobjs); showmanagesatellitewindow();" style="text-align:center;">Manage satellites</a></li>
         <li><a onclick="showselectsatellitewindow();" style="text-align:center;">Select satellite</a></li>
         <li><a onclick="showaddsatellitewindow();" style="text-align:center;">Add Satellite</a></li>
@@ -512,7 +527,7 @@
           <span class="antennasicon" id="antennasicon"></span>
           <span style="display:inline-block; height: 32px; vertical-align: middle;">Antennas</span>
         </button>
-        <ul id="antennasdropdownmenu" class="dropdown-menu" style="margin-top: 10px;">
+        <ul id="antennasdropdownmenu" class="dropdown-menu" style="margin-top: 18px;">
           <li><a onclick="showadddishwindow();" style="text-align:center;">Add dish</a></li>
           <li><a onclick="constructmanagedishestable(terrainobjs); showmanagedisheswindow();" style="text-align:center;">Manage dishes</a></li>
 
@@ -524,7 +539,7 @@
           <span class="communicationsicon" id="communicationsicon"></span>
           <span style="display:inline-block; height: 32px; vertical-align: middle;">Communications</span>
         </button>
-        <ul id="communicationsdropdownmenu" class="dropdown-menu" style="margin-top: 10px;">
+        <ul id="communicationsdropdownmenu" class="dropdown-menu" style="margin-top: 18px;">
           <li><a href="" style="text-align:center;">db fix</a></li>
           <li><a onclick="showweatherwindow();" style="text-align:center;">Show Weather</a></li>
           </ul>
@@ -534,7 +549,7 @@
         <button type="button" id="settingsbutton" class="btn btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width:32px; height:32px;">
         <span class="settingsicon" style="margin:0px -2px 0px -3px;" id="settingsicon"></span>
         </button>
-      <ul id="settingsdropdownmenu" class="dropdown-menu" style="margin-top: 10px; min-width: 250px;">
+      <ul id="settingsdropdownmenu" class="dropdown-menu" style="margin-top: 18px; min-width: 250px;">
         <span style="text-align:center; font-weight:bold; width: 100%; display: block; font-size:18px; ">Settings:</span>
 
         <p></p><div><span style="font-weight: bold; width: 100%; margin-left:7px">Unit Settings: </span></div>
@@ -603,7 +618,7 @@
           <button type="button" id="beambutton" class="btn btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
             <span style="display:inline-block; height: 32px; vertical-align: middle;">Select Beam...</span>
           </button>
-          <ul id="beamdropdownmenu" class="dropdown-menu" style="margin-top: 10px; width:auto; white-space:nowrap;">
+          <ul id="beamdropdownmenu" class="dropdown-menu" style="margin-top: 18px; width:auto; white-space:nowrap;">
             <div id="beamdropdownmenuli" style="text-align: center; overflow-y:scroll;">
             <li><a onclick="clearselectedbeam();" class="focus" style="text-align:center;">No beam selected</a></li>
             <li style="text-align:center; margin-top:5px; margin-bottom:5px; padding: 3px 20px 3px 20px; font-size: 16px; font-weight:bold; background-color: #0095ff; color:white;">Satellite: CALSPHERE 1</li>

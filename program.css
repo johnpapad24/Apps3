@@ -40,6 +40,45 @@ input[type=radio]:checked{
   box-shadow: 0px 0px 8px #9ecaed;
   -moz-box-shadow: 0px 0px 8px #9ecaed;
   -webkit-box-shadow: 0px 0px 8px #9ecaed;
+  background-color:rgba(255, 122, 89, 0.0);
+
+}
+.rullersemiwindow {
+  position:absolute;
+ margin-top:4px;
+ background-color:#fff;
+ border-radius:4px;
+ box-shadow:0 1px 4px rgba(0,0,0,.3);
+ padding:14px;
+ max-width:512px;
+ line-height:19px;
+ overflow:hidden;
+ max-height:256px;
+ opacity:1;
+ text-align:center;
+  color:black;
+  bottom: 0%;
+  right: 50%;
+transform: translate(50%,-60px);
+ transition:transform 0s .2s ease-out,opacity .2s ease-out,max-height .2s ease-out
+}
+
+.close-button-semiwindow {
+ top:2px;
+ right:2px;
+ position:absolute;
+ cursor:pointer;
+ background-image:url("Resources/Semiwindowclose.png");
+ background-size:16px;
+ height:16px;
+ width:16px;
+ opacity:.80;
+ background-color: inherit;
+ border:none;
+
+}
+.close-button-semiwindow:hover{
+  background-image:url("Resources/Semiwindowclose1.png");
 
 }
 
@@ -47,6 +86,7 @@ input[type=radio]:checked{
   color:white;
   background-color: #121212;
 }
+
 
 .icons-dark{
   filter: invert(100%);
@@ -79,15 +119,22 @@ input[type=radio]:checked{
   border-bottom: 1px solid #dadada;
   border-top: 1px solid #dadada;
 }
+.newtd2{
+  padding-top: 3px;
+  border-bottom: 1px solid #dadada;
+  border-top: 1px solid #dadada;
+  padding-bottom: 3px;
+
+}
 .newtd:hover{
-  background-color: #dadada;
+  background-color: #337ab7;
   cursor: pointer;
 }
 .newtbody{
   display:table; width:100%; height:auto;
 }
 .selectedtr{
-  background-color: #337ab7;
+  background-color: #2DB92D;
   color:white;
 }
 .md-checkbox {
@@ -229,7 +276,7 @@ font-weight: bold;
   margin-left: 5px;
   margin-right: 5px;
   border-radius: 100px;
-  background-color: #32CD32;
+  background-color: #2DB92D;
   border-radius: 100px;
   color:white !important;
   display: block;
@@ -791,4 +838,26 @@ fieldset:disabled a.btn {
 .show > .btn-dark.dropdown-toggle:focus {
   color: #fff;
   box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+-webkit-animation: autofill 0s forwards;
+animation: autofill 0s forwards;
+}
+
+@keyframes autofill {
+100% {
+   background: transparent;
+   color: inherit;
+}
+}
+
+@-webkit-keyframes autofill {
+100% {
+   background: transparent;
+   color: inherit;
+}
 }
