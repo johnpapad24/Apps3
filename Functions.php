@@ -20,6 +20,15 @@ function connectdb($servername, $username, $password){
  return $conn;
 }
 
+function checkconnectdb($servername, $username, $password){
+  $conn = mysqli_connect($servername, $username, $password);
+  if (!$conn){
+    return false;
+  }
+  mysqli_close($conn);
+  return true;
+}
+
 function updatedb($conn,$tlefile){
 $createdbifnotq=$conn->query('CREATE DATABASE IF NOT EXISTS Satellites;');
 $usedbq=$conn->query('USE Satellites;');
@@ -117,6 +126,30 @@ function getsatnames_new($conn,$windowname){
  return;
 }
 
+function getbrowsefiles($windowname,$projectsdir){
+  $id="";
+  if($windowname=="browsefileopenwindow"){
+     $id="browsefileopen";
+   }
+   else if($windowname=="browsefilesavewindow"){
+     $id="browsefilesave";
+   }
+   chdir($projectsdir);
+  $files=glob("*.{psav,PSAV}", GLOB_ERR);
+  chdir("..");
+  echo '<table class="newtable" id="'.$id.'table" style="height: 270px; overflow-y: auto; display: block; overflow-x: auto;"><tbody class="newtbody">';
+  if(is_array($files)){
+    $arrlength=count($files);
+    for ($i=0;$i<$arrlength;$i++) {
+      echo '<tr class="newtr" value="'.basename($files[i]).'"><td class="newtd" onclick="highlight('."'".$id."'".');" style="text-align: center;">'.$i.')</td><td class="newtd"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAABKUlEQVQ4jWNkgAKvnqPyf34zizBgAUxMTAKvBZiOn003+YYuxwJjWKmIdoeZS4ViM+Do7Q//b7/4+oph5hkldEPgBnCwMP5SleDGpp/h+rOvjNEOiuJ/9997IDZpm8r2PK9PcNdh1YEFcLGxMMQ7KovqiSvd8Zy0jQ/DBfiAIDcLw+lbrxgYGBgYVMW5RT9/k93JwMBgSbQBtupCKPwPX37cxemCn7//Mey9+garQc7aIgzsrKi+JsoFqhLcDLgCGMMAZmZGrIpvv/jKoCjGxcDCxIgiTnQs4AIYLvj79z/D7RdfUcTweYEoF9x+8ZVh24VXDD9//yPsAnZWJgYvAzFizCXeBfgA3AU//vxnQ/c7LvDjz382DAOO3Xldeuj6u06ibGX9C09pAGtFWP4tQF5dAAAAAElFTkSuQmCC"/>'.basename($files[i]).'</td><td class="newtd">Last modified: '.date("m/d/Y H:i:s",filemtime($files[i])).'<td></tr>';
+    }
+  }
+  echo '</tbody></table>';
+
+
+}
+
+
 function loggger($logfile, $message, $status){
   if($status!="OK" && $status!="FAILED" && $status!=""){ return false;}
   if($status!=""){$status=' : '.$status;}
@@ -178,6 +211,11 @@ function checkandlogonstartup($logfile, $message, $status){
   }
 }
 
+function checkandlogonstartup2($logfile, $message, $status){
+  $check=loggger($logfile,$message,$status);
+  return check;
+}
+
 function checkandcreatesettingsfile($settingsfile){
   $file=fopen($settingsfile,'r');
   if(!$file){
@@ -194,6 +232,17 @@ function createsettingsfile($settingsfile){
   $file=fopen($settingsfile,'w');
   if(!$file){ return false;}
   $test=fwrite($file, 'loadsetting("tempunitswitch",false);'."\r\n".'loadsetting("lengthunitswitch",false);'."\r\n".'loadsetting("eciunitswitch",false);'."\r\n".'loadsetting("xaxischeckbox",false);'."\r\n".'loadsetting("yaxischeckbox",false);'."\r\n".'loadsetting("zaxischeckbox",false);'."\r\n".'loadsetting("darkmodeswitch",false);');
+  fclose($file);
+  return $test;
+}
+
+function createsavefile($savefilename,$data){
+  //chdir($projectsdir);
+  $file=fopen($savefilename,'w');
+  if(!$file){ return false;}
+  $test=fwrite($file, $data);
+  fclose($file);
+//  chdir("..");
   return $test;
 }
 
@@ -246,6 +295,13 @@ function addsatellite($conn,$satname,$tle1,$tle2){
   else{
     $updatq=$conn->query('UPDATE Satellite SET Tleline1='.'"'.$tle1.'"'.', Tleline2='.'"'.$tle2.'"'. ' Where Name='.'"'.$name.'";');
   }
+}
+
+function checktlefile($tlefile){
+  if(!file_get_contents($tlefile)) {
+    return false;
+  }
+  return true;
 }
 
 function requesterror($message){

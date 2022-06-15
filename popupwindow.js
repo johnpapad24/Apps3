@@ -343,6 +343,39 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
             left    : (settings.left == "auto") ? ((overlay.width() - settings.width) / 2) : parseInt(settings.left, 10),
             top     : (settings.top == "auto") ? ((overlay.height() - settings.height) / 2) : parseInt(settings.top, 10)
         };
+        if(document.getElementById("darkmodeswitch").checked==true){
+          var popupWindow = $("<div>", {
+              class   : "popupwindow popupwindow-dark",
+              css     : {
+                  height  : settings.height,
+                  left    : position.left,
+                  top     : position.top,
+                  width   : settings.width
+              }
+          })
+          .css(_css.popupwindow)
+          .addClass(settings.customClass)
+          .data({
+              originalTarget      : originalTarget,
+              originalParent      : originalTarget.parent(),
+              overlay             : overlay,
+              minPlaceholder      : minPlaceholder,
+              settings            : settings,
+              opened              : false,
+              collapsed           : false,
+              minimized           : false,
+              maximized           : false,
+              currentPosition     : position,
+              currentSize         : {
+                  height  : settings.height,
+                  width   : settings.width
+              },
+              savedPosition       : undefined,
+              savedSize           : undefined
+          })
+          .appendTo(overlay);
+        }
+        else{
         var popupWindow = $("<div>", {
             class   : "popupwindow",
             css     : {
@@ -373,7 +406,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
             savedSize           : undefined
         })
         .appendTo(overlay);
-
+        }
         if (settings.draggable) {
             if (settings.nativeDrag) {
                 popupWindow
@@ -389,14 +422,37 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
 
         // Titlebar
         var leftToRight = (settings.buttonsPosition.toLowerCase().indexOf("l") < 0);
-        var titlebar = $("<div>", {
-            class   : "popupwindow_titlebar"
-        })
-        .css(_css.titlebar)
-        .appendTo(popupWindow);
-        if (settings.draggable) titlebar.addClass("popupwindow_titlebar_draggable");
+
+        if(document.getElementById("darkmodeswitch").checked==true){
+          var titlebar = $("<div>", {
+              class   : "popupwindow_titlebar popupwindow_titlebar-dark"
+          })
+          .css(_css.titlebar)
+          .appendTo(popupWindow);
+          if (settings.draggable) titlebar.addClass("popupwindow_titlebar_draggable");
+        }
+        else{
+          var titlebar = $("<div>", {
+              class   : "popupwindow_titlebar"
+          })
+          .css(_css.titlebar)
+          .appendTo(popupWindow);
+          if (settings.draggable) titlebar.addClass("popupwindow_titlebar_draggable");
+        }
 
         // Text
+        if(document.getElementById("darkmodeswitch").checked==true){
+
+          $("<div>", {
+              class   : "popupwindow_titlebar_text popupwindow_titlebar_text-dark",
+              text    : settings.title
+          })
+          .css(_css.titlebar_text)
+          .css("order", leftToRight ? 1 : 5)
+          .appendTo(titlebar);
+
+        }
+        else{
         $("<div>", {
             class   : "popupwindow_titlebar_text",
             text    : settings.title
@@ -404,6 +460,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         .css(_css.titlebar_text)
         .css("order", leftToRight ? 1 : 5)
         .appendTo(titlebar);
+      }
 
         // Buttons
         if (settings.buttons.close) {
@@ -455,7 +512,7 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
         if(document.getElementById("darkmodeswitch").checked==true){
 
             var content = $("<div>", {
-                class   : "popupwindow_content popupwindow-dark"
+                class   : "popupwindow_content popupwindow_content-dark"
             })
             .css(_css.content)
             .appendTo(popupWindow);
@@ -473,11 +530,23 @@ PopupWindow - The ultimate popup/dialog/modal jQuery plugin
 
         // StatusBar
         if (settings.statusBar) {
+
+          if(document.getElementById("darkmodeswitch").checked==true){
+
+            var statusBar = $("<div>", {
+                class   : "popupwindow_statusbar popupwindow_statusbar-dark"
+            })
+            .css(_css.statusbar)
+            .appendTo(popupWindow);
+
+          }
+          else{
             var statusBar = $("<div>", {
                 class   : "popupwindow_statusbar"
             })
             .css(_css.statusbar)
             .appendTo(popupWindow);
+          }
 
             $("<div>", {
                 class   : "popupwindow_statusbar_content"

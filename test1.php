@@ -14,8 +14,9 @@
 <link href="popupwindow.css" rel="stylesheet">
 <script src="popupwindow.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
-<script src="functions.js"></script>
+<script  src="functions.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
   <script src="../Build/Cesium/Cesium.js"></script>
   <style>
       @import url(../Build/Cesium/Widgets/widgets.css);
@@ -105,8 +106,7 @@
     <span style="text-align:center;font-weight:bold; font-size:x-large; ">Open Project</span>
   </div>
   <div>
-    <input type="text" id="openfiledir" placeholder="No file chosen..."> <button type="button" class="btn btn-primary" onclick="browsefile();" >Browse...</button>
-    <input id="openfile" type="file" style="display: none;" />
+    <input type="text" id="openfiledir" placeholder="No file chosen..."> <button type="button" class="btn btn-primary" onclick="showbrowsefileopenwindow();" >Browse...</button>
 </div>
 <div style="margin-top:10px">
   <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
@@ -116,22 +116,56 @@
 
 <div id="saveprojectwindow" style="display:none;">
   <div style="display: block; margin: auto; text-align:center;">
-    <span style="text-align:center;font-weight:bold; font-size:x-large; ">Save Project as</span>
-    <input type="text" id="savefiledir"> <input type="file" id="savefile">
+    <span style="text-align:center;font-weight:bold; font-size:x-large; ">Save Project</span>
+  </div>
+  <div>
+    <input type="text" id="savefiledir" placeholder="No file chosen..."> <button type="button" class="btn btn-primary" onclick="showbrowsefilesavewindow();" >Browse...</button>
 </div>
 <div style="margin-top:10px">
   <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
-  <button type="button" style="float:right;" class="btn btn-primary" onclick="saveproject();" >Save</button>
+  <button type="button" style="float:right;" class="btn btn-primary" onclick="projectsaver(document.getElementById('savefiledir').value,terrainobjs);" >Save</button>
 </div>
 </div>
 
-<div id="browsefilewindow" style="display:none;">
-  <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefileloading">
+<div id="browsefileopenwindow" style="display:none;">
+  <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefileopenloading">
     <div style="font-weight:bold; font-size:x-large; margin-bottom:10px;">Loading</div>
     <div class="lds-dual-ring"></div>
   </div>
+
+  <div id="browsefileopenmainwindow" style="display:none;">
+
+    <div style="margin:10px 10px 10px;" id="browsefileopentablespan">
+    <script>browsefileloader("browsefileopenwindow");</script></div>
+    <div style="max-height:20%;">
+          <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+          <button type="button" style="float:right;" class="btn btn-primary" onclick="selecttoopenfile();" >Select</button>
+    </div>
+</div>
+<div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefileopennofiles">
+  <div style="font-weight:bold; font-size:x-large; min-width:max-content;">There are no save files.</div>
+</div>
 </div>
 
+<div id="browsefilesavewindow" style="display:none;">
+  <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefilesaveloading">
+    <div style="font-weight:bold; font-size:x-large; margin-bottom:10px;">Loading</div>
+    <div class="lds-dual-ring"></div>
+  </div>
+
+  <div id="browsefilesavemainwindow" style="display:none;">
+
+    <div style="margin:10px 10px 10px;" id="browsefilesavetablespan">
+    <script>browsefileloader("browsefilesavewindow");</script></div>
+    <div style="max-height:20%;">
+          <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+          <button type="button" style="float:right;" class="btn btn-primary" onclick="selecttoopenfile();" >Select</button>
+    </div>
+</div>
+<div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefilesavenofiles">
+  <div style="font-weight:bold; font-size:x-large; min-width:max-content;">There are no save files.</div>
+</div>
+</div>
 
 <div id="selectsatellitewindow" style="display: none;">
   <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="selectsatelliteloading">
@@ -234,6 +268,8 @@
 
   <div style="text-align:center; margin-bottom:8px;">Size: <input type="text" id="adddishsize" placeholder="100"> cm   <span id="adddishsizeerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">Gain: <input type="text" id="adddishgain" placeholder="40.0"> dB  <span id="adddishgainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
+  <div style="text-align:center; margin-bottom:15px; margin-top:15px;"><button type="button"  class="btn btn-primary">Alternative gain calculation</button></div>
+  <div style="text-align:center; margin-bottom:8px;">Efficiency (k): <input type="text" id="adddishefficiencyk" placeholder="70"> %  <span id="adddishefficiencykerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; font-weight: bold;">Usage:</div>
   <div style="text-align:center;">
   <label for="1" style="font-weight:normal;">Downlink:</label>
@@ -268,6 +304,8 @@
 
   <div style="text-align:center; margin-bottom:8px;">Size: <input type="text" id="editdishsize" placeholder="100"> cm   <span id="editdishsizeerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">Gain: <input type="text" id="editdishgain" placeholder="40.0"> dB  <span id="editdishgainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
+  <div style="text-align:center; margin-bottom:15px; margin-top:15px;"><button type="button"  class="btn btn-primary">Alternative gain calculation</button></div>
+  <div style="text-align:center; margin-bottom:8px;">Efficiency (k): <input type="text" id="editdishefficiencyk" placeholder="70"> %  <span id="editdishefficiencykerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; font-weight: bold;">Usage:</div>
   <div style="text-align:center;">
   <label for="1" style="font-weight:normal;">Downlink:</label>
@@ -347,7 +385,13 @@
 
     </table>
 
-    <div style="font-weight:bold; font-size:x-large; min-width:max-content; text-align:center; padding-top:10px; padding-bottom:10px;"><span>Estimated weather signal difference: </span> <span id="Estimatedweathersiglosses" style="border-radius: 7px; background-color:#F04A00; padding: 4px 4px 1px 4px; text-align: center; color:white;">-100dB</span></div>
+    <div style="font-weight:bold; font-size:x-large; min-width:max-content; text-align:center; padding-top:10px; padding-bottom:10px;"><span>Estimated weather signal difference: </span> <span id="Estimatedweathersiglosses" value="" style="border-radius: 7px; background-color:#F04A00; padding: 4px 4px 1px 4px; text-align: center; color:white;">-100dB</span> at <select name="weatherlossband" class="" onchange="var dat=document.getElementById('Estimatedweathersiglosses').value; calculatedsiglosses(dat);" id="weatherlossband">
+      <option value="L">L</option>
+      <option value="S">S</option>
+      <option value="C">C</option>
+      <option selected value="Ku">Ku</option>
+      <option value="Ka">Ka</option>
+    </select> band</div>
     <div style="padding-bottom:5px; font-weight:bold; font-size:large; min-width:max-content; text-align:center;">5day forecast:</div>
 
     <!-- 5day forecast -->
@@ -438,11 +482,149 @@
 
 </div>
 
-<div id="generatetargetedspotbeamwindow">
+<div id="linkbudgetcalculatorwindow" style="display: none;">
+  <div style="font-weight:bold; font-size:x-large; text-align:center;">Link budget calculator</div>
+  <div style="float:left; height:100%;">
+    <div style="text-align:center; font-weight: bold; font-size: large; margin-bottom:8px;">Uplink:</div>
+
+      <div style="text-align:center; margin-bottom:8px;">Select dish:
+      <select disabled style="text-align:center; margin-bottom:8px;" name="linkbudgetuplinkdish" id="linkbudgetuplinkdish">
+      <option selected>-- No dishes available --<option>
+      </select>
+      </div>
+
+      <div style="text-align:center; margin-bottom:8px;">Select band:
+      <select  name="linkbudgetuplinkband" id="linkbudgetuplinkband">
+        <option value="L">L</option>
+        <option value="S">S</option>
+        <option value="C">C</option>
+        <option selected value="Ku">Ku</option>
+        <option value="Ka">Ka</option>
+      </select>
+    </div>
+
+      <div style="text-align:center; margin-bottom:8px;">BUC power:
+
+       <input type="text" id="linkbudgetuplinkbucpower" placeholder="15.0"> W</div>
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetuplinkbucpowererror" style="font-weight:bold; color:#fe2f2f"></span></div>
+      <div style="text-align:center; margin-bottom:8px;">Uplink satellite G/T:
+
+       <input type="text" id="linkbudgetuplinkdbk" placeholder="3"> dB/K</div>
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetuplinkdbkerror" style="font-weight:bold; color:#fe2f2f"></span></div>
+
+      <div style="text-align:center; margin-bottom:8px;">Uplink satellite distance:
+
+       <input type="text" id="linkbudgetuplinksatdistance" placeholder="36000"> <span id="linkbudgetuplinksatdistanceunitspan">km</span></div>
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetuplinksatdistanceerror" style="font-weight:bold; color:#fe2f2f"></span></div>
+
+
+      <div style="text-align:center; margin-bottom:8px;">Uplink bandwidth:
+
+       <input type="text" id="linkbudgetuplinkbandwidth" placeholder="15284"> Khz</div>
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetuplinkbandwidtherror" style="font-weight:bold; color:#fe2f2f"></span></div>
+
+      <div style="text-align:center; margin-bottom:8px;">Other losses (optional):
+       <input type="text" id="linkbudgetuplinkotherlosses" placeholder="0.7"> dB</div>
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetuplinkotherlosseserror" style="font-weight:bold; color:#fe2f2f"></span></div>
+
+
+      <div style="text-align:center; margin-bottom:8px;"><button type="button" id="linkbudgetcalulateuplink" class="btn btn-primary" disabled onclick="checkandcalculateuplinktotalsnr(terrainobjs);" >Calculate</button></div>
+
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetuplinkcalcerror" style="font-weight:bold; color:#fe2f2f"></span></div>
+      <div id="linkbudgetuplinkweatherlosses" style="text-align:center; font-weight: bold; font-size: large;  margin-bottom:8px;"> Estimated weather losses: <span id="linkbudgetuplinkweatherlossesvalue">-- dB</span></div>
+      <div id="linkbudgetuplinktotalsnr" style="text-align:center; font-weight: bold; font-size: large; padding-left: 4px; padding-right: 4px; border-radius:8px; background-color: #2DB92D; color:white;"> Estimated total uplink SNR: <span id="linkbudgetuplinktotalsnrvalue">--</span> dB</div>
+
+
+  </div>
+
+
+  <div style="float:right;   height:100%;">
+    <div style="text-align:center; font-weight: bold; font-size: large; margin-bottom:8px;">Downlink:</div>
+
+      <div style="text-align:center; margin-bottom:8px;">Select dish:
+      <select disabled style="text-align:center; margin-bottom:8px;" name="linkbudgetdownlinkdish" id="linkbudgetdownlinkdish">
+      <option selected>-- No dishes available --<option>
+      </select>
+      </div>
+
+      <div style="text-align:center; margin-bottom:8px;">Select band:
+      <select  name="linkbudgetdownlinkband" id="linkbudgetdownlinkband">
+        <option value="L">L</option>
+        <option value="S">S</option>
+        <option value="C">C</option>
+        <option selected value="Ku">Ku</option>
+        <option value="Ka">Ka</option>
+      </select>
+    </div>
+
+      <div style="text-align:center; margin-bottom:8px;">Downlink EIRP:
+
+       <input type="text" id="linkbudgetdownlinkeirp" placeholder="45.0"> dBW</div>
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetdownlinkeirperror" style="font-weight:bold; color:#fe2f2f"></span></div>
+
+      <div style="text-align:center; margin-bottom:8px;">Downlink satellite distance:
+
+       <input type="text" id="linkbudgetdownlinksatdistance" placeholder="36000"> <span id="linkbudgetdownlinksatdistanceunitspan">km</span></div>
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetdownlinksatdistanceerror" style="font-weight:bold; color:#fe2f2f"></span></div>
+
+
+      <div style="text-align:center; margin-bottom:8px;">Downlink bandwidth:
+
+       <input type="text" id="linkbudgetdownlinkbandwidth" placeholder="15284"> Khz</div>
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetdownlinkbandwidtherror" style="font-weight:bold; color:#fe2f2f"></span></div>
+
+      <div style="text-align:center; margin-bottom:8px;">Other losses (optional):
+       <input type="text" id="linkbudgetdownlinkotherlosses" placeholder="0.7"> dB</div>
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetdownlinkotherlosseserror" style="font-weight:bold; color:#fe2f2f"></span></div>
+
+
+      <div style="text-align:center; margin-bottom:8px;"><button type="button" id="linkbudgetcalulatedownlink" class="btn btn-primary" disabled onclick="checkandcalculatedownlinktotalsnr(terrainobjs);" >Calculate</button></div>
+
+      <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetdownlinkcalcerror" style="font-weight:bold; color:#fe2f2f"></span></div>
+      <div id="linkbudgetdownlinkweatherlosses" style="text-align:center; font-weight: bold; font-size: large;  margin-bottom:8px;"> Estimated weather losses: <span id="linkbudgetdownlinkweatherlossesvalue">-- dB</span></div>
+      <div id="linkbudgetdownlinktotalsnr" style="text-align:center; font-weight: bold; font-size: large; padding-left: 4px; padding-right: 4px; border-radius:8px; background-color: #F04A00; color:white;"> Estimated total downlink SNR: <span id="linkbudgetdownlinktotalsnrvalue">--</span> dB</div>
+
+  </div>
+
+
+
+</div>
+
+<div id="minsnrandbercalculatorwindow" style="display: none;">
+ <div style="font-weight:bold; font-size:x-large; text-align:center;">Min SNR/cur.BER calculator </div>
+ <div style="text-align:center; padding-top:5px; padding-bottom:5px; font-size:large; font-weight:bold;">Calulate min SNR required:</div>
+
+ <div style="text-align:center; padding-top:5px; padding-bottom:5px; ">
+   <span >Protocol:</span>
+   <select name="minsnrberprotocol" id="minsnrberprotocol" onchange="changeminsnrberprotocol();">
+  <option selected value="DVB-S">DVB-S</option>
+  <option value="DVB-S2">DVB-S2</option>
+  </select>
+
+   <span style="padding-left: 3px;">Modulation: </span><select name="modulationscheme" id="modulationscheme" onchange="changefecvalues();">
+     <option selected value="QPSK">QPSK</option>
+ </select>
+<span style="padding-left: 3px;">FEC value:</span>
+
+  <select name="minsnrberfecvalue" id="minsnrberfecvalue">
+    <option selected value="1/2">1/2</option>
+    <option value="2/3">2/3</option>
+    <option value="3/4">3/4</option>
+    <option value="5/6">5/6</option>
+    <option value="7/8">7/8</option>
+  </select>
+
+ </div>
+
+ <div style="text-align:center; padding-top:5px; padding-bottom:5px; "><button type="button" class="btn btn-primary" onclick="calulateminsnrber();" >Calculate min SNR</button></div>
+ <div style="text-align:center; padding-top:5px; padding-bottom:5px; font-size:large;">Minimum required SNR: <span id="minsnrspan">--</span><span style="padding-left: 3px;">dB</span></div>
+</div>
+
+<div id="generatetargetedspotbeamwindow" style="display: none;">
   <div style="text-align:center; font-size: x-large; font-weight:bold; margin-bottom:8px;">Generate tageted spotbeam:</div>
 
 
-  <div style="text-align:center;   font-weight: bold; margin-bottom:8px;">Name:
+  <div style="text-align:center;   margin-bottom:8px;">Name:
   <input type="text" id="targetedspotbeamname" placeholder="Custom targeted spotbeam" onclick=""> <span id="targetedspotbeamnameerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></div>
 
   <div style="text-align:center;   font-weight: bold; margin-bottom:8px;">Satellite:</div>
@@ -472,6 +654,7 @@
     <option value="Ka">Ka</option>
   </select></div>
   <div style="text-align:center; margin-bottom:8px;">Max Gain: <input type="text" id="targetedspotbeammaxgain" placeholder="50.0"> <span id="targetedspotbeammaxgainunit">dbW</span>  <span id="targetedspotbeammaxgainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
+  <div style="text-align:center; margin-bottom:15px; margin-top:15px;"><button type="button" onclick="showbeammaxgainalternativecalculatorwindow();" class="btn btn-primary">Alternative max gain calculation</button></div>
   <div style="text-align:center; margin-bottom:8px;">Min Gain: <input type="text" id="targetedspotbeammingain" placeholder="40.0"> <span id="targetedspotbeammingainunit">dbW</span>  <span id="targetedspotbeammingainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">Semimajor Axis size: <input type="text" id="targetedspotbeamsemimajoraxisonmaxgain" placeholder="45.0"><span id="targetedspotbeamlengthunit"> km</span>  <span id="targetedspotbeamsemimajoraxisonmaxgainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">Eccentricity: <input type="text" id="targetedspotbeameccentricity" placeholder="0.5"> <span id="targetedspotbeameccentricityerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
@@ -484,6 +667,47 @@
     <button type="button" style="float:right;" class="btn btn-primary" onclick="checkandtargetedspotbeaminterrain(viewer,terrainobjs);" >Generate Beam</button>
   </div>
 
+</div>
+
+<div id="beammaxgainalternativecalculatorwindow" style="display: none;">
+  <div style="text-align:center; font-size: x-large; font-weight:bold; margin-bottom:8px;">Alternative calculation methods:</div>
+  <div style="text-align: center; margin-bottom:8px;">f(GHz): <input type="text" id="beammaxgainfrequency" placeholder="0.0000000" onkeyup="liveconverttolamba();"> or <input type="text" id="beammaxgainlamda" placeholder="0.0000000" onkeyup="liveconverttofrequency();"> :l(mm) </div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="beammaxgainfrequencylamdaerror" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 1 (ht,Dt):</div>
+  <div style="text-align:center; margin-bottom:8px;"> ht: <input type="text" id="beammaxgainht1" placeholder="0.0000000">,<input type="text" id="beammaxgaindt" placeholder="0.0000000"> :Dt </div>
+
+  <div style="text-align: center; margin-bottom:8px;">  <button type="button" class="btn btn-primary" onclick="checkandcalculatemaxgainfromhtdt();" >Calculate</button></div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="beammaxgainht1error" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="beammaxgaindterror" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 2 (ht,theta3db):</div>
+  <div style="text-align:center; margin-bottom:8px;"> ht: <input type="text" id="beammaxgainht2" placeholder="0.0000000">,<input type="text" id="beammaxgaintheta3dbt" placeholder="0.0000000"> :Dt </div>
+  <div style="text-align: center; margin-bottom:8px;">  <button type="button" class="btn btn-primary" onclick="checkandcalculatemaxgainfromhttheta3dbt();" >Calculate</button></div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="beammaxgainht2error" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align: center;">
+    <span id="beammaxgaintheta3dberror" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+
+</div>
+
+<div id="dishmaxgainalternativecalculatorwindow" style="display: none;">
+  <div style="text-align:center; font-size: x-large; font-weight:bold; margin-bottom:8px;">Alternative calculation methods:</div>
+  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 1 (ht,Dt):</div>
+  <div style="text-align:center; margin-bottom:8px;"> ht: <input type="text" id="dishmaxgainht1" placeholder="0.0000000">,<input type="text" id="dishmaxgaindt" placeholder="0.0000000"> :Dt </div>
+  <div style="text-align: center; margin-bottom:8px;">  <button type="button" class="btn btn-primary" onclick="checkandcalculatemaxgainfromhtdt();" >Calculate</button></div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="dishmaxgainht1error" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="dishmaxgaindterror" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
 </div>
 
 <div id="rullersemiwindow" class="rullersemiwindow" style="display:none;">
@@ -540,7 +764,8 @@
           <span style="display:inline-block; height: 32px; vertical-align: middle;">Communications</span>
         </button>
         <ul id="communicationsdropdownmenu" class="dropdown-menu" style="margin-top: 18px;">
-          <li><a href="" style="text-align:center;">db fix</a></li>
+          <li><a onclick="showlinkbudgetcalculatorwindow();" style="text-align:center;">Link budget calculator</a></li>
+          <li><a onclick="showminsnrandbercalculatorwindow();" style="text-align:center;">Min. SNR/cur.BER calculator</a></li>
           <li><a onclick="showweatherwindow();" style="text-align:center;">Show Weather</a></li>
           </ul>
         </div>

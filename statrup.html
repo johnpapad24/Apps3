@@ -1,0 +1,277 @@
+<html lang="en">
+<head>
+  <!-- Use correct character set. -->
+  <meta charset="utf-8">
+  <!-- Tell IE to use the latest, best version. -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>Hello World!</title>
+  <link href="popupwindow.css" rel="stylesheet">
+  <link href="bootstrap.min.css" rel="stylesheet">
+	<script src="jquery-3.6.0.min.js"></script>
+  <script src="bootstrap.min.js"></script>
+	<script src="popupwindow.js"></script>
+  <script src="functions.js"></script>
+</head>
+<body>
+  <div id="logwindow" style="display:none;" >
+    <div style="width:100%; height:100%;">
+    <div style="display: block; margin:auto; height: 100%; width:100%;"><textarea id="logtextarea" style="height: 100%; width:100%; resize:none; min-height:150px; min-width:350px;" readonly></textarea>
+    <button style="left: 50%; position: relative; -ms-transform: translate(-50%); transform: translate(-50%);">OK</button>
+  </div>
+</div>
+</div>
+  <div style="text-align:center; display: block; vertical-align:middle; margin-left: auto;
+    margin-right: auto; position: relative;">
+      <img style="" src="Resources/splash.jpeg">
+  </div>
+
+
+  <div class="progress" style="display:block; margin:auto; text-align:center; position: relative; max-width:500px; margin-top:10px;">
+    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%;">0%</div>
+  </div>
+
+  <div style="text-align:center; display: block; margin-top:10px">
+    <span id="processtext">Initializing...</span>
+  </div>
+  <div id="startupprogesserrordiv" style="display: none; margin: auto; text-align:center;">
+    <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">
+    <span id="startupprogesserrordivspan" style="color: red; font-size: 18px; font-weight: bold;"></span>
+  </div>
+  <div style="text-align:center;">
+    <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button>
+  </div>
+  <div id="logwindow" style="display:none;" >
+    <div style="width:100%; height:100%;">
+    <div style="display: block; margin:auto; height: 100%; width:100%;"><textarea id="logtextarea" style="height: 100%; width:100%; resize:none; min-height:150px; min-width:350px;" readonly></textarea>
+    <button style="left: 50%; position: relative; -ms-transform: translate(-50%); transform: translate(-50%);">OK</button>
+  </div>
+ </div>
+ </div>
+
+
+</body>
+<script>
+function startupprocesserror_js(message){
+  document.getElementsByClassName('progress-bar').item(0).className+=' progress-bar-danger';
+  document.getElementById("startupprogesserrordivspan").innerHTML=message;
+  document.getElementById("startupprogesserrordiv").style.display="block";
+}
+function startupprogessor(step,totalsteps,processname){
+  var percent=Math.round(step/totalsteps);
+  document.getElementsByClassName('progress-bar').item(0).setAttribute('aria-valuenow',percent);
+  document.getElementsByClassName('progress-bar').item(0).setAttribute('style','width:'+percent+"%;");
+  document.getElementsByClassName('progress-bar').item(0).innerHTML=percent+"%";
+  document.getElementById('processtext').innerHTML=processname;
+}
+function logonstartup(message,status){
+  $.ajax({
+             url: '/Apps/Startuplogger.php',
+             async:false,
+             type: 'POST',
+             data:{message:message,status:status},
+             success: function(data) {
+               if(data==false){
+                 startupprocesserror_js("Error! Write to log file failed.");
+                 return false;
+               }
+               return true;
+             },
+             fail: function(data){
+               startupprocesserror_js("Error! Write to log file failed.");
+               return false;
+             }
+         });
+
+}
+function programstartup(){
+var totalsteps=6;
+var check=true;
+var percent=0;
+var step=0;
+
+//initialization
+$.ajax({
+           url: '/Apps/Logcreator.php',
+           async:false,
+           type: 'POST',
+           success: function(data) {
+             if(data==true){
+                step=step+1;
+                check=logonstartup("Starting initialization...","");
+                if(check==false){return;}
+                startupprogessor(step,totalsteps,"Checking internet connection...");
+             }
+             else{
+               startupprocesserror_js("Error! Log file creation failed.");
+               return;
+             }
+
+           },
+           fail: function(data){
+              startupprocesserror_js("Error! Log file creation failed.");
+              return;
+           }
+       });
+
+
+//checking internet connection
+
+$.ajax({
+           url: '/Apps/Checkinternetconn.php',
+           async:false,
+           type: 'POST',
+           success: function(data) {
+             if(data==true){
+                 step=step+1;
+                 check=logonstartup("Checking internet connection...","OK");
+                 if(check==false){return;}
+                 startupprogessor(step,totalsteps,"Checking TLE File...");
+             }
+             else{
+               check=logonstartup("Checking internet connection...","FAILED");
+               if(check==false){return;}
+               startupprocesserror_js("Error! Cannot connect to the internet.");
+               return;
+             }
+
+
+           },
+           fail: function(data){
+             check=logonstartup("Checking internet connection...","FAILED");
+             if(check==false){return;}
+             startupprocesserror_js("Error! Cannot connect to the internet.");
+             return;
+           }
+       });
+
+
+//checking tle file
+
+
+$.ajax({
+           url: '/Apps/Checktlefile.php',
+           async:false,
+           type: 'POST',
+           success: function(data) {
+             if(data==true){
+                step=step+1;
+                check=logonstartup("Checking TLE file...","OK");
+                if(check==false){return;}
+                startupprogessor(step,totalsteps,"Connecting to database...");
+             }
+             else{
+               check=logonstartup("Checking TLE file...","FAILED");
+               if(check==false){return;}
+               startupprocesserror_js("Error! TLE file not found.");
+               return;
+             }
+
+           },
+           fail: function(data){
+             check=logonstartup("Checking TLE file...","FAILED");
+             if(check==false){return;}
+             startupprocesserror_js("Error! TLE file not found.");
+             return;
+           }
+       });
+
+
+//connecting to db
+
+$.ajax({
+           url: '/Apps/Checkconnectdb.php',
+           async:false,
+           type: 'POST',
+           success: function(data) {
+             if(data==true){
+                  step=step+1;
+                  check=logonstartup("Connecting to database...","OK");
+                  if(check==false){return;}
+                  startupprogessor(step,totalsteps,"Updating database...");
+             }
+             else{
+               check=logonstartup("Connecting to database...","FAILED");
+               if(check==false){return;}
+               startupprocesserror_js("Error! Cannot connect to database.");
+               return;
+             }
+
+           },
+           fail: function(data){
+             check=logonstartup("Connecting to database...","FAILED");
+             if(check==false){return;}
+             startupprocesserror_js("Error! Cannot connect to database.");
+             return;
+           }
+       });
+
+
+//update db
+
+$.ajax({
+           url: '/Apps/Dbupdater.php',
+           async:false,
+           type: 'POST',
+           success: function(data) {
+             if(data==0){
+                  step=step+1;
+                  check=logonstartup("Updating database...","OK");
+                  if(check==false){return;}
+                  startupprogessor(step,totalsteps,"Checking/creating settings file...");
+             }
+             else{
+               check=logonstartup("Updating database...","FAILED");
+               if(check==false){return;}
+               startupprocesserror_js("Error! Cannot update database.");
+               return;
+             }
+
+           },
+           fail: function(data){
+             check=logonstartup("Updating database...","FAILED");
+             if(check==false){return;}
+             startupprocesserror_js("Error! Cannot update database.");
+             return;
+           }
+       });
+
+
+//check and create settings file
+
+$.ajax({
+           url: '/Apps/Settingsfilecreator.php',
+           async:false,
+           type: 'POST',
+           success: function(data) {
+             if(data==true){
+                  step=step+1;
+                  check=logonstartup("Checking/creating settings file...","OK");
+                  if(check==false){return;}
+                  startupprogessor(step,totalsteps,"Starting up...");
+
+             }
+             else{
+               check=logonstartup("Checking/creating settings file...","FAILED");
+               if(check==false){return;}
+               startupprocesserror_js("Error! Creation of settings file failed.");
+               return;
+             }
+
+           },
+           fail: function(data){
+             check=logonstartup("Checking/creating settings file...","FAILED");
+             if(check==false){return;}
+             startupprocesserror_js("Error! Creation of settings file failed.");
+             return;
+           }
+       });
+       check=logonstartup("Started Cessium environment Load...","");
+       if(check==false){return;}
+
+}
+programstartup();
+
+</script>
+</html>

@@ -47,13 +47,14 @@ class t_satellite{
   }
 }
 class dish {
-  constructor(id, name, longitude, latitude, size, gain, usage){
+  constructor(id, name, longitude, latitude, size, gain,efficiencyk, usage){
       this.id=id;
       this.name=name;
       this.longitude=longitude;
       this.latitude=latitude;
       this.size=size;
       this.gain=gain;
+      this.efficiencyk=efficiencyk;
       this.usage=usage;
 
   }
@@ -81,6 +82,12 @@ class dish {
   }
   get getGainString(){
     return this.gain + " dB";
+  }
+  get getEfficiencyk(){
+    return this.efficiencyk;
+  }
+  get getEfficiencykString(){
+    return this.efficiencyk+" %";
   }
   get getUsage(){
     return this.usage;
@@ -123,10 +130,23 @@ function togglelengthunit(){
     if(document.getElementById("lengthunitswitch").checked){
         document.getElementById("distanceunit").innerHTML=" mi";
         document.getElementById("targetedspotbeamlengthunit").innerHTML=" mi";
+        document.getElementById("linkbudgetdownlinksatdistanceunitspan").innerHTML=" mi";
+        document.getElementById("linkbudgetuplinksatdistanceunitspan").innerHTML=" mi";
+
         if(document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value!=""){
           var smavtoconvert=document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value;
           smavtoconvert=convertkmtomiles(smavtoconvert);
           document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value=smavtoconvert;
+        }
+        if(document.getElementById("linkbudgetuplinksatdistance").value!=""){
+          var smavtoconvert=document.getElementById("linkbudgetuplinksatdistance").value;
+          smavtoconvert=convertkmtomiles(smavtoconvert);
+          document.getElementById("linkbudgetuplinksatdistance").value=smavtoconvert;
+        }
+        if(document.getElementById("linkbudgetdownlinksatdistance").value!=""){
+          var smavtoconvert=document.getElementById("linkbudgetdownlinksatdistance").value;
+          smavtoconvert=convertkmtomiles(smavtoconvert);
+          document.getElementById("linkbudgetdownlinksatdistance").value=smavtoconvert;
         }
         var toconvert=document.getElementById("distancevalue").innerHTML;
         toconvert=convertkmtomiles(toconvert);
@@ -137,10 +157,22 @@ function togglelengthunit(){
     else{
       document.getElementById("distanceunit").innerHTML=" km";
       document.getElementById("targetedspotbeamlengthunit").innerHTML=" km";
+      document.getElementById("linkbudgetdownlinksatdistanceunitspan").innerHTML=" km";
+      document.getElementById("linkbudgetuplinksatdistanceunitspan").innerHTML=" km";
       if(document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value!=""){
         var smavtoconvert=document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value;
         smavtoconvert=convertmilestokm(smavtoconvert);
         document.getElementById("targetedspotbeamsemimajoraxisonmaxgain").value=smavtoconvert;
+      }
+      if(document.getElementById("linkbudgetuplinksatdistance").value!=""){
+        var smavtoconvert=document.getElementById("linkbudgetuplinksatdistance").value;
+        smavtoconvert=convertmilestokm(smavtoconvert);
+        document.getElementById("linkbudgetuplinksatdistance").value=smavtoconvert;
+      }
+      if(document.getElementById("linkbudgetdownlinksatdistance").value!=""){
+        var smavtoconvert=document.getElementById("linkbudgetdownlinksatdistance").value;
+        smavtoconvert=convertmilestokm(smavtoconvert);
+        document.getElementById("linkbudgetdownlinksatdistance").value=smavtoconvert;
       }
       var toconvert=document.getElementById("distancevalue").innerHTML;
       toconvert=convertmilestokm(toconvert);
@@ -310,6 +342,8 @@ function writetolog(message,status){
 
 }
 
+
+
 function satellitelistloader(windowname){
   $.ajax({
              url: '/Apps/Satellitelistgetter.php',
@@ -333,6 +367,72 @@ function satellitelistloader(windowname){
                    document.getElementById('deletesatellitewindowtablespan').innerHTML=data;
                 }
                 return data;
+             }
+         });
+}
+
+function browsefileloader(windowname){
+  $.ajax({
+             url: '/Apps/Browsefilegetter.php',
+             type: 'POST',
+             data: {windowname: windowname},
+              error:function (xhr, ajaxOptions, thrownError){
+                  if(xhr.status!=200) {
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot load file list.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+                    showerrorwindow();
+                  }
+              },
+              success: function(data) {
+
+               if(windowname=="browsefileopenwindow"){
+                  document.getElementById('browsefileopentablespan').innerHTML=data;
+                  var table = document.getElementById("browsefileopentable");
+                  if(document.querySelectorAll('#browsefileopentable tbody tr').length==0){
+                    document.getElementById('browsefileopenloading').style.display="none";
+                    document.getElementById('browsefileopennofiles').style.display="block";
+                    return;
+                  }
+                  document.getElementById('browsefileopenloading').style.display="none";
+                  document.getElementById('browsefileopenmainwindow').style.display="block";
+                }
+                else if(windowname=="browsefilesavewindow"){
+                   document.getElementById('browsefilesaveloading').style.display="none";
+                   var table = document.getElementById("browsefilesavetable");
+                   if(document.querySelectorAll('#browsefilesavetable tbody tr').length==0){
+                     document.getElementById('browsefilesaveloading').style.display="none";
+                     document.getElementById('browsefilesavenofiles').style.display="block";
+                     return;
+                   }
+                   document.getElementById('browsefilesavemainwindow').style.display="block";
+                   document.getElementById('browsefilesavetablespan').innerHTML=data;
+                }
+                return data;
+             }
+         });
+}
+
+function projectsaver(filename,terrainobjects){
+  if(filename==""){
+    return;
+  }
+  var psav=toJSON(terrainobjects);
+  alert(psav);
+  var searchTxt = ".psav";
+  var rgx = RegExp(searchTxt, "gi");
+  var strArr = filename.split(searchTxt);
+  var filename2=strArr[0]+".psav";
+  alert(filename2);
+  $.ajax({
+             url: '/Apps/Savefilecreator.php',
+             type: 'POST',
+             data: {filename: filename2, data:psav},
+              error:function (xhr, ajaxOptions, thrownError){
+                  if(xhr.status!=200) {
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot save file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+                    showerrorwindow();
+                  }
+              },
+              success: function(data) {
              }
          });
 }
@@ -367,6 +467,17 @@ function loadsettings(){
 
   });
 }
+
+function projectloader(projectfile,terrainobjects){
+  $.getJSON("Projects/"+projectfile)
+    .done(function( data ) {
+      terrainobjects=JSON.parse(data);
+    })
+    .fail(function( jqxhr, settings, exception ) {
+
+  });
+}
+
 
 function loadsetting(setting,value,viewer){
   document.getElementById(setting).checked=value;
@@ -433,11 +544,27 @@ function activatedarkmode(){
   document.getElementById("settingsdropdown").className="dropdown dropdown-bubble dropdown-bubble-dark";
   document.getElementById("settingsdropdownmenu").className="dropdown-menu dropdown-menu-dark";
   }
-  var popupwindowcollection = document.getElementsByClassName("popupwindow_content");
+  var popupwindowcollection = document.getElementsByClassName("popupwindow");
   for (var i=0;i<popupwindowcollection.length;i++){
-      popupwindowcollection[i].className="popupwindow_content popupwindow-dark";
+      popupwindowcollection[i].className="popupwindow popupwindow-dark";
     }
-  document.getElementById("rullersemiwindow").className="rullersemiwindow popupwindow-dark";
+  var popupwindowcontentcollection = document.getElementsByClassName("popupwindow_content");
+  for (var i=0;i<popupwindowcontentcollection.length;i++){
+      popupwindowcontentcollection[i].className="popupwindow_content popupwindow_content-dark";
+    }
+    var popuptitlebarcollection = document.getElementsByClassName("popupwindow_titlebar");
+    for (var i=0;i<popuptitlebarcollection.length;i++){
+        popuptitlebarcollection[i].className="popupwindow_titlebar popupwindow_titlebar_draggable popupwindow_titlebar-dark";
+    }
+    var popuptitlebartextcollection = document.getElementsByClassName("popupwindow_titlebar_text");
+    for (var i=0;i<popuptitlebartextcollection.length;i++){
+        popuptitlebartextcollection[i].className="popupwindow_titlebar_text popupwindow_titlebar_text-dark";
+    }
+    var popupstatusbarcollection = document.getElementsByClassName("popupwindow_statusbar");
+    for (var i=0;i<popupstatusbarcollection.length;i++){
+        popupstatusbarcollection[i].className="popupwindow_statusbar popupwindow_statusbar-dark";
+    }
+  document.getElementById("rullersemiwindow").className="rullersemiwindow semiwindow-dark";
   var textinputs= document.querySelectorAll("input[type=text]");
   for(var i=0;i<textinputs.length;i++){
     textinputs[i].className="input-dark";
@@ -455,6 +582,13 @@ function activatedarkmode(){
   document.getElementById("antennasicon").className="antennasicon icons-dark";
   document.getElementById("communicationsicon").className="communicationsicon icons-dark";
   document.getElementById("settingsicon").className="settingsicon icons-dark";
+
+  document.getElementById("targetedspotbeamsat").className="select-dark";
+  document.getElementById("targetedspotbeamband").className="select-dark";
+  document.getElementById("weatherlossband").className="select-dark";
+  document.getElementById("minsnrberprotocol").className="select-dark";
+  document.getElementById("modulationscheme").className="select-dark";
+  document.getElementById("minsnrberfecvalue").className="select-dark";
 
 
 }
@@ -481,7 +615,23 @@ function deactivatedarkmode(){
   }
   var popupwindowcollection = document.getElementsByClassName("popupwindow-dark");
   while(popupwindowcollection.length>0){
-    popupwindowcollection[0].className="popupwindow_content";
+    popupwindowcollection[0].className="popupwindow";
+  }
+  var popupwindowcontentcollection = document.getElementsByClassName("popupwindow_content-dark");
+  while(popupwindowcontentcollection.length>0){
+    popupwindowcontentcollection[0].className="popupwindow_content";
+  }
+  var popuptitlebarcollection = document.getElementsByClassName("popupwindow_titlebar-dark");
+  while(popuptitlebarcollection.length>0){
+    popuptitlebarcollection[0].className="popupwindow_titlebar popupwindow_titlebar_draggable";
+  }
+  var popuptitlebartextcollection = document.getElementsByClassName("popupwindow_titlebar_text-dark");
+  while(popuptitlebartextcollection.length>0){
+    popuptitlebartextcollection[0].className="popupwindow_titlebar_text";
+  }
+  var popupstatusbarcollection = document.getElementsByClassName("popupwindow_statusbar-dark");
+  while(popupstatusbarcollection.length>0){
+    popupstatusbarcollection[0].className="popupwindow_statusbar";
   }
   document.getElementById("rullersemiwindow").className="rullersemiwindow";
   var textinputs= document.querySelectorAll("input[type=text]");
@@ -501,6 +651,13 @@ function deactivatedarkmode(){
   document.getElementById("antennasicon").className="antennasicon";
   document.getElementById("communicationsicon").className="communicationsicon";
   document.getElementById("settingsicon").className="settingsicon";
+
+  document.getElementById("targetedspotbeamsat").className="";
+  document.getElementById("targetedspotbeamband").className="";
+  document.getElementById("weatherlossband").className="";
+  document.getElementById("minsnrberprotocol").className="";
+  document.getElementById("modulationscheme").className="";
+  document.getElementById("minsnrberfecvalue").className="";
 
 
 }
@@ -688,10 +845,11 @@ function addsatellitetoterrain(viewer,terrainobjects){
   var start = Cesium.JulianDate.fromDate(new Date());
   var colorarr=colorrand();
   alert(colorarr);
+  var starttime
 
 
 
-  var positionsOverTime = new Cesium.SampledPositionProperty();
+  /*var positionsOverTime = new Cesium.SampledPositionProperty();
   for (var i = 0; i < 60*60*600; i+= 6) {
           var time = Cesium.JulianDate.addSeconds(start, i, new Cesium.JulianDate());
           var jsDate = Cesium.JulianDate.toDate(time);
@@ -711,6 +869,72 @@ function addsatellitetoterrain(viewer,terrainobjects){
           positionsOverTime.addSample(time, pos);
 
   }
+  */
+  var satellitemodel = viewer.entities.add({
+  id: "satellite_"+satname,
+  name: satname,
+  position: new Cesium.CallbackProperty(function (time, result) {
+    var jsDate = Cesium.JulianDate.toDate(time);
+    var positionAndVelocity = satellite.propagate(satrec, jsDate);
+    var gmst = satellite.gstime(jsDate);
+    var p   = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
+    var position = Cesium.Cartesian3.fromRadians(p.longitude, p.latitude, p.height * 1000);
+
+   var pos=new Cesium.Cartesian3();
+    var transform=Cesium.Matrix4.fromRotationTranslation(Cesium.Transforms.computeTemeToPseudoFixedMatrix(time));
+
+    var pos=Cesium.Matrix4.multiplyByPoint(transform, position, pos);
+
+    return pos;
+
+
+}, false),
+  description: "Orbit of Satellite: "+satname,
+  model: {
+    uri : "Resources/10477_Satellite_v1_L3.glb",
+    minimumPixelSize: 96
+
+  },
+
+
+
+  });
+  /*var satellitemodel = viewer.entities.add({
+  id: "satellite_"+satname,
+  name: satname,
+  position: positionsOverTime,
+  description: "Orbit of Satellite: "+satname,
+  model: {
+    uri : "Resources/10477_Satellite_v1_L3.glb",
+    minimumPixelSize: 96
+
+  },
+
+
+
+  });
+/*  var polylinepos=Cesium.Cartesian3.fromDegreesArray(positionsOverTime);
+  var polyline =  viewer.entities.add({
+    id: "orbit_satellite_"+satname,
+    description: "Orbit of Satellite: "+satname,
+    path: {
+      material: {
+          polylineOutline: {
+            color: {
+              rgba: [255, 0, 255, 255],
+            },
+            outlineColor: {
+              rgba: [0, 255, 255, 255],
+            },
+            outlineWidth: 5,
+          },
+        },
+        width: 8
+      },
+      position:positionsOverTime,
+
+
+  });
   const satellitemodel = viewer.entities.add({
   id: "satellite_"+satname,
   name: satname,
@@ -732,6 +956,7 @@ function addsatellitetoterrain(viewer,terrainobjects){
   "outlineColor": {"rgba": [0, 0, 0, 255]}, "outlineWidth": 2
 
   });
+  */
   var satelliteobj=new t_satellite("satellite_"+satname,satname,colorarr[0],satellitemodel,beamlist);
   terrainobjects.getSatellitesInTerrain.push(satelliteobj);
 
@@ -1367,11 +1592,13 @@ function loadeditdishwindow(terrainobjects,dishid){
   document.getElementById("editdishlatitude").setCustomValidity('');
   document.getElementById("editdishsize").setCustomValidity('');
   document.getElementById("editdishgain").setCustomValidity('');
+  document.getElementById("editdishefficiencyk").setCustomValidity('');
   document.getElementById("editdishnameerror").innerHTML='';
   document.getElementById("editdishlongitudeerror").innerHTML='';
   document.getElementById("editdishlatitudeerror").innerHTML='';
   document.getElementById("editdishsizeerror").innerHTML='';
   document.getElementById("editdishgainerror").innerHTML='';
+  document.getElementById("editdishefficiencykerror").innerHTML='';
   for(var i=0; i<terrainobjects.getDishesInTerrain.length;i++){
     if(terrainobjects.getDishesInTerrain[i].id==dishid){
       document.getElementById("editdishname").value=terrainobjects.getDishesInTerrain[i].name;
@@ -1379,6 +1606,7 @@ function loadeditdishwindow(terrainobjects,dishid){
       document.getElementById("editdishlatitude").value=terrainobjects.getDishesInTerrain[i].latitude;
       document.getElementById("editdishsize").value=terrainobjects.getDishesInTerrain[i].size;
       document.getElementById("editdishgain").value=terrainobjects.getDishesInTerrain[i].gain;
+      document.getElementById("editdishefficiencyk").value=terrainobjects.getDishesInTerrain[i].efficiencyk;
       if(terrainobjects.getDishesInTerrain[i].usage=="Uplink"){
           document.getElementById("editdishusageselectdnl").checked=false;
           document.getElementById("editdishusageselectupl").checked=true;
@@ -1447,12 +1675,13 @@ function checkandadddishinterrain(viewer,terrainobjects){
   document.getElementById("adddishlatitude").setCustomValidity('');
   document.getElementById("adddishsize").setCustomValidity('');
   document.getElementById("adddishgain").setCustomValidity('');
+  document.getElementById("adddishefficiencyk").setCustomValidity('');
   document.getElementById("adddishnameerror").innerHTML='';
   document.getElementById("adddishlongitudeerror").innerHTML='';
   document.getElementById("adddishlatitudeerror").innerHTML='';
   document.getElementById("adddishsizeerror").innerHTML='';
   document.getElementById("adddishgainerror").innerHTML='';
-
+  document.getElementById("adddishefficiencykerror").innerHTML='';
 
 
       var namestr=document.getElementById("adddishname").value;
@@ -1460,6 +1689,7 @@ function checkandadddishinterrain(viewer,terrainobjects){
       var latitude=document.getElementById("adddishlatitude").value;
       var size=document.getElementById("adddishsize").value;
       var gain=document.getElementById("adddishgain").value;
+      var efficiencyk=document.getElementById("adddishefficiencyk").value;
       var er=0;
 
       if(namestr.trim()==""){
@@ -1535,6 +1765,25 @@ function checkandadddishinterrain(viewer,terrainobjects){
           er=1;
         }
       }
+      if(efficiencyk.trim()==""){
+        document.getElementById("adddishefficiencyk").setCustomValidity('Efficincy (k) is required.');
+        document.getElementById("adddishefficiencykerror").innerHTML='Efficincy (k) is required.';
+
+        er=1
+      }
+      else{
+        if(!isNumber(efficiencyk.trim())){
+          document.getElementById("adddishefficiencyk").setCustomValidity('Invalid fficincy (k).');
+          document.getElementById("adddishefficiencykerror").innerHTML='Invalid Efficincy (k).';
+          er=1;
+        }
+        if(Number(efficiencyk.trim())>100 || Number(efficiencyk.trim())<0){
+          document.getElementById("adddishefficiencyk").setCustomValidity('Efficincy (k) must be in [0-100]% range.');
+          document.getElementById("adddishefficiencykerror").innerHTML='Efficincy (k) must be in [0-100]% range.';
+          er=1;
+        }
+
+      }
       if(er==0){
         var usage;
         var val;
@@ -1551,9 +1800,9 @@ function checkandadddishinterrain(viewer,terrainobjects){
            usage="Uplink";
          }
 
-         adddishinterrain(viewer,terrainobjects,namestr,longitude,latitude,size,gain,usage,0);
+         adddishinterrain(viewer,terrainobjects,namestr,longitude,latitude,size,gain,efficiencyk,usage,0);
          constructmanagedishestable(terrainobjects);
-
+         fillandactivatelinkbudgetwindow(terrainobjects);
       }
 
 }
@@ -1564,11 +1813,13 @@ function checkandeditdishinterrain(viewer,terrainobjects){
   document.getElementById("editdishlatitude").setCustomValidity('');
   document.getElementById("editdishsize").setCustomValidity('');
   document.getElementById("editdishgain").setCustomValidity('');
+  document.getElementById("editdishefficiencyk").setCustomValidity('');
   document.getElementById("editdishnameerror").innerHTML='';
   document.getElementById("editdishlongitudeerror").innerHTML='';
   document.getElementById("editdishlatitudeerror").innerHTML='';
   document.getElementById("editdishsizeerror").innerHTML='';
   document.getElementById("editdishgainerror").innerHTML='';
+  document.getElementById("editdishefficiencykerror").innerHTML='';
 
 
 
@@ -1577,6 +1828,7 @@ function checkandeditdishinterrain(viewer,terrainobjects){
       var latitude=document.getElementById("editdishlatitude").value;
       var size=document.getElementById("editdishsize").value;
       var gain=document.getElementById("editdishgain").value;
+      var efficiencyk=document.getElementById("editdishefficiencyk").value;
       var er=0;
 
       if(namestr.trim()==""){
@@ -1636,8 +1888,7 @@ function checkandeditdishinterrain(viewer,terrainobjects){
       if(gain.trim()==""){
         document.getElementById("editdishgain").setCustomValidity('Gain is required.');
         document.getElementById("editdishgainerror").innerHTML='Gain is required.';
-
-        er=1
+        er=1;
       }
       else{
         if(!isNumber(gain.trim())){
@@ -1646,6 +1897,26 @@ function checkandeditdishinterrain(viewer,terrainobjects){
           er=1;
         }
       }
+
+      if(efficiencyk.trim()==""){
+        document.getElementById("editdishefficiencyk").setCustomValidity('Efficincy (k) is required.');
+        document.getElementById("editdishefficiencykerror").innerHTML='Efficincy (k) is required.';
+        er=1;
+      }
+      else{
+        if(!isNumber(efficiencyk.trim())){
+          document.getElementById("editdishefficiencyk").setCustomValidity('Invalid fficincy (k).');
+          document.getElementById("editdishefficiencykerror").innerHTML='Invalid Efficincy (k).';
+          er=1;
+        }
+        if(Number(efficiencyk.trim())>100 || Number(efficiencyk.trim())<0){
+          document.getElementById("editdishefficiencyk").setCustomValidity('Efficincy (k) must be in [0-100]% range.');
+          document.getElementById("editdishefficiencykerror").innerHTML='Efficincy (k) must be in [0-100]% range.';
+          er=1;
+        }
+
+      }
+
       if(er==0){
         var usage;
         var val;
@@ -1670,23 +1941,23 @@ function checkandeditdishinterrain(viewer,terrainobjects){
             }
          }
          terrainobjects.getDishesInTerrain.splice(oldpos,1);
-         adddishinterrain(viewer,terrainobjects,namestr,longitude,latitude,size,gain,usage,oldpos);
+         adddishinterrain(viewer,terrainobjects,namestr,longitude,latitude,size,gain,efficiencyk,usage,oldpos);
          constructmanagedishestable(terrainobjects);
-
+         fillandactivatelinkbudgetwindow(terrainobjects);
       }
 }
-function adddishinterrain(viewer,terrainobjects,namestr,longitude,latitude,size,gain,usage,pos){
+function adddishinterrain(viewer,terrainobjects,namestr,longitude,latitude,size,gain,efficiencyk,usage,pos){
   const dishmodel = viewer.entities.add({
   id: "dish_"+namestr.trim(),
   name: namestr.trim(),
-  description: "Dish Antenna: "+namestr.trim()+"\n"+"Specifications:\n"+"Position: "+longitude.trim()+","+latitude.trim()+"\n"+"Size: "+size.trim()+"\n"+"Gain: "+gain.trim()+"\n"+"Usage: "+usage,
+  description: "Dish Antenna: "+namestr.trim()+"<br>"+"Specifications:<br>"+"Position: "+longitude.trim()+","+latitude.trim()+"<br>"+"Size: "+size.trim()+" cm<br>"+"Gain: "+gain.trim()+" dB<br>"+"Efficincy (k): "+efficiencyk.trim()+"%<br>"+"Usage: "+usage,
     position: Cesium.Cartesian3.fromDegrees(longitude.trim(), latitude.trim()),
     model:{
         uri : 'Resources/dish.gltf'
     }
 
   });
-  var dishobj=new dish("dish_"+namestr.trim(),namestr.trim(),longitude.trim(),latitude.trim(),size.trim(),gain.trim(),usage);
+  var dishobj=new dish("dish_"+namestr.trim(),namestr.trim(),longitude.trim(),latitude.trim(),size.trim(),gain.trim(),efficiencyk.trim(),usage);
   if(pos==0){
     terrainobjects.getDishesInTerrain.push(dishobj);
   }
@@ -1694,6 +1965,63 @@ function adddishinterrain(viewer,terrainobjects,namestr,longitude,latitude,size,
     terrainobjects.getDishesInTerrain.splice(pos,0,dishobj);
   }
   viewer.zoomTo(dishmodel);
+}
+function fillandactivatelinkbudgetwindow(terrainobjects){
+  var hasuplinkdish=0;
+  var hasdownlinkdish=0;
+  var uselect=document.getElementById("linkbudgetuplinkdish");
+  var dselect=document.getElementById("linkbudgetdownlinkdish");
+  dselect.options.length = 0;
+  uselect.options.length = 0;
+  for(var i=0;i<terrainobjects.getDishesInTerrain.length;i++){
+    if(terrainobjects.getDishesInTerrain[i].getUsage=="Uplink"){
+      var opt = document.createElement('option');
+      opt.value = terrainobjects.getDishesInTerrain[i].getName;
+      opt.innerHTML = terrainobjects.getDishesInTerrain[i].getName;
+      uselect.appendChild(opt);
+      hasuplinkdish = 1;
+
+    }
+    if(terrainobjects.getDishesInTerrain[i].getUsage=="Downlink"){
+      var opt = document.createElement('option');
+      opt.value = terrainobjects.getDishesInTerrain[i].getName;
+      opt.innerHTML = terrainobjects.getDishesInTerrain[i].getName;
+      dselect.appendChild(opt);
+      hasdownlinkdish=1;
+    }
+  }
+  if(uselect.options.length == 1){
+    uselect.selectedIndex = "0";
+    document.getElementById("linkbudgetcalulateuplink").disabled = false;
+    document.getElementById("linkbudgetuplinkdish").disabled = false;
+
+  }
+  if(dselect.options.length == 1){
+    dselect.selectedIndex = "0";
+    document.getElementById("linkbudgetcalulatedownlink").disabled = false;
+    document.getElementById("linkbudgetdownlinkdish").disabled = false;
+  }
+  if(uselect.options.length == 0){
+    var opt = document.createElement('option');
+    opt.innerHTML = "-- No dishes available --";
+    uselect.appendChild(opt);
+    uselect.selectedIndex = "0";
+    document.getElementById("linkbudgetcalulateuplink").disabled = true;
+    document.getElementById("linkbudgetuplinkdish").disabled = true;
+
+  }
+  if(dselect.options.length == 0){
+    var opt = document.createElement('option');
+    opt.innerHTML = "-- No dishes available --";
+    dselect.appendChild(opt);
+    dselect.selectedIndex = "0";
+    document.getElementById("linkbudgetcalulatedownlink").disabled = true;
+    document.getElementById("linkbudgetdownlinkdish").disabled = true;
+  }
+
+
+
+
 }
 function checkandaddsatellite(){
   document.getElementById("addsatellitename").setCustomValidity('');
@@ -1741,9 +2069,403 @@ function checkandaddsatellite(){
   }
 }
 
+function checkandcalculatemaxgainfromhtdt(){
+  document.getElementById("beammaxgainht1").setCustomValidity('');
+  document.getElementById("beammaxgaindt").setCustomValidity('');
+  document.getElementById("beammaxgainfrequency").setCustomValidity('');
+  document.getElementById("beammaxgainlamda").setCustomValidity('');
+  document.getElementById("beammaxgainht1error").innerHTML='';
+  document.getElementById("beammaxgaindterror").innerHTML='';
+  document.getElementById("beammaxgainfrequencylamdaerror").innerHTML='';
+
+
+
+  var htstr=document.getElementById("beammaxgainht1").value;
+  var dtstr=document.getElementById("beammaxgaindt").value;
+  var er=0;
+  var lamda=document.getElementById("beammaxgainlamda").value;
+  if(lamda==""){
+    document.getElementById("beammaxgainfrequency").setCustomValidity("Frequency is required.");
+    document.getElementById("beammaxgainlamda").setCustomValidity("Lamda is required.");
+
+      document.getElementById("beammaxgainfrequencylamdaerror").innerHTML="Frequency/lamda is required.";
+      er=1;
+  }
+  if(!(isNumber(lamda))){
+    document.getElementById("beammaxgainfrequency").setCustomValidity("Invalid frequency.");
+    document.getElementById("beammaxgainlamda").setCustomValidity("Invalid lamda.");
+
+      document.getElementById("beammaxgainfrequencylamdaerror").innerHTML="Invalid frequency/lamda.";
+    er=1;
+  }
+  if(htstr.trim()==""){
+    document.getElementById("beammaxgainht1").setCustomValidity('ht is required.');
+    document.getElementById("beammaxgainht1error").innerHTML='ht is required.';
+    er=1;
+  }
+  if(dtstr.trim()==""){
+    document.getElementById("beammaxgaindt").setCustomValidity('Dt is required.');
+    document.getElementById("beammaxgaindterror").innerHTML='Dt is required.';
+    er=1;
+  }
+
+  if(!isNumber(htstr.trim())){
+    document.getElementById("beammaxgainht1").setCustomValidity('Invalid ht.');
+    document.getElementById("beammaxgainht1error").innerHTML='Invalid ht.';
+    er=1;
+  }
+  if(!isNumber(dtstr.trim())){
+    document.getElementById("beammaxgaindt").setCustomValidity('Invalid dt.');
+    document.getElementById("beammaxgaindterror").innerHTML='Invalid dt.';
+    er=1;
+  }
+  if(er==0){
+    var r1=(Math.PI*dtstr)/(lamda*0.001);
+    r1=htstr*Math.pow(r1,2);
+    r1=10*Math.log10(r1);
+
+    document.getElementById("targetedspotbeammaxgain").value=r1;
+    document.getElementById("beammaxgainht1").setCustomValidity('');
+    document.getElementById("beammaxgaindt").setCustomValidity('');
+    document.getElementById("beammaxgainfrequency").setCustomValidity('');
+    document.getElementById("beammaxgainlamda").setCustomValidity('');
+    document.getElementById("beammaxgainht2").setCustomValidity('');
+    document.getElementById("beammaxgaintheta3dbt").setCustomValidity('');
+    document.getElementById("beammaxgainht1error").innerHTML='';
+    document.getElementById("beammaxgaindterror").innerHTML='';
+    document.getElementById("beammaxgainfrequencylamdaerror").innerHTML='';
+    document.getElementById("beammaxgainht2error").innerHTML='';
+    document.getElementById("beammaxgaintheta3dbterror").innerHTML='';
+    $("#beammaxgainalternativecalculatorwindow").PopupWindow("close");
+
+  }
+}
+
+function checkandcalculatemaxgainfromhttheta3dbt(){
+  document.getElementById("beammaxgainht2").setCustomValidity('');
+  document.getElementById("beammaxgaintheta3dbt").setCustomValidity('');
+
+  var htstr=document.getElementById("beammaxgainht2").value;
+  var theta3dbstr=document.getElementById("beammaxgaintheta3dbt").value;
+  var er=0;
+
+  if(htstr.trim()==""){
+    document.getElementById("beammaxgaindt").setCustomValidity('ht is required.');
+    document.getElementById("beammaxgaintheta3dbterror").innerHTML='ht is required.';
+    er=1;
+  }
+  if(theta3dbstr.trim()==""){
+    document.getElementById("beammaxgainht1").setCustomValidity('theta3db is required.');
+    document.getElementById("beammaxgainht1error").innerHTML='theta3db is required.';
+    er=1;
+  }
+  if(!isNumber(htstr.trim())){
+    document.getElementById("beammaxgainht1").setCustomValidity('Invalid ht.');
+    document.getElementById("beammaxgainht1error").innerHTML='Invalid ht.';
+    er=1;
+  }
+  if(!isNumber(theta3dbstr.trim())){
+    document.getElementById("beammaxgaindt").setCustomValidity('Invalid theta3db.');
+    document.getElementById("beammaxgaindterror").innerHTML='Invalid theta3db.';
+    er=1;
+  }
+  if(er==0){
+    var r1=(Math.PI*50)/(theta3dbstr);
+    r1=htstr*Math.pow(r1,2);
+    r1=10*Math.log10(htstr*r1);
+
+    document.getElementById("targetedspotbeammaxgain").value=r1;
+    document.getElementById("beammaxgainht1").setCustomValidity('');
+    document.getElementById("beammaxgaindt").setCustomValidity('');
+    document.getElementById("beammaxgainfrequency").setCustomValidity('');
+    document.getElementById("beammaxgainlamda").setCustomValidity('');
+    document.getElementById("beammaxgainht2").setCustomValidity('');
+    document.getElementById("beammaxgaintheta3dbt").setCustomValidity('');
+    document.getElementById("beammaxgainht1error").innerHTML='';
+    document.getElementById("beammaxgaindterror").innerHTML='';
+    document.getElementById("beammaxgainfrequencylamdaerror").innerHTML='';
+    document.getElementById("beammaxgainht2error").innerHTML='';
+    document.getElementById("beammaxgaintheta3dbterror").innerHTML='';
+
+    $("#beammaxgainalternativecalculatorwindow").PopupWindow("close");
+  }
+}
+
+function checkandcalculateuplinktotalsnr(terrainobjects){
+  document.getElementById("linkbudgetuplinkbucpower").setCustomValidity('');
+  document.getElementById("linkbudgetuplinkdbk").setCustomValidity('');
+  document.getElementById("linkbudgetuplinkbandwidth").setCustomValidity('');
+  document.getElementById("linkbudgetuplinksatdistance").setCustomValidity('');
+  document.getElementById("linkbudgetuplinkotherlosses").setCustomValidity('');
+  var select1=document.getElementById("linkbudgetuplinkdish");
+  var select2=document.getElementById("linkbudgetuplinkband");
+  document.getElementById("linkbudgetuplinkbucpowererror").innerHTML='';
+  document.getElementById("linkbudgetuplinkdbkerror").innerHTML='';
+  document.getElementById("linkbudgetuplinksatdistanceerror").innerHTML='';
+  document.getElementById("linkbudgetuplinkotherlosseserror").innerHTML='';
+  document.getElementById("linkbudgetuplinkbandwidtherror").innerHTML='';
+  document.getElementById("linkbudgetuplinkcalcerror").innerHTML='';
+  document.getElementById("linkbudgetuplinkweatherlosses").style.display="none";
+  document.getElementById("linkbudgetuplinktotalsnr").style.display="none";
+
+
+      var bucpower=document.getElementById("linkbudgetuplinkbucpower").value;
+      var uplinkdbk=document.getElementById("linkbudgetuplinkdbk").value;
+      var otherlosses=document.getElementById("linkbudgetuplinkotherlosses").value;
+      var bandwidth=document.getElementById("linkbudgetuplinkbandwidth").value;
+      var satdistance=document.getElementById("linkbudgetuplinksatdistance").value;
+      var dishname= select1.options[select1.selectedIndex].value;
+      var band=select2.options[select2.selectedIndex].value;
+
+      var er=0;
+
+      if(bucpower.trim()==""){
+        document.getElementById("linkbudgetuplinkbucpower").setCustomValidity('BUC power is required.');
+        document.getElementById("linkbudgetuplinkbucpowererror").innerHTML='BUC power is required.';
+        er=1;
+      }
+      if(!isNumber(bucpower.trim())){
+        document.getElementById("linkbudgetuplinkbucpower").setCustomValidity('Invalid BUC power.');
+        document.getElementById("linkbudgetuplinkbucpowererror").innerHTML='Invalid BUC power.';
+        er=1;
+      }
+      if(uplinkdbk.trim()==""){
+        document.getElementById("linkbudgetuplinkdbk").setCustomValidity('Uplink dB/K is required.');
+        document.getElementById("linkbudgetuplinkdbkerror").innerHTML='Uplink dB/K is required.';
+        er=1;
+      }
+      if(!isNumber(uplinkdbk.trim())){
+        document.getElementById("linkbudgetuplinkdbk").setCustomValidity('Invalid Uplink dB/K.');
+        document.getElementById("linkbudgetuplinkdbkerror").innerHTML='Invalid Uplink dB/K.';
+        er=1;
+      }
+      if(satdistance.trim()==""){
+        document.getElementById("linkbudgetuplinksatdistance").setCustomValidity('Uplink satellite distance is required.');
+        document.getElementById("linkbudgetuplinksatdistanceerror").innerHTML='Uplink satellite distance is required.';
+        er=1;
+      }
+      if(!isNumber(satdistance.trim())){
+        document.getElementById("linkbudgetuplinksatdistance").setCustomValidity('Invalid uplink satellite distance.');
+        document.getElementById("linkbudgetuplinksatdistanceerror").innerHTML='Invalid uplink satellite distance.';
+        er=1;
+      }
+      if(bandwidth.trim()==""){
+        document.getElementById("linkbudgetuplinkbandwidth").setCustomValidity('Uplink bandwidth required.');
+        document.getElementById("linkbudgetuplinkbandwidtherror").innerHTML='Uplink bandwidth is required.';
+        er=1;
+      }
+      if(!isNumber(bandwidth.trim())){
+        document.getElementById("linkbudgetuplinkbandwidth").setCustomValidity('Invalid bandwidth.');
+        document.getElementById("linkbudgetuplinkbandwidtherror").innerHTML='Invalid bandwidth.';
+        er=1;
+      }
+      if(otherlosses.trim()==""){
+        otherlosses=0;
+      }
+      else if(!isNumber(otherlosses.trim())){
+        document.getElementById("linkbudgetuplinkotherlosses").setCustomValidity('Invalid other losses.');
+        document.getElementById("linkbudgetuplinkotherlosseserror").innerHTML='Invalid other losses.';
+        er=1;
+      }
+
+      if(er==0){
+        var dishgain;
+        var longitude;
+        var latitude;
+        var found=0;
+        var fspl;
+        bandwidth=bandwidth*1000;
+        if(document.getElementById("lengthunitswitch").checked){
+          satdistance=convertmilestokm(satdistance);
+        }
+        for(var i=0;i<terrainobjects.getDishesInTerrain.length;i++){
+          if(terrainobjects.getDishesInTerrain[i].getName==dishname){
+            dishgain=terrainobjects.getDishesInTerrain[i].getGain;
+            longitude=terrainobjects.getDishesInTerrain[i].getLongtitude;
+            latitude=terrainobjects.getDishesInTerrain[i].getLatitude;
+            found=1;
+          }
+        }
+        var data=getweatherlite(longitude,latitude);
+
+        var wsiglosses=calculatedsiglosseslite(data,band);
+        if(band=="L"){
+          fspl=20*Math.log10(satdistance)+20*Math.log10(1.5)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
+        }
+        if(band=="S"){
+          fspl=20*Math.log10(satdistance)+20*Math.log10(2.5)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
+        }
+        if(band=="C"){
+          fspl=20*Math.log10(satdistance)+20*Math.log10(4.0)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
+        }
+        if(band=="Ku"){
+          fspl=20*Math.log10(satdistance)+20*Math.log10(12)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
+        }
+        if(band=="Ka"){
+          fspl=20*Math.log10(satdistance)+20*Math.log10(20)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
+        }
+        var totalsnr = 10*Math.log10(Number(bucpower))+Number(dishgain)-10*Math.log10(Number(bandwidth))-Number(fspl)-wsiglosses+Number(uplinkdbk)+228.5991672;
+        totalsnr=totalsnr.toFixed(2);
+        document.getElementById("linkbudgetuplinkweatherlossesvalue").innerHTML=wsiglosses +"dB";
+        document.getElementById("linkbudgetuplinktotalsnrvalue").innerHTML=totalsnr;
+        document.getElementById("linkbudgetuplinkweatherlosses").style.display="block";
+        document.getElementById("linkbudgetuplinktotalsnr").style.display="block";
+
+
+      }
+
+
+
+
+}
+function checkandcalculatedownlinktotalsnr(terrainobjects){
+  document.getElementById("linkbudgetdownlinkeirp").setCustomValidity('');
+  document.getElementById("linkbudgetdownlinkbandwidth").setCustomValidity('');
+  document.getElementById("linkbudgetdownlinksatdistance").setCustomValidity('');
+  document.getElementById("linkbudgetdownlinkotherlosses").setCustomValidity('');
+  var select1=document.getElementById("linkbudgetdownlinkdish");
+  var select2=document.getElementById("linkbudgetdownlinkband");
+  document.getElementById("linkbudgetdownlinkeirperror").innerHTML='';
+  document.getElementById("linkbudgetdownlinkbandwidtherror").innerHTML='';
+  document.getElementById("linkbudgetdownlinksatdistanceerror").innerHTML='';
+  document.getElementById("linkbudgetuplinkotherlosseserror").innerHTML='';
+  document.getElementById("linkbudgetdownlinkotherlosseserror").innerHTML='';
+  document.getElementById("linkbudgetdownlinkcalcerror").innerHTML='';
+  document.getElementById("linkbudgetdownlinkweatherlosses").style.display="none";
+  document.getElementById("linkbudgetdownlinktotalsnr").style.display="none";
+
+
+      var downlinkeirp=document.getElementById("linkbudgetdownlinkeirp").value;
+      var otherlosses=document.getElementById("linkbudgetdownlinkotherlosses").value;
+      var bandwidth=document.getElementById("linkbudgetdownlinkbandwidth").value;
+      var satdistance=document.getElementById("linkbudgetdownlinksatdistance").value;
+      var dishname= select1.options[select1.selectedIndex].value;
+      var band=select2.options[select2.selectedIndex].value;
+
+      var er=0;
+
+
+      if(downlinkeirp.trim()==""){
+        document.getElementById("linkbudgetdownlinkeirp").setCustomValidity('Downlink EIRP is required.');
+        document.getElementById("linkbudgetdownlinkeirperror").innerHTML='Downlink EIRP is required.';
+        er=1;
+      }
+      if(!isNumber(downlinkeirp.trim())){
+        document.getElementById("linkbudgetdownlinkeirp").setCustomValidity('Invalid downlink EIRP.');
+        document.getElementById("linkbudgetdownlinkeirperror").innerHTML='Invalid downlink EIRP.';
+        er=1;
+      }
+      if(satdistance.trim()==""){
+        document.getElementById("linkbudgetdownlinksatdistance").setCustomValidity('Downlink satellite distance is required.');
+        document.getElementById("linkbudgetdownlinksatdistanceerror").innerHTML='Downlink satellite distance is required.';
+        er=1;
+      }
+      if(!isNumber(satdistance.trim())){
+        document.getElementById("linkbudgetdownlinksatdistance").setCustomValidity('Invalid uplink satellite distance.');
+        document.getElementById("linkbudgetdownlinksatdistanceerror").innerHTML='Invalid uplink satellite distance.';
+        er=1;
+      }
+      if(bandwidth.trim()==""){
+        document.getElementById("linkbudgetdownlinkbandwidth").setCustomValidity('Downlink bandwidth required.');
+        document.getElementById("linkbudgetdownlinkbandwidtherror").innerHTML='Downlink bandwidth is required.';
+        er=1;
+      }
+      if(!isNumber(bandwidth.trim())){
+        document.getElementById("linkbudgetdownlinkbandwidth").setCustomValidity('Invalid bandwidth.');
+        document.getElementById("linkbudgetdownlinkbandwidtherror").innerHTML='Invalid bandwidth.';
+        er=1;
+      }
+      if(otherlosses.trim()==""){
+        otherlosses=0;
+      }
+      else if(!isNumber(otherlosses.trim())){
+        document.getElementById("linkbudgetdownlinkotherlosses").setCustomValidity('Invalid other losses.');
+        document.getElementById("linkbudgetdownlinkotherlosseserror").innerHTML='Invalid other losses.';
+        er=1;
+      }
+
+      if(er==0){
+        var dishgain;
+        var longitude;
+        var latitude;
+        var found=0;
+        var fspl;
+        bandwidth=bandwidth*1000;
+        if(document.getElementById("lengthunitswitch").checked){
+          satdistance=convertmilestokm(satdistance);
+        }
+        for(var i=0;i<terrainobjects.getDishesInTerrain.length;i++){
+          if(terrainobjects.getDishesInTerrain[i].getName==dishname){
+            dishgain=terrainobjects.getDishesInTerrain[i].getGain;
+            longitude=terrainobjects.getDishesInTerrain[i].getLongtitude;
+            latitude=terrainobjects.getDishesInTerrain[i].getLatitude;
+            found=1;
+          }
+        }
+        var data=getweatherlite(longitude,latitude);
+        var atemp=274.15+data.current.temp;
+        var wsiglosses=calculatedsiglosseslite(data,band);
+        if(band=="L"){
+          fspl=20*Math.log10(satdistance)+20*Math.log10(1.5)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
+        }
+        if(band=="S"){
+          fspl=20*Math.log10(satdistance)+20*Math.log10(2.5)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
+        }
+        if(band=="C"){
+          fspl=20*Math.log10(satdistance)+20*Math.log10(4.0)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
+        }
+        if(band=="Ku"){
+          fspl=20*Math.log10(satdistance)+20*Math.log10(12)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
+        }
+        if(band=="Ka"){
+          fspl=20*Math.log10(satdistance)+20*Math.log10(20)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
+        }
+        var gt=dishgain-10*Math.log10(atemp);
+        var totalsnr = Number(downlinkeirp)-10*Math.log10(Number(bandwidth))-Number(fspl)-wsiglosses+gt+228.5991672;
+        totalsnr=totalsnr.toFixed(2);
+        document.getElementById("linkbudgetdownlinkweatherlossesvalue").innerHTML=wsiglosses +" dB";
+        document.getElementById("linkbudgetdownlinktotalsnrvalue").innerHTML=totalsnr;
+        document.getElementById("linkbudgetdownlinkweatherlosses").style.display="block";
+        document.getElementById("linkbudgetdownlinktotalsnr").style.display="block";
+
+
+      }
+
+
+
+
+}
+function getweatherlite(longitude,latitude){
+  const regex = /^((\-?|\+?)?\d+(\.\d+)?),\s*((\-?|\+?)?\d+(\.\d+)?)$/gi;
+  const apiKey = "4d8fb5b93d4af21d66a2948710284366";
+
+  var x=null;
+
+    var url2=  'https://api.openweathermap.org/data/2.5/onecall?lat='+latitude+'&lon='+longitude+'&appid='+apiKey+'&units=metric';
+
+    $.ajax({
+                 url: url2,
+                 type: 'POST',
+                 async: false,
+                  error:function (xhr, ajaxOptions, thrownError){
+                      if(xhr.status!=200) {
+
+                        return null;
+                      }
+                  },
+                  success: function(data) {
+                    x=data;
+                    alert(x);
+                 }
+             });
+             return x;
+}
+
+
+
+
 function getweather(){
   var cityloc= document.getElementById("weathersearchInput").value;
-  alert(cityloc);
   if(cityloc==""){
     document.getElementById("weatherwaittoenter").style.display="none";
     document.getElementById("weatherloading").style.display="none";
@@ -1780,6 +2502,7 @@ function getweather(){
 
      alert(JSON.stringify(data));
      document.getElementById("currentweatherloc").innerHTML=cityloc;
+     document.getElementById("Estimatedweathersiglosses").value=data;
      getcurrentdayweatherdata(data);
      getmultipledayweatherdata(data,5);
 
@@ -1834,6 +2557,7 @@ function getweather(){
       }
 
       alert(JSON.stringify(data));
+      document.getElementById("Estimatedweathersiglosses").value=data;
       getcurrentdayweatherdata(data);
       getmultipledayweatherdata(data,5);
 
@@ -1862,7 +2586,7 @@ function getcurrentdayweatherdata(data){
   var cstring=data.current.weather[0].description.charAt(0).toUpperCase()+data.current.weather[0].description.slice(1);
   document.getElementById("cweatherdescription").innerHTML=cstring;
   document.getElementById("cweatherwind").innerHTML=data.current.wind_speed +" m/s";
-  document.getElementById("Estimatedweathersiglosses").innerHTML=calculatedsiglosses(data.current.weather[0].id);
+  document.getElementById("Estimatedweathersiglosses").innerHTML=calculatedsiglosses(data);
 
 }
 function getmultipledayweatherdata(data,maxdays){
@@ -1910,175 +2634,57 @@ function showtempinrespecttosettings(temp){
   }
   return Math.round(temp) + " &degC";
 }
-function calculatedsiglosses(weatherid){
-  if(weatherid==800){
-    return "0dB";
+function calculatedsiglosses(data){
+  var totalatt=0;
+  if(data.current.weather[0].id>=500 && data.current.weather[0].id<=531){
+   var rain1h=data.current.rain['1h'];
+   var bandselect = document.getElementById('weatherlossband');
+   var band = bandselect.options[bandselect.selectedIndex].value;
+   if(band=="L"){
+      totalatt=totalatt+0.0000868*(Math.pow(parseFloat(rain1h),0.9341))*5;
+   }
+   else if(band=="S"){
+     totalatt=totalatt+0.0002416*(Math.pow(parseFloat(rain1h),0.9873))*5;
+   }
+   else if(band=="C"){
+     totalatt=totalatt+0.0006479*(Math.pow(parseFloat(rain1h),1.1212))*5;
+   }
+   else if(band=="Ku"){
+     totalatt=totalatt+0.01882*(Math.pow(parseFloat(rain1h),1.2168))*5;
+   }
+   else if(band=="Ka"){
+     totalatt=totalatt+0.07504*(Math.pow(parseFloat(rain1h)^1.0995))*5;
+   }
   }
-  else if(weatherid==801){
-    return "-0.1dB";
+  alert(totalatt);
+  return totalatt.toFixed(2)+"dB";
+
+
+}
+
+function calculatedsiglosseslite(data,band){
+  var totalatt=0;
+  if(data.current.weather[0].id>=500 && data.current.weather[0].id<=531){
+   var rain1h=data.current.rain['1h'];
+   var band = bandselect.options[bandselect.selectedIndex].value;
+   if(band=="L"){
+      totalatt=totalatt+0.0000868*(Math.pow(parseFloat(rain1h),0.9341))*5;
+   }
+   else if(band=="S"){
+     totalatt=totalatt+0.0002416*(Math.pow(parseFloat(rain1h),0.9873))*5;
+   }
+   else if(band=="C"){
+     totalatt=totalatt+0.0006479*(Math.pow(parseFloat(rain1h),1.1212))*5;
+   }
+   else if(band=="Ku"){
+     totalatt=totalatt+0.01882*(Math.pow(parseFloat(rain1h),1.2168))*5;
+   }
+   else if(band=="Ka"){
+     totalatt=totalatt+0.07504*(Math.pow(parseFloat(rain1h)^1.0995))*5;
+   }
   }
-  else if(weatherid==802){
-    return "-0.2dB";
-  }
-  else if(weatherid==803){
-    return "-0.3dB";
-  }
-  else if(weatherid==804){
-    return "-0.6dB";
-  }
-  else if(weatherid==701){
-    return "-3.0dB";
-  }
-  else if(weatherid==711){
-    return "-1.8dB";
-  }
-  else if(weatherid==721){
-    return "-2.1dB";
-  }
-  else if(weatherid==731){
-    return "-2.6dB";
-  }
-  else if(weatherid==741){
-    return "-5.5dB";
-  }
-  else if(weatherid==751){
-    return "-1.2dB";
-  }
-  else if(weatherid==761){
-    return "-1.4dB";
-  }
-  else if(weatherid==762){
-    return "-2.1dB";
-  }
-  else if(weatherid==771){
-    return "-5.0dB";
-  }
-  else if(weatherid==781){
-    return "-0.2dB";
-  }
-  else if(weatherid==600){
-    return "-0.6dB";
-  }
-  else if(weatherid==601){
-    return "-2.6dB";
-  }
-  else if(weatherid==602){
-    return "-4.8dB";
-  }
-  else if(weatherid==611){
-    return "-2.3dB";
-  }
-  else if(weatherid==612){
-    return "-1.0dB";
-  }
-  else if(weatherid==613){
-    return "-2.3dB";
-  }
-  else if(weatherid==615){
-    return "-1.4dB";
-  }
-  else if(weatherid==616){
-    return "-3.4dB";
-  }
-  else if(weatherid==620){
-    return "-0.6dB";
-  }
-  else if(weatherid==621){
-    return "-2.6dB";
-  }
-  else if(weatherid==622){
-    return "-4.8dB";
-  }
-  else if(weatherid==500){
-    return "-1.8dB";
-  }
-  else if(weatherid==501){
-    return "-3.2dB";
-  }
-  else if(weatherid==502){
-    return "-5.4dB";
-  }
-  else if(weatherid==503){
-    return "-8.5dB";
-  }
-  else if(weatherid==504){
-    return "-13.4dB";
-  }
-  else if(weatherid==511){
-    return "-3.1dB";
-  }
-  else if(weatherid==520){
-    return "-1.8dB";
-  }
-  else if(weatherid==521){
-    return "-4.2dB";
-  }
-  else if(weatherid==522){
-    return "-8.5dB";
-  }
-  else if(weatherid==531){
-    return "-13.4dB";
-  }
-  else if(weatherid==300){
-    return "-0.7dB";
-  }
-  else if(weatherid==301){
-    return "-1.7dB";
-  }
-  else if(weatherid==302){
-    return "-4.6dB";
-  }
-  else if(weatherid==310){
-    return "-0.9dB";
-  }
-  else if(weatherid==311){
-    return "-2.6dB";
-  }
-  else if(weatherid==312){
-    return "-5.3dB";
-  }
-  else if(weatherid==313){
-    return "-4.4dB";
-  }
-  else if(weatherid==314){
-    return "-9.2dB";
-  }
-  else if(weatherid==321){
-    return "-0.7dB";
-  }
-  else if(weatherid==500){
-    return "-1.8dB";
-  }
-  else if(weatherid==200){
-    return "-2.2dB";
-  }
-  else if(weatherid==201){
-    return "-4.4dB";
-  }
-  else if(weatherid==202){
-    return "-14.4dB";
-  }
-  else if(weatherid==210){
-    return "-1.6dB";
-  }
-  else if(weatherid==211){
-    return "-2.9dB";
-  }
-  else if(weatherid==212){
-    return "-4.7dB";
-  }
-  else if(weatherid==221){
-    return "-5.6dB";
-  }
-  else if(weatherid==230){
-    return "-2.0dB";
-  }
-  else if(weatherid==231){
-    return "-3.9dB";
-  }
-  else if(weatherid==232){
-    return "-8.4dB";
-  }
+  alert(totalatt);
+  return totalatt.toFixed(2);
 
 
 }
@@ -2133,6 +2739,387 @@ function returnweathericon(weatherid){
     return 'Resources/WeatherIcons/strong_tstorms_light_color_96dp.png';
   }
 
+}
+
+function changeminsnrberprotocol(){
+  var opt;
+  var select1=document.getElementById("minsnrberprotocol");
+  var select=document.getElementById("modulationscheme");
+  select.innerHTML="";
+  var protocol = select1.options[select1.selectedIndex].value;
+
+  if(protocol=="DVB-S"){
+    opt = document.createElement('option');
+    opt.value = "QPSK"
+    opt.innerHTML = "QPSK"
+    select.appendChild(opt);
+
+  }
+  if(protocol=="DVB-S2"){
+    opt = document.createElement('option');
+    opt.value = "QPSK"
+    opt.innerHTML = "QPSK"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "8PSK"
+    opt.innerHTML = "8PSK"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "16APSK"
+    opt.innerHTML = "16APSK"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "32APSK"
+    opt.innerHTML = "32APSK"
+    select.appendChild(opt);
+  }
+  select.selectedIndex = "0";
+  changefecvalues();
+}
+function changefecvalues(){
+  var opt;
+  var select=document.getElementById("minsnrberfecvalue");
+  var select1=document.getElementById("minsnrberprotocol");
+  var select2=document.getElementById("modulationscheme");
+  var protocol = select1.options[select1.selectedIndex].value;
+  var modulation = select2.options[select2.selectedIndex].value;
+  select.innerHTML="";
+
+  if(protocol=="DVB-S" && modulation=="QPSK"){
+    opt = document.createElement('option');
+    opt.value = "1/2"
+    opt.innerHTML = "1/2"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "2/3"
+    opt.innerHTML = "2/3"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "3/4"
+    opt.innerHTML = "3/4"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "5/6"
+    opt.innerHTML = "5/6"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "7/8"
+    opt.innerHTML = "7/8"
+    select.appendChild(opt);
+
+  }
+  if(protocol=="DVB-S2" && modulation=="QPSK"){
+
+    opt = document.createElement('option');
+    opt.value = "1/4"
+    opt.innerHTML = "1/4"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "1/3"
+    opt.innerHTML = "1/3"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "2/5"
+    opt.innerHTML = "2/5"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "1/2"
+    opt.innerHTML = "1/2"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "3/5"
+    opt.innerHTML = "3/5"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "2/3"
+    opt.innerHTML = "2/3"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "3/4"
+    opt.innerHTML = "3/4"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "4/5"
+    opt.innerHTML = "4/5"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "5/6"
+    opt.innerHTML = "5/6"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "8/9"
+    opt.innerHTML = "8/9"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "9/10"
+    opt.innerHTML = "9/10"
+    select.appendChild(opt);
+  }
+  if(protocol=="DVB-S2" && modulation=="8PSK"){
+    opt = document.createElement('option');
+    opt.value = "3/5"
+    opt.innerHTML = "3/5"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "2/3"
+    opt.innerHTML = "2/3"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "3/4"
+    opt.innerHTML = "3/4"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "5/6"
+    opt.innerHTML = "5/6"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "8/9"
+    opt.innerHTML = "8/9"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "9/10"
+    opt.innerHTML = "9/10"
+    select.appendChild(opt);
+  }
+  if(protocol=="DVB-S2" && modulation=="16APSK"){
+    opt = document.createElement('option');
+    opt.value = "2/3"
+    opt.innerHTML = "2/3"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "3/4"
+    opt.innerHTML = "3/4"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "4/5"
+    opt.innerHTML = "4/5"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "5/6"
+    opt.innerHTML = "5/6"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "8/9"
+    opt.innerHTML = "8/9"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "9/10"
+    opt.innerHTML = "9/10"
+    select.appendChild(opt);
+  }
+  if(protocol=="DVB-S2" && modulation=="32APSK"){
+    opt = document.createElement('option');
+    opt.value = "3/4"
+    opt.innerHTML = "3/4"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "4/5"
+    opt.innerHTML = "4/5"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "5/6"
+    opt.innerHTML = "5/6"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "8/9"
+    opt.innerHTML = "8/9"
+    select.appendChild(opt);
+
+    opt = document.createElement('option');
+    opt.value = "9/10"
+    opt.innerHTML = "9/10"
+    select.appendChild(opt);
+  }
+  select.selectedIndex = "0";
+
+}
+function calulateminsnrber(){
+  var select=document.getElementById("minsnrberfecvalue");
+  var select1=document.getElementById("minsnrberprotocol");
+  var select2=document.getElementById("modulationscheme");
+  var protocol = select1.options[select1.selectedIndex].value;
+  var modulation = select2.options[select2.selectedIndex].value;
+  var fec=select.options[select.selectedIndex].value;
+  if(protocol=="DVB-S" && modulation=="QPSK"){
+    if(fec=="1/2"){
+      document.getElementById("minsnrspan").innerHTML="1.7";
+    }
+    if(fec=="2/3"){
+      document.getElementById("minsnrspan").innerHTML="3.3";
+    }
+    if(fec=="3/4"){
+      document.getElementById("minsnrspan").innerHTML="4.2";
+    }
+    if(fec=="5/6"){
+      document.getElementById("minsnrspan").innerHTML="5.1";
+    }
+    if(fec=="7/8"){
+      document.getElementById("minsnrspan").innerHTML="5.8";
+    }
+  }
+  if(protocol=="DVB-S2" && modulation=="QPSK"){
+    if(fec=="1/4"){
+      document.getElementById("minsnrspan").innerHTML="-2.3";
+    }
+    if(fec=="1/3"){
+      document.getElementById("minsnrspan").innerHTML="-1.2";
+    }
+    if(fec=="2/5"){
+      document.getElementById("minsnrspan").innerHTML="-0.3";
+    }
+    if(fec=="1/2"){
+      document.getElementById("minsnrspan").innerHTML="1.0";
+    }
+    if(fec=="3/5"){
+      document.getElementById("minsnrspan").innerHTML="2.3";
+    }
+    if(fec=="2/3"){
+      document.getElementById("minsnrspan").innerHTML="3.1";
+    }
+    if(fec=="3/4"){
+      document.getElementById("minsnrspan").innerHTML="4.1";
+    }
+    if(fec=="4/5"){
+      document.getElementById("minsnrspan").innerHTML="4.7";
+    }
+    if(fec=="5/6"){
+      document.getElementById("minsnrspan").innerHTML="5.2";
+    }
+    if(fec=="8/9"){
+      document.getElementById("minsnrspan").innerHTML="6.2";
+    }
+    if(fec=="9/10"){
+      document.getElementById("minsnrspan").innerHTML="6.5";
+    }
+  }
+  if(protocol=="DVB-S2" && modulation=="8PSK"){
+    if(fec=="3/5"){
+      document.getElementById("minsnrspan").innerHTML="5.5";
+    }
+    if(fec=="2/3"){
+      document.getElementById("minsnrspan").innerHTML="6.6";
+    }
+    if(fec=="3/4"){
+      document.getElementById("minsnrspan").innerHTML="7.9";
+    }
+    if(fec=="5/6"){
+      document.getElementById("minsnrspan").innerHTML="9.4";
+    }
+    if(fec=="8/9"){
+      document.getElementById("minsnrspan").innerHTML="10.7";
+    }
+    if(fec=="9/10"){
+      document.getElementById("minsnrspan").innerHTML="11.0";
+    }
+  }
+  if(protocol=="DVB-S2" && modulation=="16APSK"){
+    if(fec=="2/3"){
+      document.getElementById("minsnrspan").innerHTML="9.0";
+    }
+    if(fec=="3/4"){
+      document.getElementById("minsnrspan").innerHTML="10.2";
+    }
+    if(fec=="4/5"){
+      document.getElementById("minsnrspan").innerHTML="11.0";
+    }
+    if(fec=="5/6"){
+      document.getElementById("minsnrspan").innerHTML="11.6";
+    }
+    if(fec=="8/9"){
+      document.getElementById("minsnrspan").innerHTML="12.9";
+    }
+    if(fec=="9/10"){
+      document.getElementById("minsnrspan").innerHTML="13.2";
+    }
+  }
+  if(protocol=="DVB-S2" && modulation=="32APSK"){
+    if(fec=="3/4"){
+      document.getElementById("minsnrspan").innerHTML="12.8";
+    }
+    if(fec=="4/5"){
+      document.getElementById("minsnrspan").innerHTML="13.7";
+    }
+    if(fec=="5/6"){
+      document.getElementById("minsnrspan").innerHTML="14.3";
+    }
+    if(fec=="8/9"){
+      document.getElementById("minsnrspan").innerHTML="15.7";
+    }
+    if(fec=="9/10"){
+      document.getElementById("minsnrspan").innerHTML="16.1";
+    }
+  }
+
+}
+function liveconverttolamba(){
+  document.getElementById("beammaxgainfrequency").setCustomValidity("");
+  document.getElementById("beammaxgainlamda").setCustomValidity("");
+  document.getElementById("beammaxgainfrequencylamdaerror").innerHTML='';
+
+  const c=299792458;
+  var frequency=document.getElementById("beammaxgainfrequency").value;
+  if(frequency==""){
+      document.getElementById("beammaxgainlamda").value="";
+      return;
+  }
+  if(!(isNumber(frequency))){
+    document.getElementById("beammaxgainfrequency").setCustomValidity("Invalid frequency.");
+    document.getElementById("beammaxgainlamda").setCustomValidity("Invalid lamda.");
+    document.getElementById("beammaxgainlamda").value="ERROR!";
+    return;
+  }
+  document.getElementById("beammaxgainlamda").value=c/(document.getElementById("beammaxgainfrequency").value*1000000);
+}
+
+function liveconverttofrequency(){
+  document.getElementById("beammaxgainfrequency").setCustomValidity("");
+  document.getElementById("beammaxgainlamda").setCustomValidity("");
+  document.getElementById("beammaxgainfrequencylamdaerror").innerHTML='';
+
+
+  const c=299792458;
+  var lamda=document.getElementById("beammaxgainlamda").value;
+  if(lamda==""){
+      document.getElementById("beammaxgainfrequency").value="";
+      return;
+  }
+  if(!(isNumber(lamda))){
+    document.getElementById("beammaxgainfrequency").setCustomValidity("Invalid frequency.");
+    document.getElementById("beammaxgainlamda").setCustomValidity("Invalid lamda.");
+    document.getElementById("beammaxgainfrequency").value="ERROR!";
+    return;
+  }
+  document.getElementById("beammaxgainfrequency").value=c/(document.getElementById("beammaxgainlamda").value*1000000);
 }
 
 function activaterullermode(viewer){
@@ -2260,6 +3247,99 @@ function putpoint(viewer,selectedLocation){
 }
 
 
+const {parse: $parse, stringify: $stringify} = JSON;
+const {keys} = Object;
+
+const Primitive = String;   // it could be Number
+const primitive = 'string'; // it could be 'number'
+
+const ignore = {};
+const object = 'object';
+
+const noop = (_, value) => value;
+
+const primitives = value => (
+  value instanceof Primitive ? Primitive(value) : value
+);
+
+const Primitives = (_, value) => (
+  typeof value === primitive ? new Primitive(value) : value
+);
+
+const revive = (input, parsed, output, $) => {
+  const lazy = [];
+  for (let ke = keys(output), {length} = ke, y = 0; y < length; y++) {
+    const k = ke[y];
+    const value = output[k];
+    if (value instanceof Primitive) {
+      const tmp = input[value];
+      if (typeof tmp === object && !parsed.has(tmp)) {
+        parsed.add(tmp);
+        output[k] = ignore;
+        lazy.push({k, a: [input, parsed, tmp, $]});
+      }
+      else
+        output[k] = $.call(output, k, tmp);
+    }
+    else if (output[k] !== ignore)
+      output[k] = $.call(output, k, value);
+  }
+  for (let {length} = lazy, i = 0; i < length; i++) {
+    const {k, a} = lazy[i];
+    output[k] = $.call(output, k, revive.apply(null, a));
+  }
+  return output;
+};
+
+const set = (known, input, value) => {
+  const index = Primitive(input.push(value) - 1);
+  known.set(value, index);
+  return index;
+};
+
+const parse = (text, reviver) => {
+  const input = $parse(text, Primitives).map(primitives);
+  const value = input[0];
+  const $ = reviver || noop;
+  const tmp = typeof value === object && value ?
+              revive(input, new Set, value, $) :
+              value;
+  return $.call({'': tmp}, '', tmp);
+};
+
+const stringify = (value, replacer, space) => {
+  const $ = replacer && typeof replacer === object ?
+            (k, v) => (k === '' || -1 < replacer.indexOf(k) ? v : void 0) :
+            (replacer || noop);
+  const known = new Map;
+  const input = [];
+  const output = [];
+  let i = +set(known, input, $.call({'': value}, '', value));
+  let firstRun = !i;
+  while (i < input.length) {
+    firstRun = true;
+    output[i] = $stringify(input[i++], replace, space);
+  }
+  return '[' + output.join(',') + ']';
+  function replace(key, value) {
+    if (firstRun) {
+      firstRun = !firstRun;
+      return value;
+    }
+    const after = $.call(this, key, value);
+    switch (typeof after) {
+      case object:
+        if (after === null) return after;
+      case primitive:
+        return known.get(after) || set(known, input, after);
+    }
+    return after;
+  }
+};
+
+const toJSON = any => $parse(stringify(any));
+const fromJSON = any => parse($stringify(any));
+
 //show windows
 
 function showlogwindow(){
@@ -2373,11 +3453,11 @@ function showadddishwindow(){
           title: "Add Dish Window",
           autoOpen: false,
           nativeDrag: false,
-  	      height              : 450,
+  	      height              : 650,
   	      width               : 640,
   	      maxHeight           : undefined,
   	      maxWidth            : undefined,
-  	      minHeight           : 450,
+  	      minHeight           : 650,
   	      minWidth            : 640,
   	      collapsedWidth      : undefined,
   });
@@ -2389,6 +3469,21 @@ function showeditdishwindow(){
           title: "Edit Dish Window",
           autoOpen: false,
           nativeDrag: false,
+  	      height              : 650,
+  	      width               : 640,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 650,
+  	      minWidth            : 640,
+  	      collapsedWidth      : undefined,
+  });
+    $("#editdishwindow").PopupWindow("open");
+}
+function showbeammaxgainalternativecalculatorwindow(){
+  $('#beammaxgainalternativecalculatorwindow').PopupWindow({
+          title: "Add Dish Window",
+          autoOpen: false,
+          nativeDrag: false,
   	      height              : 450,
   	      width               : 640,
   	      maxHeight           : undefined,
@@ -2397,7 +3492,7 @@ function showeditdishwindow(){
   	      minWidth            : 640,
   	      collapsedWidth      : undefined,
   });
-    $("#editdishwindow").PopupWindow("open");
+    $("#beammaxgainalternativecalculatorwindow").PopupWindow("open");
 }
 
 function showaddsatellitewindow(){
@@ -2453,6 +3548,42 @@ function showweatherwindow(){
     $("#weatherwindow").PopupWindow("open");
 }
 
+function showlinkbudgetcalculatorwindow(){
+  document.getElementById("linkbudgetuplinkweatherlosses").style.display="none";
+  document.getElementById("linkbudgetuplinktotalsnr").style.display="none";
+  document.getElementById("linkbudgetdownlinkweatherlosses").style.display="none";
+  document.getElementById("linkbudgetdownlinktotalsnr").style.display="none";
+  $('#linkbudgetcalculatorwindow').PopupWindow({
+          title: "Link budget calculator",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 585,
+  	      width               : 820,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 585,
+  	      minWidth            : 820,
+  	      collapsedWidth      : undefined,
+  });
+    $("#linkbudgetcalculatorwindow").PopupWindow("open");
+}
+
+function showminsnrandbercalculatorwindow(){
+$('#minsnrandbercalculatorwindow').PopupWindow({
+        title: "Min.SNR/cur.BER calculator",
+        autoOpen: false,
+        nativeDrag: false,
+        height              : 430,
+        width               : 670,
+        maxHeight           : undefined,
+        maxWidth            : undefined,
+        minHeight           : 430,
+        minWidth            : 670,
+        collapsedWidth      : undefined,
+});
+  $("#minsnrandbercalculatorwindow").PopupWindow("open");
+}
+
 function showopenprojectwindow(){
   $('#openprojectwindow').PopupWindow({
           title: "Open Project",
@@ -2501,6 +3632,37 @@ function showerrorwindow(){
     $("#errorwindow").PopupWindow("open");
 }
 
+function showbrowsefileopenwindow(){
+  $('#browsefileopenwindow').PopupWindow({
+        title: "Browse file to open...",
+        autoOpen: false,
+        nativeDrag: false,
+        height              : 370,
+        width               : 750,
+        maxHeight           : undefined,
+        maxWidth            : undefined,
+        minHeight           : 370,
+        minWidth            : 750,
+        collapsedWidth      : undefined,
+    });
+    $("#browsefileopenwindow").PopupWindow("open");
+}
+
+function showbrowsefilesavewindow(){
+  $('#browsefilesavewindow').PopupWindow({
+        title: "Browse file to save...",
+        autoOpen: false,
+        nativeDrag: false,
+        height              : 370,
+        width               : 750,
+        maxHeight           : undefined,
+        maxWidth            : undefined,
+        minHeight           : 370,
+        minWidth            : 750,
+        collapsedWidth      : undefined,
+    });
+    $("#browsefilesavewindow").PopupWindow("open");
+}
 
 function showgeneratetargetedspotbeamwindow(sattoselect){
 

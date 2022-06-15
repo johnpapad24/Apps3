@@ -8,5 +8,7 @@ $tlefile='https://www.celestrak.com/NORAD/elements/active.txt';
 
 $logfile="testlog.log";
 
-$settingsfile="user_settings.js"
+$settingsfile="user_settings.js";
+
+$projectsdir="Apps/Projects";
 ?>
