@@ -29,6 +29,21 @@ function checkconnectdb($servername, $username, $password){
   return true;
 }
 
+function gettectable($tecfile){
+  if(!file_get_contents($tecfile)) {
+    echo "1";
+  }
+  $file=fopen($tecfile,'r');
+  if(!$file){
+    echo "1";
+  }
+  fgets($file);
+  while(!feof($file)){
+    echo( fgets($file));
+  }
+  fclose($file);
+}
+
 function updatedb($conn,$tlefile){
 $createdbifnotq=$conn->query('CREATE DATABASE IF NOT EXISTS Satellites;');
 $usedbq=$conn->query('USE Satellites;');
@@ -63,7 +78,6 @@ while (!feof($file)){
 
       return 3;
     }
-    fwrite($csvfile, "Beams/TargetedSpotbeam.beam");
     fclose($csvfile);
 
   }
@@ -72,7 +86,6 @@ while (!feof($file)){
     if(!$csvfile){
      return 3;
     }
-    fwrite($csvfile, "Beams/TargetedSpotbeam.beam");
     fclose($csvfile);
   }
 }
@@ -126,6 +139,8 @@ function getsatnames_new($conn,$windowname){
  return;
 }
 
+
+
 function getbrowsefiles($windowname,$projectsdir){
   $id="";
   if($windowname=="browsefileopenwindow"){
@@ -134,14 +149,15 @@ function getbrowsefiles($windowname,$projectsdir){
    else if($windowname=="browsefilesavewindow"){
      $id="browsefilesave";
    }
-   chdir($projectsdir);
-  $files=glob("*.{psav,PSAV}", GLOB_ERR);
-  chdir("..");
+
+
+  $files=glob($projectsdir."*.{PSAV,psav}",GLOB_BRACE|GLOB_ERR);
+
   echo '<table class="newtable" id="'.$id.'table" style="height: 270px; overflow-y: auto; display: block; overflow-x: auto;"><tbody class="newtbody">';
   if(is_array($files)){
     $arrlength=count($files);
     for ($i=0;$i<$arrlength;$i++) {
-      echo '<tr class="newtr" value="'.basename($files[i]).'"><td class="newtd" onclick="highlight('."'".$id."'".');" style="text-align: center;">'.$i.')</td><td class="newtd"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAABKUlEQVQ4jWNkgAKvnqPyf34zizBgAUxMTAKvBZiOn003+YYuxwJjWKmIdoeZS4ViM+Do7Q//b7/4+oph5hkldEPgBnCwMP5SleDGpp/h+rOvjNEOiuJ/9997IDZpm8r2PK9PcNdh1YEFcLGxMMQ7KovqiSvd8Zy0jQ/DBfiAIDcLw+lbrxgYGBgYVMW5RT9/k93JwMBgSbQBtupCKPwPX37cxemCn7//Mey9+garQc7aIgzsrKi+JsoFqhLcDLgCGMMAZmZGrIpvv/jKoCjGxcDCxIgiTnQs4AIYLvj79z/D7RdfUcTweYEoF9x+8ZVh24VXDD9//yPsAnZWJgYvAzFizCXeBfgA3AU//vxnQ/c7LvDjz382DAOO3Xldeuj6u06ibGX9C09pAGtFWP4tQF5dAAAAAElFTkSuQmCC"/>'.basename($files[i]).'</td><td class="newtd">Last modified: '.date("m/d/Y H:i:s",filemtime($files[i])).'<td></tr>';
+      echo '<tr class="newtr" id="'.basename($files[$i]).'" style="height:37.5px;" ><td id="'.$id."_".($i+1)."_1".'" class="newtd" onclick="highlight('."'".$id."table'".');" onmouseover="document.getElementById('."'".$id."_".($i+1)."_2"."'".').className='."'".'newtd newtd3'."'".'; document.getElementById('."'".$id."_".($i+1)."_3"."'".').className='."'".'newtd newtd3'."'".';   document.getElementById('."'".$id."_".($i+1)."_4"."'".').className='."'".'newtd newtd3'."'".';" onmouseout="document.getElementById('."'".$id."_".($i+1)."_2"."'".').className='."'".'newtd'."'".'; document.getElementById('."'".$id."_".($i+1)."_3"."'".').className='."'".'newtd'."'".'; document.getElementById('."'".$id."_".($i+1)."_4"."'".').className='."'".'newtd'."'".';" style="text-align: center;">'.($i+1).')</td><td id="'.$id."_".($i+1)."_2".'" onclick="highlight('."'".$id."table'".');" onmouseover="document.getElementById('."'".$id."_".($i+1)."_1"."'".').className='."'".'newtd newtd3'."'".'; document.getElementById('."'".$id."_".($i+1)."_3"."'".').className='."'".'newtd newtd3'."'".'; document.getElementById('."'".$id."_".($i+1)."_4"."'".').className='."'".'newtd newtd3'."'".'; " onmouseout="document.getElementById('."'".$id."_".($i+1)."_1"."'".').className='."'".'newtd'."'".'; document.getElementById('."'".$id."_".($i+1)."_3"."'".').className='."'".'newtd'."'".'; document.getElementById('."'".$id."_".($i+1)."_4"."'".').className='."'".'newtd'."'".';" class="newtd"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAABKUlEQVQ4jWNkgAKvnqPyf34zizBgAUxMTAKvBZiOn003+YYuxwJjWKmIdoeZS4ViM+Do7Q//b7/4+oph5hkldEPgBnCwMP5SleDGpp/h+rOvjNEOiuJ/9997IDZpm8r2PK9PcNdh1YEFcLGxMMQ7KovqiSvd8Zy0jQ/DBfiAIDcLw+lbrxgYGBgYVMW5RT9/k93JwMBgSbQBtupCKPwPX37cxemCn7//Mey9+garQc7aIgzsrKi+JsoFqhLcDLgCGMMAZmZGrIpvv/jKoCjGxcDCxIgiTnQs4AIYLvj79z/D7RdfUcTweYEoF9x+8ZVh24VXDD9//yPsAnZWJgYvAzFizCXeBfgA3AU//vxnQ/c7LvDjz382DAOO3Xldeuj6u06ibGX9C09pAGtFWP4tQF5dAAAAAElFTkSuQmCC"/>'.basename($files[$i]).'</td><td  id="'.$id."_".($i+1)."_3".'" onclick="highlight('."'".$id."table'".');" onmouseover="document.getElementById('."'".$id."_".($i+1)."_1"."'".').className='."'".'newtd newtd3'."'".'; document.getElementById('."'".$id."_".($i+1)."_2"."'".').className='."'".'newtd newtd3'."'".'; document.getElementById('."'".$id."_".($i+1)."_4"."'".').className='."'".'newtd newtd3'."'".';" onmouseout="document.getElementById('."'".$id."_".($i+1)."_1"."'".').className='."'".'newtd'."'".'; document.getElementById('."'".$id."_".($i+1)."_2"."'".').className='."'".'newtd'."'".'; document.getElementById('."'".$id."_".($i+1)."_4"."'".').className='."'".'newtd'."'".';"  class="newtd">Last modified: '.date("m/d/Y H:i:s",filemtime($files[$i])).'</td><td id="'.$id."_".($i+1)."_4".'"  onmouseover="document.getElementById('."'".$id."_".($i+1)."_2"."'".').className='."'".'newtd newtd3'."'".'; document.getElementById('."'".$id."_".($i+1)."_3"."'".').className='."'".'newtd newtd3'."'".';   document.getElementById('."'".$id."_".($i+1)."_1"."'".').className='."'".'newtd newtd3'."'".';" onmouseout="document.getElementById('."'".$id."_".($i+1)."_2"."'".').className='."'".'newtd'."'".'; document.getElementById('."'".$id."_".($i+1)."_3"."'".').className='."'".'newtd'."'".'; document.getElementById('."'".$id."_".($i+1)."_1"."'".').className='."'".'newtd'."'".';" style="text-align:center;" class="newtd"><button type="button" class="btn btn-danger" onclick="showconfirmdeleteprojectfilewindow('."'".basename($files[$i])."'".');">Delete</button> </td></tr>';
     }
   }
   echo '</tbody></table>';
@@ -149,6 +165,14 @@ function getbrowsefiles($windowname,$projectsdir){
 
 }
 
+function deletefile($filename){
+  if(unlink($filename)) {
+      return 0;
+  }
+  else {
+      return 1;
+  }
+}
 
 function loggger($logfile, $message, $status){
   if($status!="OK" && $status!="FAILED" && $status!=""){ return false;}
@@ -238,7 +262,7 @@ function createsettingsfile($settingsfile){
 
 function createsavefile($savefilename,$data){
   //chdir($projectsdir);
-  $file=fopen($savefilename,'w');
+  $file=fopen($savefilename,'w+');
   if(!$file){ return false;}
   $test=fwrite($file, $data);
   fclose($file);
@@ -285,18 +309,63 @@ function gettle($conn,$satname){
   return $tle;
 }
 
-function addsatellite($conn,$satname,$tle1,$tle2){
+function addsatellite($conn,$name,$tle1,$tle2){
   $conn->query("USE Satellites");
   $existsq= mysqli_query($conn, 'SELECT count(*) as exist from Satellite where Name='."\"".$name."\"".';');
   $res=$existsq->fetch_assoc();
   if($res["exist"]<1){
     $insertq= $conn->query('insert into Satellite (Name, Tleline1, Tleline2, BeamCSV) Values ('."\"".$name."\", \"".$tle1."\", \"".$tle2."\", ".'"/CSVs/'.$name.'.csv");');
+
   }
   else{
     $updatq=$conn->query('UPDATE Satellite SET Tleline1='.'"'.$tle1.'"'.', Tleline2='.'"'.$tle2.'"'. ' Where Name='.'"'.$name.'";');
   }
-}
 
+  $dirname="CSVs/".filename_satinizer($name);
+  $cfile=$dirname."/beams.csv";
+  if(!is_dir($dirname)){
+    $dirmade=mkdir($dirname,0777,true);
+    chmod($dirname,0777);
+    if($dirmade==false){
+      return 2;
+    }
+    $csvfile=fopen($cfile, 'w');
+    if(!$csvfile){
+
+      return 3;
+    }
+    fclose($csvfile);
+
+  }
+  else if(!is_file($cfile)){
+    $csvfile=fopen($cfile, 'w');
+    if(!$csvfile){
+     return 3;
+    }
+    fclose($csvfile);
+  }
+  return 0;
+}
+function deletesatellite($conn,$name){
+  $conn->query("USE Satellites");
+  $deleteq=mysqli_query($conn,'DELETE FROM Satellite WHERE Name='."\"".$name."\"".';');
+  $dirname="CSVs/".filename_satinizer($name);
+  $filedel=recursivedirdelete($dirname);
+  if($filedel==true){
+    return 0;
+  }
+  else {
+    return 1;
+  }
+}
+function recursivedirdelete($dirname){
+  $files = glob($dirname . '/*');
+	foreach ($files as $file) {
+		is_dir($file) ? recursivedirdelete($file) : unlink($file);
+	}
+	$res=rmdir($dirname);
+  return $res;
+}
 function checktlefile($tlefile){
   if(!file_get_contents($tlefile)) {
     return false;

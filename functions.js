@@ -15,16 +15,68 @@ class terrainobjects{
   get getCurrentbeamInTerrain(){
     return this.currentbeam;
   }
+  set setSatellitesInTerrain(sit){
+    this.satellites=sit;
+  }
+  set setDishesInTerrain(dit){
+    this.dishes=dit;
+  }
   set setCurrentBeamInTerrain(currentbeam){
     this.currentbeam=currentbeam;
   }
+
+  get jsonfyterrainobjects(){
+    var json='{ "satellites":[';
+    for(var i=0;i<this.getSatellitesInTerrain.length;i++){
+
+      json=json+'{"id":"'+this.getSatellitesInTerrain[i].getId+'",  "name":"'+this.getSatellitesInTerrain[i].getName+'",  "color":"'+this.getSatellitesInTerrain[i].getColor+'",  "czml": null, "tle1":"'+this.getSatellitesInTerrain[i].getsattle1+'", "tle2":"'+this.getSatellitesInTerrain[i].getsattle2+ '", "beams":';
+
+      if(this.getSatellitesInTerrain[i].getBeams!=null){
+        var json=json+'[';
+        var beamjson2="";
+        for(var k=0;k<this.getSatellitesInTerrain[i].getBeams.length;k++){
+
+          beamjson2='{"id":"'+this.getSatellitesInTerrain[i].getBeams[k].getId+'",  "name":"'+this.getSatellitesInTerrain[i].getBeams[k].getName+'",  "satellite":"'+this.getSatellitesInTerrain[i].getBeams[k].getSatellite+'", "data": null, "usage":"'+ this.getSatellitesInTerrain[i].getBeams[k].getUsage+ '", "band":"'+ this.getSatellitesInTerrain[i].getBeams[k].getBand+'", "locationx":'+ this.getSatellitesInTerrain[i].getBeams[k].getLocationx+', "locationy":'+ this.getSatellitesInTerrain[i].getBeams[k].getLocationy+', "maxgain":'+ this.getSatellitesInTerrain[i].getBeams[k].getMaxgain+', "mingain":'+ this.getSatellitesInTerrain[i].getBeams[k].getMingain+', "semimajoraxismaxgain":'+ this.getSatellitesInTerrain[i].getBeams[k].getSemimajoraxismaxgain+', "eccentricity":'+ this.getSatellitesInTerrain[i].getBeams[k].getEccentricity+', "step":'+ this.getSatellitesInTerrain[i].getBeams[k].getStep+', "tightness":'+ this.getSatellitesInTerrain[i].getBeams[k].getTightness+', "rotationangle":'+ this.getSatellitesInTerrain[i].getBeams[k].getRotationangle;
+
+         if(k<this.getSatellitesInTerrain[i].getBeams.length-1){
+           json=json+beamjson2+'},';
+         }
+         else{
+           json=json+beamjson2+'}';
+         }
+       }
+       json=json+']}';
+     }
+     else{
+       json=json+' null}'
+     }
+      if(i<this.getSatellitesInTerrain.length-1){
+        json=json+",";
+      }
+    }
+    json=json+'], "dishes":';
+    json=json+JSON.stringify(this.getDishesInTerrain);
+    json=json+', "currentbeam":';
+    if(this.getCurrentbeamInTerrain!=null){
+      var beamjson='{"id":"'+this.getCurrentbeamInTerrain.getId+'",  "name":"'+this.getCurrentbeamInTerrain.getName+'",  "satellite":"'+this.getCurrentbeamInTerrain.getSatellite+'", "data": null, "usage":"'+ this.getCurrentbeamInTerrain.getUsage+ '", "band":"'+ this.getCurrentbeamInTerrain.getBand+'", "locationx":'+ this.getCurrentbeamInTerrain.getLocationx+', "locationy":'+ this.getCurrentbeamInTerrain.getLocationy+', "maxgain":'+ this.getCurrentbeamInTerrain.getMaxgain+', "mingain":'+ this.getCurrentbeamInTerrain.getMingain+', "semimajoraxismaxgain":'+ this.getCurrentbeamInTerrain.getSemimajoraxismaxgain+', "eccentricity":'+ this.getCurrentbeamInTerrain.getEccentricity+', "step":'+ this.getCurrentbeamInTerrain.getStep+', "tightness":'+ this.getCurrentbeamInTerrain.getTightness+', "rotationangle":'+ this.getCurrentbeamInTerrain.getRotationangle+'}';
+      json=json+beamjson+"}";
+    }
+    else{
+      json=json+" null }";
+    }
+
+    return json;
+  }
+
 }
 class t_satellite{
-  constructor(id, name, color, czml,beams){
+  constructor(id, name, color, czml,tle1,tle2,beams){
     this.id=id;
     this.name=name;
     this.color=color;
     this.czml=czml;
+    this.tle1=tle1;
+    this.tle2=tle2;
     this.beams=beams;
   }
   get getId(){
@@ -39,11 +91,20 @@ class t_satellite{
   get getCzml(){
     return this.czml;
   }
+  get getsattle1(){
+    return this.tle1;
+  }
+  get getsattle2(){
+    return this.tle2;
+  }
   get getBeams(){
     return this.beams;
   }
   set setBeams(beamsarr){
     this.beams=beamsarr;
+  }
+  set setCzml(czmlobj){
+    this.czml=czmlobj;
   }
 }
 class dish {
@@ -67,7 +128,6 @@ class dish {
   get getLongtitude(){
     return this.longitude;
   }
-
   get getLatitude(){
     return this.latitude;
   }
@@ -95,15 +155,68 @@ class dish {
 
 }
 class beam{
-    constructor(name, data){
+    constructor(id,name,satellite,data,usage,band,locationx,locationy,maxgain,mingain,semimajoraxismaxgain,eccentricity,step,tightness,rotationangle){
+      this.id=id;
       this.name=name;
+      this.satellite=satellite;
       this.data=data;
+      this.usage=usage;
+      this.band=band;
+      this.locationx=locationx;
+      this.locationy=locationy;
+      this.maxgain=maxgain;
+      this.mingain=mingain;
+      this.semimajoraxismaxgain=semimajoraxismaxgain;
+      this.eccentricity=eccentricity;
+      this.step=step;
+      this.tightness=tightness;
+      this.rotationangle=rotationangle;
+
+    }
+    get getId(){
+      return this.id;
     }
     get getName(){
       return this.name;
     }
+    get getSatellite(){
+      return this.satellite;
+    }
     get getData(){
       return this.data;
+    }
+    get getUsage(){
+      return this.usage;
+    }
+    get getBand(){
+      return this.band;
+    }
+    get getLocationx(){
+      return this.locationx;
+    }
+    get getLocationy(){
+      return this.locationy;
+    }
+    get getMaxgain(){
+      return this.maxgain;
+    }
+    get getMingain(){
+      return this.mingain;
+    }
+    get getSemimajoraxismaxgain(){
+      return this.semimajoraxismaxgain;
+    }
+    get getEccentricity(){
+      return this.eccentricity;
+    }
+    get getStep(){
+      return this.step;
+    }
+    get getTightness(){
+      return this.tightness;
+    }
+    get getRotationangle(){
+      return this.rotationangle;
     }
     set setData(data){
       this.data=data;
@@ -320,11 +433,257 @@ function togglezaxis(viewer){
    viewer.entities.removeById("Z axis");
  }
 }
-function togglezaxisonclick(){
+function togglezaxisonclick(viewer){
   togglezaxis(viewer);
   settingssaver('zaxischeckbox',document.getElementById("zaxischeckbox").checked);
 
 }
+function toggleprimemeridian(viewer){
+  if(document.getElementById("allmeridianscheckbox").checked){
+    return;
+  }
+  if(document.getElementById("primemeridiancheckbox").checked){
+    viewer.entities.add({
+      id:"Prime meridian",
+      name: "Prime meridian",
+      polyline: {
+        positions: Cesium.Cartesian3.fromDegreesArray([
+        0,
+        90,
+        0,
+        0,
+        0,
+        -90,
+      ]),
+      width: 2,
+      arcType: Cesium.ArcType.RHUMB,
+      material: Cesium.Color.BLUE,
+      granularity: 0.001,
+      },
+    });
+  }
+  else{
+    viewer.entities.removeById("Prime meridian");
+  }
+}
+function toggleprimemeridianonclick(viewer){
+  toggleprimemeridian(viewer);
+  settingssaver('primemeridiancheckbox',document.getElementById("primemeridiancheckbox").checked);
+}
+
+function toggleallmeridians(viewer){
+
+  if(document.getElementById("allmeridianscheckbox").checked){
+
+    for(var i=10;i<190;i=i+10){
+      viewer.entities.add({
+        id:"Meridian "+i+" E",
+        name: "Meridian "+i+"\xB0 E",
+        polyline: {
+         positions: Cesium.Cartesian3.fromDegreesArray([
+          i,
+          90,
+          i,
+          0,
+          i,
+          -90,
+        ]),
+        width: 2,
+        arcType: Cesium.ArcType.RHUMB,
+        material: Cesium.Color.BLACK,
+        granularity: 0.001,
+        },
+      });
+    }
+      for(var i=10;i<180;i=i+10){
+        viewer.entities.add({
+          id:"Meridian "+i+" W",
+          name: "Meridian "+i+"\xB0 W",
+          polyline: {
+           positions: Cesium.Cartesian3.fromDegreesArray([
+            -i,
+            90,
+            -i,
+            0,
+            -i,
+            -90,
+          ]),
+          width: 2,
+          arcType: Cesium.ArcType.RHUMB,
+          material: Cesium.Color.BLACK,
+          granularity: 0.001,
+          },
+        });
+
+    }
+    if(document.getElementById("primemeridiancheckbox").checked==false){
+      viewer.entities.add({
+        id:"Prime meridian",
+        name: "Prime meridian",
+        polyline: {
+          positions: Cesium.Cartesian3.fromDegreesArray([
+          0,
+          90,
+          0,
+          0,
+          0,
+          -90,
+        ]),
+        width: 2,
+        arcType: Cesium.ArcType.RHUMB,
+        material: Cesium.Color.BLUE,
+        granularity: 0.001,
+        },
+      });
+    }
+  }
+  else{
+      for(var i=10;i<190;i=i+10){
+        viewer.entities.removeById("Meridian "+i+" E");
+      }
+      for(var i=10;i<180;i=i+10){
+        viewer.entities.removeById("Meridian "+i+" W");
+      }
+      if(!document.getElementById("primemeridiancheckbox").checked){
+        viewer.entities.removeById("Prime meridian");
+      }
+  }
+}
+function toggleallmeridiansonclick(viewer){
+  toggleallmeridians(viewer);
+  settingssaver('allmeridianscheckbox',document.getElementById("allmeridianscheckbox").checked);
+}
+
+
+function toggleprimeparallel(){
+  if(document.getElementById("allparallelscheckbox").checked){
+    return;
+  }
+  if(document.getElementById("primeparallelcheckbox").checked){
+    viewer.entities.add({
+      id:"Prime parallel",
+      name: "Prime parallel",
+      polyline: {
+        positions: Cesium.Cartesian3.fromDegreesArray([
+          -180,
+            0,
+          -90,
+          0,
+          0,
+          0,
+          90,
+          0,
+        180,
+          0,
+    ]),
+      width: 2,
+      arcType: Cesium.ArcType.RHUMB,
+      material: Cesium.Color.RED,
+      granularity: 0.001,
+      },
+    });
+  }
+  else{
+    viewer.entities.removeById("Prime parallel");
+  }
+}
+function toggleprimeparallelonclick(viewer){
+  toggleprimeparallel(viewer);
+  settingssaver('primeparallelcheckbox',document.getElementById("primeparallelcheckbox").checked);
+}
+
+function toggleallparallels(viewer){
+  if(document.getElementById("allparallelscheckbox").checked){
+    for(var i=10;i<90;i=i+10){
+      viewer.entities.add({
+        id:"Parallel "+i+" N",
+        name: "Parallel "+i+"\xB0 N",
+        polyline: {
+          positions: Cesium.Cartesian3.fromDegreesArray([
+            -180,
+            i,
+            -90,
+            i,
+            0,
+            i,
+            90,
+            i,
+            180,
+            i,
+      ]),
+        width: 2,
+        arcType: Cesium.ArcType.RHUMB,
+        material: Cesium.Color.BLACK,
+        granularity: 0.001,
+        },
+      });
+
+      viewer.entities.add({
+        id:"Parallel "+i+" S",
+        name: "Parallel "+i+"\xB0 S",
+        polyline: {
+          positions: Cesium.Cartesian3.fromDegreesArray([
+            -180,
+            -i,
+            -90,
+            -i,
+            0,
+            -i,
+            90,
+            -i,
+            180,
+            -i,
+      ]),
+        width: 2,
+        arcType: Cesium.ArcType.RHUMB,
+        material: Cesium.Color.BLACK,
+        granularity: 0.001,
+        },
+      });
+
+    }
+
+
+    if(!document.getElementById("primeparallelcheckbox").checked){
+      viewer.entities.add({
+        id:"Prime parallel",
+        name: "Prime parallel",
+        polyline: {
+          positions: Cesium.Cartesian3.fromDegreesArray([
+            -180,
+              0,
+            -90,
+            0,
+            0,
+            0,
+            90,
+            0,
+          180,
+            0,
+      ]),
+        width: 2,
+        arcType: Cesium.ArcType.RHUMB,
+        material: Cesium.Color.RED,
+        granularity: 0.001,
+        },
+      });
+    }
+  }
+  else{
+      for(var i=10;i<90;i=i+10){
+        viewer.entities.removeById("Parallel "+i+" N");
+        viewer.entities.removeById("Parallel "+i+" S");
+      }
+      if(!document.getElementById("primeparallelcheckbox").checked){
+        viewer.entities.removeById("Prime parallel");
+      }
+  }
+}
+function toggleallparallelsonclick(viewer){
+  toggleallparallels(viewer);
+  settingssaver('allparallelscheckbox',document.getElementById("allparallelscheckbox").checked);
+}
+
 function writetolog(message,status){
   var x=null;
   var x=$.ajax({
@@ -335,7 +694,7 @@ function writetolog(message,status){
              success: function(data) {
              },
              fail: function(data){
-               document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot write to logfile.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+               document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot write to logfile.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
                showerrorwindow();
              }
          });
@@ -351,7 +710,8 @@ function satellitelistloader(windowname){
              data: {windowname: windowname},
               error:function (xhr, ajaxOptions, thrownError){
                   if(xhr.status!=200) {
-                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot load satellite list.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+                    writetolog("Loading satellite list...","FAILED");
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot load satellite list.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
                     showerrorwindow();
                   }
               },
@@ -366,45 +726,65 @@ function satellitelistloader(windowname){
                    document.getElementById('deletesatellitemainwindow').style.display="block";
                    document.getElementById('deletesatellitewindowtablespan').innerHTML=data;
                 }
+                writetolog("Loading satellite list...","OK");
                 return data;
              }
          });
 }
 
 function browsefileloader(windowname){
+
+  if(windowname=="browsefileopenwindow"){
+       document.getElementById('browsefileopenloading').style.display="block";
+       document.getElementById('browsefileopennofiles').style.display="none";
+       document.getElementById('browsefileopenmainwindow').style.display="none";
+
+   }
+   else if(windowname=="browsefilesavewindow"){
+      document.getElementById('browsefilesaveloading').style.display="block";
+      document.getElementById('browsefilesavenofiles').style.display="none";
+      document.getElementById('browsefilesavemainwindow').style.display="none";
+
+  }
   $.ajax({
              url: '/Apps/Browsefilegetter.php',
              type: 'POST',
              data: {windowname: windowname},
               error:function (xhr, ajaxOptions, thrownError){
                   if(xhr.status!=200) {
-                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot load file list.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot load file list.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
                     showerrorwindow();
                   }
               },
               success: function(data) {
-
+                alert(data);
                if(windowname=="browsefileopenwindow"){
                   document.getElementById('browsefileopentablespan').innerHTML=data;
                   var table = document.getElementById("browsefileopentable");
                   if(document.querySelectorAll('#browsefileopentable tbody tr').length==0){
                     document.getElementById('browsefileopenloading').style.display="none";
                     document.getElementById('browsefileopennofiles').style.display="block";
+                    document.getElementById('browsefileopenmainwindow').style.display="none";
                     return;
                   }
                   document.getElementById('browsefileopenloading').style.display="none";
+                  document.getElementById('browsefileopennofiles').style.display="none";
                   document.getElementById('browsefileopenmainwindow').style.display="block";
                 }
                 else if(windowname=="browsefilesavewindow"){
-                   document.getElementById('browsefilesaveloading').style.display="none";
+
+                  document.getElementById('browsefilesavetablespan').innerHTML=data;
                    var table = document.getElementById("browsefilesavetable");
                    if(document.querySelectorAll('#browsefilesavetable tbody tr').length==0){
                      document.getElementById('browsefilesaveloading').style.display="none";
                      document.getElementById('browsefilesavenofiles').style.display="block";
+                     document.getElementById('browsefilesavemainwindow').style.display="none";
+
                      return;
                    }
+                   document.getElementById('browsefilesaveloading').style.display="none";
+                   document.getElementById('browsefilesavenofiles').style.display="none";
                    document.getElementById('browsefilesavemainwindow').style.display="block";
-                   document.getElementById('browsefilesavetablespan').innerHTML=data;
                 }
                 return data;
              }
@@ -415,7 +795,7 @@ function projectsaver(filename,terrainobjects){
   if(filename==""){
     return;
   }
-  var psav=toJSON(terrainobjects);
+  var psav=terrainobjects.jsonfyterrainobjects;
   alert(psav);
   var searchTxt = ".psav";
   var rgx = RegExp(searchTxt, "gi");
@@ -425,14 +805,18 @@ function projectsaver(filename,terrainobjects){
   $.ajax({
              url: '/Apps/Savefilecreator.php',
              type: 'POST',
+             async:false,
              data: {filename: filename2, data:psav},
               error:function (xhr, ajaxOptions, thrownError){
                   if(xhr.status!=200) {
-                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot save file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot save file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
                     showerrorwindow();
                   }
               },
               success: function(data) {
+                currentsavefile=filename2;
+                browsefileloader("browsefileopenwindow");
+                browsefileloader("browsefilesavewindow");
              }
          });
 }
@@ -446,11 +830,14 @@ function settingssaver(setting,value){
               },
               error:function (xhr, ajaxOptions, thrownError){
                   if(xhr.status!=200) {
-                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Request failed</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+                    writetolog("Saving Settings...","FAILED");
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Request failed</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
                     showerrorwindow();
                   }
               },
               success: function(data) {
+                writetolog("Saving Settings...","OK");
+
              }
          });
 }
@@ -462,20 +849,143 @@ function loadsettings(){
     })
     .fail(function( jqxhr, settings, exception ) {
       writetolog("Loading settings file...","FAILED");
-      document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot load settings file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+      document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot load settings file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
       showerrorwindow();
 
   });
 }
+function clearterrainobjects(viewer,terrainobjects){
+  for(var i=0;i<terrainobjs.getSatellitesInTerrain.length;i++){
+    viewer.entities.removeById(terrainobjects.getSatellitesInTerrain[i].id);
+  }
+  for(var i=0;i<terrainobjs.getDishesInTerrain.length;i++){
+    viewer.entities.removeById(terrainobjects.getDishesInTerrain[i].id);
+  }
+  clearselectedbeam(viewer,terrainobjects);
 
-function projectloader(projectfile,terrainobjects){
-  $.getJSON("Projects/"+projectfile)
-    .done(function( data ) {
-      terrainobjects=JSON.parse(data);
-    })
-    .fail(function( jqxhr, settings, exception ) {
+  terrainobjs.setSatellitesInTerrain=new Array();
+  terrainobjs.setDishesInTerrain=new Array();
+  terrainobjs.currentbeam=null;
 
-  });
+}
+function openproject(viewer){
+  if(filename==""){
+    return;
+  }
+  var projectfile=document.getElementById("openfiledir").value;
+  var searchTxt = ".psav";
+  var rgx = RegExp(searchTxt, "gi");
+  var strArr = projectfile.split(searchTxt);
+  var filename2=strArr[0]+".psav";
+
+  projectloader(filename2,viewer);
+}
+
+function projectloader(projectfile,viewer){
+  $.ajax({
+               url: '/Apps/Getfilecontentsstring.php',
+               type: 'POST',
+               async: false,
+               data:{
+                  filename: projectfile
+                },
+                fail: function (data){
+                  writetolog("Loading project file...","FAILED");
+                  document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot load project file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
+                  showerrorwindow();
+
+                },
+                success: function(data) {
+                  alert(data);
+                  if(data=="false"){
+                    writetolog("Loading project file...","FAILED");
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot load project file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
+                    showerrorwindow();
+                    return;
+                  }
+                  var tbjs=JSON.parse(data);
+                  clearterrainobjects(viewer,terrainobjs);
+
+                  for(var i=0;i<tbjs.satellites.length;i++){
+                    const satrec = satellite.twoline2satrec(
+                    tbjs.satellites[i].tle1,
+                    tbjs.satellites[i].tle2
+                    );
+                    var date = new Date();
+                    var positionAndVelocity = satellite.propagate(satrec, date);
+                    var gmst = satellite.gstime(date);
+                    var position = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
+                    var start = Cesium.JulianDate.fromDate(new Date());
+                    var starttime;
+                    var satellitemodel = viewer.entities.add({
+                    id: "satellite_"+tbjs.satellites[i].name,
+                    name: tbjs.satellites[i].name,
+                    position: new Cesium.CallbackProperty(function (time, result) {
+                      var jsDate = Cesium.JulianDate.toDate(time);
+                      var positionAndVelocity = satellite.propagate(satrec, jsDate);
+                      var gmst = satellite.gstime(jsDate);
+                      var p   = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
+                      var position = Cesium.Cartesian3.fromRadians(p.longitude, p.latitude, p.height * 1000);
+
+                     var pos=new Cesium.Cartesian3();
+                      var transform=Cesium.Matrix4.fromRotationTranslation(Cesium.Transforms.computeTemeToPseudoFixedMatrix(time));
+
+                      var pos=Cesium.Matrix4.multiplyByPoint(transform, position, pos);
+
+                      return pos;
+
+
+                  }, false),
+                    description: "Orbit of Satellite: "+tbjs.satellites[i].name,
+                    model: {
+                      uri : "Resources/10477_Satellite_v1_L3.glb",
+                      minimumPixelSize: 96
+
+                    },        });
+                    var beamlist=[];
+                    for(var j=0;j<tbjs.satellites[i].beams.length;j++){
+                      var cbeam=new beam(tbjs.satellites[i].beams[j].id,tbjs.satellites[i].beams[j].name,tbjs.satellites[i].beams[j].satellite,null,tbjs.satellites[i].beams[j].usage,tbjs.satellites[i].beams[j].band,tbjs.satellites[i].beams[j].locationx,tbjs.satellites[i].beams[j].locationy,tbjs.satellites[i].beams[j].maxgain,tbjs.satellites[i].beams[j].mingain,tbjs.satellites[i].beams[j].semimajoraxismaxgain,tbjs.satellites[i].beams[j].eccentricity,tbjs.satellites[i].beams[j].step,tbjs.satellites[i].beams[j].tightness, tbjs.satellites[i].beams[j].rotationangle);
+                      alert(JSON.stringify(cbeam));
+                      beamlist.push(cbeam);
+                    }
+                    if(beamlist.length==0){
+                      beamlist=null;
+                    }
+
+                    var satelliteobj=new t_satellite("satellite_"+tbjs.satellites[i].name,tbjs.satellites[i].name,tbjs.satellites[i].color,satellitemodel,tbjs.satellites[i].tle1,tbjs.satellites[i].tle2.trim(),beamlist);
+                    terrainobjs.getSatellitesInTerrain.push(satelliteobj);
+                }
+                  constructmanagesatellitetable(terrainobjs);
+                  for(var i=0;i<tbjs.dishes.length;i++){
+                    const dishmodel = viewer.entities.add({
+                    id: "dish_"+tbjs.dishes[i].name,
+                    name: tbjs.dishes[i].name,
+                    description: "Dish Antenna: "+tbjs.dishes[i].name+"<br>"+"Specifications:<br>"+"Position: "+tbjs.dishes[i].longitude+","+tbjs.dishes[i].latitude+"<br>"+"Size: "+tbjs.dishes[i].size+" cm<br>"+"Gain: "+tbjs.dishes[i].gain+" dB<br>"+"Efficincy (k): "+tbjs.dishes[i].efficiencyk+"%<br>"+"Usage: "+tbjs.dishes[i].usage,
+                      position: Cesium.Cartesian3.fromDegrees(tbjs.dishes[i].longitude, tbjs.dishes[i].latitude),
+                      model:{
+                          uri : 'Resources/dish.gltf'
+                      }
+
+                    });
+                    var dishobj=new dish("dish_"+tbjs.dishes[i].name,tbjs.dishes[i].name,tbjs.dishes[i].longitude,tbjs.dishes[i].latitude,tbjs.dishes[i].size,tbjs.dishes[i].gain,tbjs.dishes[i].efficiencyk,tbjs.dishes[i].usage);
+                    terrainobjs.getDishesInTerrain.push(dishobj);
+                  }
+                  constructmanagedishestable(terrainobjs);
+
+
+                  generatebeamsdropdownmenu(terrainobjs);
+                  if(tbjs.currentbeam!=null){
+                    beamchooser(viewer,terrainobjs,tbjs.currentbeam.id);
+                  }
+                  writetolog("Loading project file...","OK");
+
+
+               }
+
+
+
+    });
+
 }
 
 
@@ -488,9 +998,9 @@ function loadsetting(setting,value,viewer){
     case 'lengthunitswitch':
       togglelengthunit();
     break;
-    case 'eciunitswitch':
-      toggleeciunit();
-    break;
+    //case 'eciunitswitch':
+    //  toggleeciunit();
+  //  break;
     case 'xaxischeckbox':
       togglexaxis(viewer);
     break;
@@ -500,19 +1010,73 @@ function loadsetting(setting,value,viewer){
     case 'zaxischeckbox':
       togglezaxis(viewer);
     break;
+    case 'primemeridiancheckbox':
+      toggleprimemeridian(viewer);
+    break;
+    case 'allmeridianscheckbox':
+      toggleallmeridians(viewer);
+    break;
+    case 'primeparallelcheckbox':
+      toggleprimeparallel(viewer);
+    break;
+    case 'allparallelscheckbox':
+      toggleallparallels(viewer);
+    break;
     case 'darkmodeswitch':
       toggledarkmode();
     break;
   }
 }
 
+function deletefile(){
+  var filename= document.getElementById("filetodelete").innerHTML;
+  $.ajax({
+               url: '/Apps/Deleteprojectfile.php',
+               type: 'POST',
+               async: false,
+               data:{
+                  filename: filename
+                },
+                fail: function (data){
+                  writetolog("Deleting project file...","FAILED");
+                  document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Failed to delete project file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
+                  showerrorwindow();
+
+                },
+                success: function(data) {
+                  if(data==0){
+                    browsefileloader("browsefileopenwindow");
+                    browsefileloader("browsefilesavewindow");
+                    writetolog("Deleting project file...","OK");
+                  }
+                  else if(data==1){
+                    writetolog("Deleting project file...","FAILED");
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Failed to delete project file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
+                    showerrorwindow();
+
+                  }
+                  else {
+                    writetolog("Deleting project file...","FAILED");
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Failed to delete project file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
+                    showerrorwindow();
+                  }
+
+                }
+              });
+
+}
+
 function initializesettings(viewer){
     document.getElementById("tempunitswitch").checked = false;
     document.getElementById("lengthunitswitch").checked = false;
-    document.getElementById("eciunitswitch").checked = false;
+  //  document.getElementById("eciunitswitch").checked = false;
     document.getElementById("xaxischeckbox").checked = false;
     document.getElementById("yaxischeckbox").checked = false;
     document.getElementById("zaxischeckbox").checked = false;
+    document.getElementById("primemeridiancheckbox").checked = false;
+    document.getElementById("primeparallelcheckbox").checked = false;
+    document.getElementById("allmeridianscheckbox").checked = false;
+    document.getElementById("allparallelscheckbox").checked = false;
     document.getElementById("darkmodeswitch").checked = false;
     toggletempunit();
     togglelengthunit();
@@ -520,6 +1084,10 @@ function initializesettings(viewer){
     togglexaxis(viewer);
     toggleyaxis(viewer);
     togglezaxis(viewer);
+    toggleprimemeridian(viewer);
+    toggleprimeparallel(viewer);
+    toggleallmeridians(viewer);
+    toggleallparallels(viewer);
     toggledarkmode();
 }
 
@@ -590,6 +1158,7 @@ function activatedarkmode(){
   document.getElementById("modulationscheme").className="select-dark";
   document.getElementById("minsnrberfecvalue").className="select-dark";
 
+  document.getElementById("logtextarea").className="textarea-dark";
 
 }
 function deactivatedarkmode(){
@@ -658,6 +1227,8 @@ function deactivatedarkmode(){
   document.getElementById("minsnrberprotocol").className="";
   document.getElementById("modulationscheme").className="";
   document.getElementById("minsnrberfecvalue").className="";
+
+  document.getElementById("logtextarea").className="";
 
 
 }
@@ -809,6 +1380,23 @@ for (var i=0;i < table.rows.length;i++){
 }
 }
 
+function findfilename(tablename){
+  var table=document.getElementById(tablename);
+  var row=table.getElementsByClassName("selectedtr")[0];
+  if(row==null){return;}
+
+  var filename=row.id;
+
+  if(tablename=="browsefileopentable"){
+    document.getElementById('openfiledir').value=filename;
+
+  }
+  if(tablename=="browsefilesavetable"){
+    document.getElementById('savefiledir').value=filename;
+  }
+}
+
+
 function addsatellitetoterrain(viewer,terrainobjects){
   var table=document.getElementById('sateliteselect');
   var row=table.getElementsByClassName("selectedtr")[0];
@@ -826,9 +1414,10 @@ function addsatellitetoterrain(viewer,terrainobjects){
   jQuery.get(beamfilename, function(data) {
     var beamlist=CSVToArray(data,",");
     alert(beamlist);
+
   })
   .fail(function() {
-    alert("error");
+    writetolog("Adding Satelite in terrain...","FAILED");
     return;
 });
 
@@ -845,7 +1434,7 @@ function addsatellitetoterrain(viewer,terrainobjects){
   var start = Cesium.JulianDate.fromDate(new Date());
   var colorarr=colorrand();
   alert(colorarr);
-  var starttime
+  var starttime;
 
 
 
@@ -957,7 +1546,7 @@ function addsatellitetoterrain(viewer,terrainobjects){
 
   });
   */
-  var satelliteobj=new t_satellite("satellite_"+satname,satname,colorarr[0],satellitemodel,beamlist);
+  var satelliteobj=new t_satellite("satellite_"+satname,satname,colorarr[0],satellitemodel,tle.split('\n')[0].trim(),tle.split('\n')[1].trim(),beamlist);
   terrainobjects.getSatellitesInTerrain.push(satelliteobj);
 
   //more later
@@ -965,6 +1554,8 @@ function addsatellitetoterrain(viewer,terrainobjects){
 
   constructmanagesatellitetable(terrainobjects);
   generatebeamsdropdownmenu(terrainobjects);
+  writetolog("Adding Satelite in terrain...","OK");
+
 }
 
 
@@ -990,7 +1581,7 @@ function generatebeamsdropdownmenu(terrainobjects){
 
     if(terrainobjects.getSatellitesInTerrain[i].getBeams!=null){
       for(var j=0;j<terrainobjects.getSatellitesInTerrain[i].getBeams.length;j++){
-          beamid="satname:_"+terrainobjects.getSatellitesInTerrain[i].getName+"beamname:_"+terrainobjects.getSatellitesInTerrain[i].getBeams[j].name;
+          beamid="satname:_"+terrainobjects.getSatellitesInTerrain[i].getName+"_beamname:_"+terrainobjects.getSatellitesInTerrain[i].getBeams[j].name;
           innerhtml+=showbeam1+beamid+showbeam2+"'"+beamid+"'"+showbeam3+terrainobjects.getSatellitesInTerrain[i].getBeams[j].name+enda+endli;
       }
     }
@@ -1014,7 +1605,7 @@ function clearselectedbeam(viewer,terrainobjects){
     viewer.entities.removeById(str);
   }
 
-  terrainobjects.setCurrentbeamInTerrain=null;
+  terrainobjects.currentbeam=null;
   generatebeamsdropdownmenu(terrainobjects);
 }
 
@@ -1270,15 +1861,19 @@ function TargetedSpotbeamGenerator(viewer,terrainobjects,beamname,usage,band,loc
   });
   currentbeamelements.push(beamelement);
   currentgain=currentgain-step;
+
   if(currentgain<mingain){
     currentgain=mingain;
   }
   }
-  var newbeam= new beam(beamname,currentbeamelements);
-  terrainobjects.setCurrentbeamInTerrain=new beam(beamname,currentbeamelements);
-  terrainobjects.currentbeam=new beam(beamname,currentbeamelements);
+
   var select = document.getElementById('targetedspotbeamsat');
   var value = select.options[select.selectedIndex].value;
+  var bbeamid="satname:_"+value+"_beamname:_"+beamname;
+  var newbeam= new beam(bbeamid,beamname,value,currentbeamelements,usage,band,locationx,locationy,maxgain,mingain,semimajoraxismaxgain,eccentricity,step,tightness,rotationangle);
+  terrainobjects.setCurrentbeamInTerrain=new beam(bbeamid,beamname,value,currentbeamelements,usage,band,locationx,locationy,maxgain,mingain,semimajoraxismaxgain,eccentricity,step,tightness,rotationangle);
+  terrainobjects.currentbeam=new beam(bbeamid,beamname,value,currentbeamelements,usage,band,locationx,locationy,maxgain,mingain,semimajoraxismaxgain,eccentricity,step,tightness,rotationangle);
+
   for(var i=0;i<terrainobjects.getSatellitesInTerrain.length;i++){
     if(terrainobjects.getSatellitesInTerrain[i].getName==value){
         if(terrainobjects.getSatellitesInTerrain[i].getBeams==null){
@@ -1302,7 +1897,7 @@ function TargetedSpotbeamGenerator(viewer,terrainobjects,beamname,usage,band,loc
     }
   }
   generatebeamsdropdownmenu(terrainobjects);
-  var beamid="satname:_"+value+"beamname:_"+beamname;
+  var beamid="satname:_"+value+"_beamname:_"+beamname;
   selectedbeamhighligher(viewer,terrainobjects,beamid);
 }
 
@@ -1332,15 +1927,77 @@ function beamchooser(viewer,terrainobjs,beamid){
     if(as[i].id==beamid){
       as[i].className+="focus";
       var beamdat=beamid.split("satname:_");
-      var beamdata=beamdat[1].split("beamname:_");
+      var beamdata=beamdat[1].split("_beamname:_");
       for(var j=0;j<terrainobjs.getSatellitesInTerrain.length;j++){
+
         if(terrainobjs.getSatellitesInTerrain[j].getName==beamdata[0]){
+
           for(var k=0;k<terrainobjs.getSatellitesInTerrain[j].getBeams.length;k++){
+
             if(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getName==beamdata[1]){
-              terrainobjs.setCurrentBeamInTerrain=new beam(beamdata[1],terrainobjs.getSatellitesInTerrain[j].getBeams[k].data);
-              terrainobjs.currentbeam=new beam(beamdata[1],terrainobjs.getSatellitesInTerrain[j].getBeams[k].data);
-              for(var l=0; l<terrainobjs.getSatellitesInTerrain[j].getBeams[k].data.length;l++){
-                viewer.entities.add(terrainobjs.getSatellitesInTerrain[j].getBeams[k].data[l]);
+              if(terrainobjs.getSatellitesInTerrain[j].getBeams[k].data==null){
+                var unit;
+                var color;
+                var currentbeamelements=[];
+                if(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getUsage=="D"){
+                  unit="dBW";
+                }
+                else if(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getUsage=="U"){
+                  unit="dB/K";
+                }
+                if(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getBand=="L"){
+                  color=Cesium.Color.fromCssColorString("#64c2ed").withAlpha(0.3);
+                }
+                else if(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getBand=="S"){
+                  color=Cesium.Color.AQUAMARINE.withAlpha(0.3);
+                }
+                else if(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getBand=="C"){
+                  color=Cesium.Color.fromCssColorString("#e6a8d7").withAlpha(0.3);
+                }
+                else if(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getBand=="Ku"){
+                  color=Cesium.Color.fromCssColorString("#fd5e53").withAlpha(0.3);
+                }
+                else if(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getBand=="Ka"){
+                  color=Cesium.Color.ORANGE.withAlpha(0.3);
+                }
+                var rotationangle=terrainobjs.getSatellitesInTerrain[j].getBeams[k].getRotationangle;
+
+                var stepsrequired=Math.ceil((terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMaxgain-terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMingain)/terrainobjs.getSatellitesInTerrain[j].getBeams[k].getStep)+1;
+                var currentgain=terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMaxgain;
+                for(var m=0;m<stepsrequired;m++){
+                  var semimajoraxis=Number(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getSemimajoraxismaxgain)+ m*(Number(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getSemimajoraxismaxgain)/Number(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getTightness));
+                  var semiminoraxis=semimajoraxis*Math.sqrt(1-(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getEccentricity*terrainobjs.getSatellitesInTerrain[j].getBeams[k].getEccentricity));
+
+                  var idstr=terrainobjs.getSatellitesInTerrain[j].getBeams[k].getName+"_element_"+m;
+                  var beamelement=viewer.entities.add({
+                    id: idstr,
+                    name: terrainobjs.getSatellitesInTerrain[j].getBeams[k].getName,
+                    description: "Gain: "+ currentgain+unit,
+                    position: Cesium.Cartesian3.fromDegrees(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getLocationx, terrainobjs.getSatellitesInTerrain[j].getBeams[k].getLocationy),
+                       ellipse : {
+                        semiMinorAxis : Number(semiminoraxis),
+                        semiMajorAxis : Number(semimajoraxis),
+                        rotation: Cesium.Math.toRadians(terrainobjs.getSatellitesInTerrain[j].getBeams[k].getRotationangle),
+                        material : color,
+                        zIndex : -1-m
+                      }
+                });
+                currentbeamelements.push(beamelement);
+                currentgain=currentgain-terrainobjs.getSatellitesInTerrain[j].getBeams[k].getStep;
+
+                if(currentgain<terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMingain){
+                  currentgain=terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMingain;
+                }
+                }
+                terrainobjs.setCurrentBeamInTerrain=new beam(beamid,beamdata[1],beamdata[0],currentbeamelements,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getUsage,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getBand,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getLocationx,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getLocationy,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMaxgain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMingain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getSemimajoraxismaxgain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getEccentricity,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getStep,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getTightness,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getRotationangle);
+                terrainobjs.currentbeam=new beam(beamid,beamdata[1],beamdata[0],currentbeamelements,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getUsage,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getBand,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getLocationx,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getLocationy,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMaxgain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMingain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getSemimajoraxismaxgain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getEccentricity,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getStep,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getTightness,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getRotationangle);
+              }
+              else{
+                terrainobjs.setCurrentBeamInTerrain=new beam(beamid,beamdata[1],beamdata[0],terrainobjs.getSatellitesInTerrain[j].getBeams[k].getData,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getUsage,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getBand,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getLocationx,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getLocationy,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMaxgain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMingain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getSemimajoraxismaxgain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getEccentricity,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getStep,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getTightness,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getRotationangle);
+                terrainobjs.currentbeam=new beam(beamid,beamdata[1],beamdata[0],terrainobjs.getSatellitesInTerrain[j].getBeams[k].getData,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getUsage,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getBand,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getLocationx,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getLocationy,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMaxgain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getMingain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getSemimajoraxismaxgain,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getEccentricity,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getStep,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getTightness,terrainobjs.getSatellitesInTerrain[j].getBeams[k].getRotationangle);
+                for(var l=0; l<terrainobjs.getSatellitesInTerrain[j].getBeams[k].data.length;l++){
+                  viewer.entities.add(terrainobjs.getSatellitesInTerrain[j].getBeams[k].data[l]);
+                }
               }
               break;
             }
@@ -1431,7 +2088,7 @@ function colorrand(){
 
 function addsatellitetodb(satname,tle1,tle2){
   $.ajax({
-               url: '/Apps/addsatellite.php',
+               url: '/Apps/Addsatellitetodb.php',
                type: 'POST',
                data:{
                   satname: satname,
@@ -1440,30 +2097,70 @@ function addsatellitetodb(satname,tle1,tle2){
                 },
                 error:function (xhr, ajaxOptions, thrownError){
                     if(xhr.status!=200) {
-                      document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot add Satellite.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+                      writetolog("Add satellite to db...","FAILED");
+                      document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot add Satellite.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
                       showerrorwindow();
                     }
                 },
                 success: function(data) {
+                  if(data==0){
+                    writetolog("Add satellite to db...","OK");
+                  }
+                  else{
+                    writetolog("Add satellite to db...","FAILED");
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot add Satellite.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
+                    showerrorwindow();
+                  }
                }
            });
 }
-function removesatellitefromdb(satname){
+function deletesatellitefromdb(viewer,terrainobjs){
+  var satname=document.getElementById("sattodelete").innerHTML;
+  for(var i=0;i<terrainobjs.getSatellitesInTerrain.length;i++){
+    if(terrainobjs.getSatellitesInTerrain[i].getName==satname){
+      viewer.entities.removeById(terrainobjects.getSatellitesInTerrain[i].id);
+    }
+  }
+
   $.ajax({
-               url: '/Apps/removesatellite.php',
+               url: '/Apps/Deletesatellitefromdb.php',
                type: 'POST',
                data:{
                   satname: satname
                 },
                 error:function (xhr, ajaxOptions, thrownError){
                     if(xhr.status!=200) {
-                      document.sgetElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot Remove Satellite.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+                      writetolog("Delete satellite from db...","FAILED");
+                      document.sgetElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot delete satellite.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
                       showerrorwindow();
                     }
                 },
                 success: function(data) {
+                  if(data==0){
+                    writetolog("Delete satellite from db...","OK");
+                  }
+                  else{
+                    writetolog("Delete satellite from db...","FAILED");
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot delete satellite.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
+                    showerrorwindow();
+                  }
+
                }
            });
+
+           document.getElementById("deletesatellitewindowtablespan").style.display="none";
+           document.getElementById("selectsatellitewindowtablespan").style.display="none";
+           document.getElementById("deletesatelliteloading").style.display="block";
+           document.getElementById("selectsatelliteloading").style.display="block";
+           document.getElementById("deletesatellitewindowtablespan").innerHTML="";
+           document.getElementById("selectsatellitewindowtablespan").innerHTML="";
+           document.getElementById("deletesatellitewindowtablespan").innerHTML=satellitelistloader("deletesatellitewindow");
+           document.getElementById("selectsatellitewindowtablespan").innerHTML=satellitelistloader("selectsatellitewindow");
+           document.getElementById("deletesatellitewindowtablespan").style.display="block";
+           document.getElementById("selectsatellitewindowtablespan").style.display="block";
+           document.getElementById("deletesatelliteloading").style.display="none";
+           document.getElementById("selectsatelliteloading").style.display="none";
+
 }
 function gettle(satname){
 var x;
@@ -1476,12 +2173,14 @@ $.ajax({
               },
               error:function (xhr, ajaxOptions, thrownError){
                   if(xhr.status!=200) {
-                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot get TLE.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;">Show Log</button> </div>';
+                    writetolog("Getting TLE...","FAILED");
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot get TLE.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
                     showerrorwindow();
                     return null;
                   }
               },
               success: function(data) {
+                writetolog("Getting TLE...","OK");
                 x=data;
              }
          });
@@ -2023,7 +2722,7 @@ function fillandactivatelinkbudgetwindow(terrainobjects){
 
 
 }
-function checkandaddsatellite(){
+function checkandaddsatellite(checksumcheck){
   document.getElementById("addsatellitename").setCustomValidity('');
   document.getElementById("addsatellitetle1").setCustomValidity('');
   document.getElementById("addsatellitetle2").setCustomValidity('');
@@ -2049,6 +2748,75 @@ function checkandaddsatellite(){
     document.getElementById("addsatellitetle2").setCustomValidity('TLE line 2 is required.');
     document.getElementById("addsatellitetle2error").innerHTML='TLE line 2 is required.';
     er=1;
+  }
+  if(checksumcheck==true){
+    var tle1chars=tle1str.split('');
+    var tle2chars=tle2str.split('');
+    var lastchartle1=tle1chars[tle1chars.length-1];
+    var lastchartle2=tle2chars[tle2chars.length-1];
+    var sumtle1=0;
+    var sumtle2=0;
+    var checksumerror1=0;
+    var checksumerror2=0;
+    if(!isNumber(lastchartle1)){
+      er=1;
+      checksumerror1=1;
+    }
+    if(!isNumber(lastchartle2)){
+      er=1;
+     checksumerror2=1;
+    }
+    if(tle1chars[0]!=1){
+      er=1;
+      checksumerror1=1;
+    }
+    if(tle2chars[0]!=2){
+      er=1;
+     checksumerror2=1;
+    }
+    if(er==0){
+      for(var i=0; i<tle1chars.length-1;i++){
+        if(tle1chars[i]=='-'){
+          sumtle1=sumtle1+1;
+        }
+        if(isNumber(tle1chars[i])){
+          sumtle1=sumtle1+Number(tle1chars[i]);
+        }
+      }
+
+      for(var i=0; i<tle2chars.length-1;i++){
+        if(tle2chars[i]=='-'){
+          sumtle2=sumtle2+1;
+        }
+        if(isNumber(tle2chars[i])){
+          sumtle2=sumtle2+Number(tle2chars[i]);
+        }
+      }
+
+      if(sumtle1%10!=Number(lastchartle1)){
+        er=1;
+        checksumerror1=1;
+      }
+      if(sumtle2%10!=Number(lastchartle2)){
+        er=1;
+        checksumerror2=1;
+      }
+
+    }
+    if(checksumerror1==1 && checksumerror2==1){
+      document.getElementById("checksumerror").innerHTML="Checksum error on TLE lines 1 & 2.<br> The recommend action is to check your TLE line again for errors.<br> You can continue to force add satellite to db although problems may occur."
+      showconfirmaddsatelliteonchecksumerrorwindow();
+    }
+    else if (checksumerror1==1) {
+      document.getElementById("checksumerror").innerHTML="Checksum error on TLE line 1.<br> The recommend action is to check your TLE line again for errors.<br> You can continue to force add satellite to db although problems may occur."
+      showconfirmaddsatelliteonchecksumerrorwindow();
+
+    }
+    else if (checksumerror2==1) {
+      document.getElementById("checksumerror").innerHTML="Checksum error on TLE line 2.<br> The recommend action is to check your TLE line again for errors.<br> You can continue to force add satellite to db although problems may occur."
+      showconfirmaddsatelliteonchecksumerrorwindow();
+    }
+
   }
  //more checks later
   if(er==0){
@@ -2435,6 +3203,55 @@ function checkandcalculatedownlinktotalsnr(terrainobjects){
 
 
 }
+function gettecvalue(longitude,latitude){
+
+  var x=null;
+  $.ajax({
+             url: '/Apps/Gettec.php',
+             type: 'POST',
+             async:false,
+              error:function (xhr, ajaxOptions, thrownError){
+                  if(xhr.status!=200) {
+                    document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot get TEC value.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
+                    showerrorwindow();
+                  }
+              },
+              success: function(data) {
+
+                if(data=="0"){
+                  document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot get TEC value.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
+                  showerrorwindow();
+                  x=null;
+                }
+                else{
+                  x=data;
+                }
+             }
+         });
+  if(x==null){
+
+    return;
+  }
+
+
+  var newlng=longitude+180;
+  var newlat=latitude+90;
+  var steplng=360/73;
+  var steplat=180/73;
+  var poslng=Math.round((longitude+180)/steplng);
+  if(poslng>72){ poslng=72;}
+  var poslat=Math.round((latitude-90)/steplat);
+  poslat=-poslat;
+  if(poslat>72){ poslat=72;}
+  x=x.trim();
+  x = x.replace(/\s+/g, ',');
+  ///var arr=CSVToArray(x,",");
+  var splited=x.split(",");
+  return splited[73*poslat+poslng];
+
+}
+
+
 function getweatherlite(longitude,latitude){
   const regex = /^((\-?|\+?)?\d+(\.\d+)?),\s*((\-?|\+?)?\d+(\.\d+)?)$/gi;
   const apiKey = "4d8fb5b93d4af21d66a2948710284366";
@@ -2455,7 +3272,6 @@ function getweatherlite(longitude,latitude){
                   },
                   success: function(data) {
                     x=data;
-                    alert(x);
                  }
              });
              return x;
@@ -2588,6 +3404,8 @@ function getcurrentdayweatherdata(data){
   document.getElementById("cweatherwind").innerHTML=data.current.wind_speed +" m/s";
   document.getElementById("Estimatedweathersiglosses").innerHTML=calculatedsiglosses(data);
 
+  document.getElementById("Estimatedtecvalue").value=gettecvalue(data.lon,data.lat);
+  document.getElementById("Estimatedtecvalue").innerHTML=parseFloat(document.getElementById("Estimatedtecvalue").value).toFixed(2) + " TECU";
 }
 function getmultipledayweatherdata(data,maxdays){
   data.daily.forEach((value, index) => {
@@ -2653,7 +3471,7 @@ function calculatedsiglosses(data){
      totalatt=totalatt+0.01882*(Math.pow(parseFloat(rain1h),1.2168))*5;
    }
    else if(band=="Ka"){
-     totalatt=totalatt+0.07504*(Math.pow(parseFloat(rain1h)^1.0995))*5;
+     totalatt=totalatt+0.07504*(Math.pow(parseFloat(rain1h),1.0995))*5;
    }
   }
   alert(totalatt);
@@ -3247,6 +4065,8 @@ function putpoint(viewer,selectedLocation){
 }
 
 
+
+
 const {parse: $parse, stringify: $stringify} = JSON;
 const {keys} = Object;
 
@@ -3511,11 +4331,48 @@ $('#addsatellitewindow').PopupWindow({
   $("#addsatellitewindow").PopupWindow("open");
 }
 
+function showconfirmdeleteprojectfilewindow(filename){
+
+  document.getElementById('confirmdeletefilespan').innerHTML="Are you sure to delete project file "+ filename+"?";
+  document.getElementById('filetodelete').innerHTML=filename;
+  $('#confirmdeleteprojectfilewindow').PopupWindow({
+          title: "Confirm Deletion",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 200,
+  	      width               : 500,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 200,
+  	      minWidth            : 400,
+  	      collapsedWidth      : undefined,
+  });
+    $("#confirmdeleteprojectfilewindow").PopupWindow("open");
+}
+
+function showconfirmaddsatelliteonchecksumerrorwindow(){
+
+  $('#confirmaddsatelliteonchecksumerrorwindow').PopupWindow({
+          title: "Checksum Error",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 220,
+  	      width               : 650,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 220,
+  	      minWidth            : 650,
+  	      collapsedWidth      : undefined,
+  });
+    $("#confirmaddsatelliteonchecksumerrorwindow").PopupWindow("open");
+}
+
+
 function showconfirmdeletesatellitewindow(){
   var table=document.getElementById('satellitedelete');
   var row=table.getElementsByClassName("selectedtr")[0];
   var satname=row.cells[0].innerText;
-  document.getElementById('confirmdeletesatellitespan').innerHTML="Are you sure to delete satellite "+ satname+"?"
+  document.getElementById('confirmdeletesatellitespan').innerHTML="Are you sure to delete satellite "+ satname+"?";
   document.getElementById('sattodelete').innerHTML=satname;
   $('#confirmdeletesatellitewindow').PopupWindow({
           title: "Confirm Deletion",
@@ -3637,11 +4494,11 @@ function showbrowsefileopenwindow(){
         title: "Browse file to open...",
         autoOpen: false,
         nativeDrag: false,
-        height              : 370,
+        height              : 400,
         width               : 750,
         maxHeight           : undefined,
         maxWidth            : undefined,
-        minHeight           : 370,
+        minHeight           : 400,
         minWidth            : 750,
         collapsedWidth      : undefined,
     });
@@ -3653,11 +4510,11 @@ function showbrowsefilesavewindow(){
         title: "Browse file to save...",
         autoOpen: false,
         nativeDrag: false,
-        height              : 370,
+        height              : 400,
         width               : 750,
         maxHeight           : undefined,
         maxWidth            : undefined,
-        minHeight           : 370,
+        minHeight           : 400,
         minWidth            : 750,
         collapsedWidth      : undefined,
     });

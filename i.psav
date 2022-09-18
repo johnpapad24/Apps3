@@ -1,0 +1,3 @@
+{ "terrainobjects":{ "satellites":[ {"id":"satellite_CALSPHERE 4A",  "name":"CALSPHERE 4A",  "color":"Blue",  "czml":"null", "tle":"1 01520U 65065H   22150.89272564  .00000072  00000+0  12218-3 0  9998
+2 01520  89.9914 130.1738 0067811 314.4063  78.0733 13.35888058765316", "beams":"null"},{"id":"satellite_LES-5",  "name":"LES-5",  "color":"Green",  "czml":"null", "tle":"1 02866U 67066E   22149.57855597 -.00000062  00000+0  00000+0 0  9993
+2 02866   1.3422 244.6678 0051888  39.7396  12.4259  1.09425386114838", "beams":"null"}

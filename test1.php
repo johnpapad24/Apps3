@@ -13,6 +13,7 @@
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <link href="popupwindow.css" rel="stylesheet">
 <script src="popupwindow.js"></script>
+<script src="to-xml.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
 <script  src="functions.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
@@ -54,6 +55,7 @@
 <script>
   var viewer = new Cesium.Viewer('cesiumContainer');
   var terrainobjs=new terrainobjects();
+  var currentsavefile='';
   $(".rightclickaction li").click(function(){
        switch($(this).attr("data-action")) {
         case "Add dish": var ttext=viewer.entities.getById('locationMarker').label.text.toString(); var etext=ttext.substring(1, ttext.length-1); strarr=etext.split(","); document.getElementById("adddishlongitude").value=strarr[0]; document.getElementById("adddishlatitude").value=strarr[1]; showadddishwindow();  break;
@@ -95,8 +97,8 @@
 
  <div id="logwindow" style="display:none;" >
    <div style="width:100%; height:100%;">
-   <div style="display: block; margin:auto; height: 100%; width:100%;"><textarea id="logtextarea" style="height: 100%; width:100%; resize:none; min-height:150px; min-width:350px;" readonly></textarea>
-   <button style="left: 50%; position: relative; -ms-transform: translate(-50%); transform: translate(-50%);">OK</button>
+   <div style="display: block; margin:auto; height: 100%; width:100%;"><textarea id="logtextarea" style="height: 100%; width:100%; resize:none; min-height:150px; min-width:350px; border-radius:2px;" readonly></textarea>
+   <button style="left: 50%; position: relative; -ms-transform: translate(-50%); transform: translate(-50%); " class="btn btn-primary" onclick="$('#logwindow').PopupWindow('Close');">OK</button>
  </div>
 </div>
 </div>
@@ -105,12 +107,12 @@
   <div style="display: block; margin: auto; text-align:center;">
     <span style="text-align:center;font-weight:bold; font-size:x-large; ">Open Project</span>
   </div>
-  <div>
+  <div style="text-align:center; margin-top:10px;">
     <input type="text" id="openfiledir" placeholder="No file chosen..."> <button type="button" class="btn btn-primary" onclick="showbrowsefileopenwindow();" >Browse...</button>
 </div>
 <div style="margin-top:10px">
-  <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
-  <button type="button" style="float:right;" class="btn btn-primary" onclick="openproject();" >Open</button>
+  <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#openprojectwindow').PopupWindow('Close');">Close</button>
+  <button type="button" style="float:right;" class="btn btn-primary" onclick="openproject(viewer);" >Open</button>
 </div>
 </div>
 
@@ -118,11 +120,11 @@
   <div style="display: block; margin: auto; text-align:center;">
     <span style="text-align:center;font-weight:bold; font-size:x-large; ">Save Project</span>
   </div>
-  <div>
+  <div style="text-align:center; margin-top:10px;">
     <input type="text" id="savefiledir" placeholder="No file chosen..."> <button type="button" class="btn btn-primary" onclick="showbrowsefilesavewindow();" >Browse...</button>
 </div>
 <div style="margin-top:10px">
-  <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+  <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#saveprojectwindow').PopupWindow('Close');">Close</button>
   <button type="button" style="float:right;" class="btn btn-primary" onclick="projectsaver(document.getElementById('savefiledir').value,terrainobjs);" >Save</button>
 </div>
 </div>
@@ -133,17 +135,18 @@
     <div class="lds-dual-ring"></div>
   </div>
 
+  <div id="browsefileopennofiles" style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <div style="font-weight:bold; font-size:x-large; min-width:max-content;">There are no project files.</div>
+  </div>
+
   <div id="browsefileopenmainwindow" style="display:none;">
 
     <div style="margin:10px 10px 10px;" id="browsefileopentablespan">
     <script>browsefileloader("browsefileopenwindow");</script></div>
     <div style="max-height:20%;">
-          <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
-          <button type="button" style="float:right;" class="btn btn-primary" onclick="selecttoopenfile();" >Select</button>
+          <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#browsefileopenwindow').PopupWindow('Close');">Close</button>
+          <button type="button" style="float:right;" class="btn btn-primary" onclick="findfilename('browsefileopentable');" >Select</button>
     </div>
-</div>
-<div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefileopennofiles">
-  <div style="font-weight:bold; font-size:x-large; min-width:max-content;">There are no save files.</div>
 </div>
 </div>
 
@@ -153,17 +156,30 @@
     <div class="lds-dual-ring"></div>
   </div>
 
+  <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefilesavenofiles">
+    <div style="font-weight:bold; font-size:x-large; min-width:max-content;">There are no project files.</div>
+  </div>
+
   <div id="browsefilesavemainwindow" style="display:none;">
 
     <div style="margin:10px 10px 10px;" id="browsefilesavetablespan">
     <script>browsefileloader("browsefilesavewindow");</script></div>
     <div style="max-height:20%;">
-          <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
-          <button type="button" style="float:right;" class="btn btn-primary" onclick="selecttoopenfile();" >Select</button>
+          <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#browsefilesavewindow').PopupWindow('Close');">Close</button>
+          <button type="button" style="float:right;" class="btn btn-primary" onclick="findfilename('browsefilesavetable');" >Select</button>
     </div>
 </div>
-<div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefilesavenofiles">
-  <div style="font-weight:bold; font-size:x-large; min-width:max-content;">There are no save files.</div>
+</div>
+
+<div id="confirmdeleteprojectfilewindow" style="display:none;">
+  <div style="display: block; margin: auto; text-align:center;">
+  <img style="vertical-align:middle;" src="Resources/warning-icon.png" width="48" height="48">
+  <span id="filetodelete" style="display: none"></span>
+  <span id="confirmdeletefilespan" style="font-size: 18px;"></span>
+</div>
+<div style="margin-top:10px">
+  <button type="button" style="float:left;" class="btn btn-primary" onclick="$('#confirmdeleteprojectfilewindow').PopupWindow('Close');">Close</button>
+  <button type="button" style="float:right;" class="btn btn-danger" onclick="deletefile();" >Delete File</button>
 </div>
 </div>
 
@@ -179,7 +195,7 @@
     <div style="margin:10px 10px 10px;" id="selectsatellitewindowtablespan">
     <script>satellitelistloader("selectsatellitewindow");</script></div>
     <div style="max-height:20%;">
-          <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+          <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#selectsatellitewindow').PopupWindow('Close');">Close</button>
           <button type="button" style="float:right;" class="btn btn-primary" onclick="addsatellitetoterrain(viewer,terrainobjs);" >Save changes</button>
     </div>
 </div>
@@ -197,7 +213,7 @@
     <div style="margin:10px 10px 10px;" id="deletesatellitewindowtablespan">
     <script>satellitelistloader("deletesatellitewindow");</script></div>
     <div style="max-height:20%;">
-          <button type="button" style="float:left;" class="btn btn-primary" onclick="this._Close('addsatellitewindow')">Close</button>
+          <button type="button" style="float:left;" class="btn btn-primary" onclick="$('#deletesatellitewindow').PopupWindow('Close');">Close</button>
           <button type="button" style="float:right;" class="btn btn-danger" onclick="showconfirmdeletesatellitewindow();" >Delete Satelite</button>
     </div>
 </div>
@@ -210,8 +226,8 @@
   <span id="confirmdeletesatellitespan" style="font-size: 18px;"></span>
 </div>
 <div style="margin-top:10px">
-  <button type="button" style="float:left;" class="btn btn-primary" onclick="this._Close('addsatellitewindow')">Close</button>
-  <button type="button" style="float:right;" class="btn btn-danger" onclick="deletesatellite(viewer,terrainobjs);" >Delete Satelite</button>
+  <button type="button" style="float:left;" class="btn btn-primary" onclick="$('#confirmdeletesatellitewindow').PopupWindow('Close');">Close</button>
+  <button type="button" style="float:right;" class="btn btn-danger" onclick="deletesatellitefromdb(viewer,terrainobjs); $('#confirmdeletesatellitewindow').PopupWindow('Close');" >Delete Satelite</button>
 </div>
 </div>
 
@@ -222,7 +238,10 @@
   </div>
   <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="managenoselected">
     <div style="font-weight:bold; font-size:x-large; min-width:max-content;">There are no satellites selected</div>
+    <button style="margin-top:10px; left: 50%; position: relative; -ms-transform: translate(-50%); transform: translate(-50%); " class="btn btn-danger" onclick="$('#managesatellitewindow').PopupWindow('Close');">Close</button>
+
   </div>
+
   <div id="managesatellitemainwindow" style="display:none;">
    <div style="max-height:20%; text-align:center;">
      <span style="font-weight:bold; font-size:x-large;">Selected Satellites</span>
@@ -230,7 +249,7 @@
     <div style="margin:10px 10px 10px;" id="managesatellitewindowtablespan">
     <table class="newtable" id="managesatellitetable" class="newtable" style="text-align:center; height: 270px; overflow-y: auto; display: block; overflow-x: auto;"></table>
     <div style="max-height:20%;">
-          <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+          <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#managesatellitewindow').PopupWindow('Close');">Close</button>
           <button type="button" style="float:right;" class="btn btn-primary" onclick="managesatelliteapplychanges(viewer,terrainobjs);" >Save changes</button>
     </div>
 </div>
@@ -243,10 +262,21 @@
   <div style="text-align:center; margin-bottom:8px;">TLE Line 1:  <input type="text" style="width:530px;" id="addsatellitetle1" placeholder="1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927" onclick=""> <span id="addsatellitetle1error" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">TLE Line 2:  <input type="text" style="width:530px;" id="addsatellitetle2" placeholder="2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537" onclick=""> <span id="addsatellitetle2error" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div>
-    <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
-    <button type="button"  style="float:right;" class="btn btn-primary" onclick="checkandaddsatellite();" >Add Satellite</button>
+    <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#addsatellitewindow').PopupWindow('Close');">Close</button>
+    <button type="button"  style="float:right;" class="btn btn-primary" onclick="checkandaddsatellite(true);" >Add Satellite</button>
   </div>
 
+</div>
+
+<div id="confirmaddsatelliteonchecksumerrorwindow" style="display:none;">
+  <div style="display: block; margin: auto; text-align:center;">
+  <img style="vertical-align:middle;" src="Resources/warning-icon.png" width="48" height="48">
+  <span id="checksumerror" style="font-size: 18px;"></span>
+</div>
+<div style="margin-top:10px">
+  <button type="button" style="float:left;" class="btn btn-primary" onclick="$('#confirmaddsatelliteonchecksumerrorwindow').PopupWindow('Close');">Close</button>
+  <button type="button" style="float:right;" class="btn btn-warning" onclick="checkandaddsatellite(false); $('#confirmaddsatelliteonchecksumerrorwindow').PopupWindow('Close');" >Force add Satellite</button>
+</div>
 </div>
 
 <div id="adddishwindow" style="display: none;">
@@ -278,7 +308,7 @@
   <input type="radio" name="adddishusageselect" value="2">
 </div>
 <div>
-  <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+  <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#adddishwindow').PopupWindow('Close');">Close</button>
   <button type="button"  style="float:right;" class="btn btn-primary" onclick="checkandadddishinterrain(viewer,terrainobjs);" >Add dish</button>
 </div>
 </div>
@@ -314,7 +344,7 @@
   <input type="radio" id="editdishusageselectupl" name="editdishusageselect" value="2">
 </div>
 <div>
-  <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+  <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#editdishwindow').PopupWindow('Close');">Close</button>
   <button type="button" style="float:right;" class="btn btn-primary" onclick="checkandeditdishinterrain(viewer,terrainobjs);" >Edit dish</button>
 </div>
 </div>
@@ -327,6 +357,7 @@
   </div>
   <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="managedishesnoselected">
     <div style="font-weight:bold; font-size:x-large; min-width:max-content;">There are no dishes in the field.</div>
+    <button style="margin-top:10px; left: 50%; position: relative; -ms-transform: translate(-50%); transform: translate(-50%); " class="btn btn-danger" onclick="$('#managedisheswindow').PopupWindow('Close');">Close</button>
   </div>
   <div id="managedishesmainwindow" style="display:none;">
    <div style="max-height:20%; text-align:center;">
@@ -335,7 +366,7 @@
     <div style="margin:10px 10px 10px;" id="managedishestablespan">
     <table id="managedishestable" class="newtable" style="text-align:center; height: 270px; overflow-y: auto; display: block; overflow-x: auto;"></table>
     <div style="max-height:20%;">
-          <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+          <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#managedisheswindow').PopupWindow('Close');">Close</button>
           <button type="button" style="float:right;" class="btn btn-primary" onclick="managedishesapplychanges(viewer,terrainobjs);" >Save changes</button>
     </div>
 </div>
@@ -385,13 +416,16 @@
 
     </table>
 
-    <div style="font-weight:bold; font-size:x-large; min-width:max-content; text-align:center; padding-top:10px; padding-bottom:10px;"><span>Estimated weather signal difference: </span> <span id="Estimatedweathersiglosses" value="" style="border-radius: 7px; background-color:#F04A00; padding: 4px 4px 1px 4px; text-align: center; color:white;">-100dB</span> at <select name="weatherlossband" class="" onchange="var dat=document.getElementById('Estimatedweathersiglosses').value; calculatedsiglosses(dat);" id="weatherlossband">
+    <div style="font-weight:bold; font-size:x-large; min-width:max-content; text-align:center; padding-top:10px; padding-bottom:10px;"><span>Estimated weather signal difference: </span> <span id="Estimatedweathersiglosses" value="" style="border-radius: 7px; background-color:#F04A00; padding: 4px 4px 1px 4px; text-align: center; color:white;">-100dB</span> at <select name="weatherlossband" class="" onchange="var dat=document.getElementById('Estimatedweathersiglosses').value;  document.getElementById('Estimatedweathersiglosses').innerHTML=calculatedsiglosses(dat);" id="weatherlossband">
       <option value="L">L</option>
       <option value="S">S</option>
       <option value="C">C</option>
       <option selected value="Ku">Ku</option>
       <option value="Ka">Ka</option>
     </select> band</div>
+
+    <div style="font-weight:bold; font-size:x-large; min-width:max-content; text-align:center; padding-top:10px; padding-bottom:10px;"><span>Estimated TEC value: </span> <span id="Estimatedtecvalue" value="" style="border-radius: 7px; background-color:#a2ca4c; padding: 4px 4px 1px 4px; text-align: center; color:white;">10 TECU</span></div>
+
     <div style="padding-bottom:5px; font-weight:bold; font-size:large; min-width:max-content; text-align:center;">5day forecast:</div>
 
     <!-- 5day forecast -->
@@ -477,7 +511,7 @@
 
   </div>
   <div style="max-height:20%; padding-top:10px; text-align:center;">
-    <button type="button" class="btn btn-primary" onclick="" >OK</button>
+    <button type="button" class="btn btn-danger" onclick="$('#weatherwindow').PopupWindow('Close');" >Close</button>
   </div>
 
 </div>
@@ -663,7 +697,7 @@
   <div style="text-align:center; margin-bottom:8px;">Rotation Angle: <input type="text" id="targetedspotbeamrot" placeholder="30"> <span id="targetedspotbeamrotunit">degrees</span>  <span id="targetedspotbeamroterror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
 
   <div>
-    <button type="button" style="float:left;" class="btn btn-danger" onclick="this._Close('addsatellitewindow')">Close</button>
+    <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#generatetargetedspotbeamwindow').PopupWindow('Close');">Close</button>
     <button type="button" style="float:right;" class="btn btn-primary" onclick="checkandtargetedspotbeaminterrain(viewer,terrainobjs);" >Generate Beam</button>
   </div>
 
@@ -726,9 +760,8 @@
     </button>
     <ul id="projectdropdownmenu" class="dropdown-menu" style="margin-top: 18px;">
       <li><a onclick="showopenprojectwindow();" style="text-align:center;">Open project</a></li>
-      <li><a onclick="showsaveprojectwindow();" style="text-align:center;">Save project</a></li>
+      <li><a onclick="if(currentsavefile==''){showsaveprojectwindow();}else{projectsaver(currentsavefile,terrainobjs);}" style="text-align:center;">Save project</a></li>
       <li><a onclick="showsaveprojectwindow();" style="text-align:center;">Save as...</a></li>
-
       </ul>
     </div>
 
@@ -796,7 +829,7 @@
           </label>
           </div>
         <div style="display:inline-block;">mi</div></div>
-          <div><span style="font-weight: normal; width: 100%; margin-left:10px">Earth system: </span>
+        <!--  <div><span style="font-weight: normal; width: 100%; margin-left:10px">Earth system: </span>
           <div style="display:inline-block;">J2000</div>
           <div style="display:inline-block; min-width:40px; text-align:left;">
           <label class="switch">
@@ -804,11 +837,11 @@
           <span class="slider round"></span>
           </label>
           </div>
-          <div style="display:inline-block; ">TEME</div></div>
+          <div style="display:inline-block; ">TEME</div></div>-->
           <p></p>
           <div><span style="font-weight: bold; width: 100%; margin-left:7px">Viewer Settings: </span></div>
           <div><span style="font-weight: normal; width: 100%; margin-left:10px">Show axis: </span>
-          <div style="font-weight: normal; width: 100%; max-width:250px; max-height:20px; margin-left:-32px;" >
+          <div style="font-weight: normal; width: 100%; max-width:250px; max-height:20px; margin-left:-28px;" >
 
             <span>Show x:</span>
             <div class="md-checkbox" style="display:inline; margin-right: 1.5em;">
@@ -827,6 +860,43 @@
                 </div>
             </div></div>
 
+            <p></p>
+
+
+            <div><span style="font-weight: normal; width: 100%; margin-left:10px">Show meridians/parallels: </span>
+            <div style="font-weight: normal; width: 100%; max-width:250px; max-height:200px; " >
+
+              <span>Show prime meridian: </span>
+              <div class="md-checkbox" style="display:inline; margin-left:0.4em;">
+                <input id="primemeridiancheckbox" type="checkbox" onclick="toggleprimemeridianonclick(viewer);">
+                <label for="primemeridiancheckbox"></label>
+              </div>
+              <div></div>
+
+              <span>Show prime parallel:</span>
+              <div class="md-checkbox" style="display:inline; margin-left:1.0em">
+                <input id="primeparallelcheckbox" type="checkbox" onclick="toggleprimeparallelonclick(viewer);">
+                <label for="primeparallelcheckbox"></label>
+                  </div>
+                  <div></div>
+
+              <span>Show all meridians:</span>
+              <div class="md-checkbox" style="display:inline; margin-left:1.4em;">
+                <input id="allmeridianscheckbox" type="checkbox" onclick="toggleallmeridiansonclick(viewer);">
+                <label for="allmeridianscheckbox"></label>
+              </div>
+              <div></div>
+
+                  <span>Show all parallels:</span>
+                  <div class="md-checkbox" style="display:inline; margin-left:2.0em;">
+                    <input id="allparallelscheckbox" type="checkbox" onclick="toggleallparallelsonclick(viewer);">
+                    <label for="allparallelscheckbox"></label>
+                      </div>
+              </div></div>
+
+
+
+
          <p></p>
          <div><span style="font-weight: bold; width: 100%; margin-left:7px">UI Settings: </span></div>
          <div style="font-weight: normal; width: 100%; margin-left: -5px;">
@@ -839,7 +909,7 @@
          <div><span style="font-weight: bold; width: 100%; margin-left:7px">Miselaneous: </span></div>
         <li><a style="text-align:center;" onclick="showlogwindow();">Show log</a></li>
         </ul>
-        <div id="beamdropdown" class="dropdown dropdown-bubble" style="display:inline;">
+        <div id="beamdropdown" class="dropdown dropdown-bubble" style="display:none;">
           <button type="button" id="beambutton" class="btn btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
             <span style="display:inline-block; height: 32px; vertical-align: middle;">Select Beam...</span>
           </button>
