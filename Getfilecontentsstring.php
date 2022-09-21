@@ -9,5 +9,6 @@ if($buf==false){
   echo "false";
   return;
 }
+else if($buf)
 echo $buf;
 ?>

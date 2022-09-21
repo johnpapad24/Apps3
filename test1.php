@@ -95,7 +95,7 @@
 <div id="errorwindow" style="display:none;">
 </div>
 
- <div id="logwindow" style="display:none;" >
+ <div id="logwindow" style="display:none; height: calc(100% - 40px);" >
    <div style="width:100%; height:100%;">
    <div style="display: block; margin:auto; height: 100%; width:100%;"><textarea id="logtextarea" style="height: 100%; width:100%; resize:none; min-height:150px; min-width:350px; border-radius:2px;" readonly></textarea>
    <button style="left: 50%; position: relative; -ms-transform: translate(-50%); transform: translate(-50%); " class="btn btn-primary" onclick="$('#logwindow').PopupWindow('Close');">OK</button>
@@ -103,11 +103,12 @@
 </div>
 </div>
 
-<div id="openprojectwindow" style="display:none;">
-  <div style="display: block; margin: auto; text-align:center;">
-    <span style="text-align:center;font-weight:bold; font-size:x-large; ">Open Project</span>
+
+<div id="openprojectwindow" style="display:none; ">
+  <div style="display: block; margin: auto; text-align:center; ">
+    <span style="text-align:center;font-weight:bold; font-size:x-large; height:50%;">Open Project</span>
   </div>
-  <div style="text-align:center; margin-top:10px;">
+  <div style="text-align:center; margin-top:10px; ">
     <input type="text" id="openfiledir" placeholder="No file chosen..."> <button type="button" class="btn btn-primary" onclick="showbrowsefileopenwindow();" >Browse...</button>
 </div>
 <div style="margin-top:10px">
@@ -116,7 +117,7 @@
 </div>
 </div>
 
-<div id="saveprojectwindow" style="display:none;">
+<div id="saveprojectwindow" style="display:none; height: calc(100% - 40px);" >
   <div style="display: block; margin: auto; text-align:center;">
     <span style="text-align:center;font-weight:bold; font-size:x-large; ">Save Project</span>
   </div>
@@ -129,7 +130,7 @@
 </div>
 </div>
 
-<div id="browsefileopenwindow" style="display:none;">
+<div id="browsefileopenwindow" style="display:none; height: calc(100% - 40px);">
   <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefileopenloading">
     <div style="font-weight:bold; font-size:x-large; margin-bottom:10px;">Loading</div>
     <div class="lds-dual-ring"></div>
@@ -150,7 +151,7 @@
 </div>
 </div>
 
-<div id="browsefilesavewindow" style="display:none;">
+<div id="browsefilesavewindow" style="display:none; height: calc(100% - 40px);">
   <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefilesaveloading">
     <div style="font-weight:bold; font-size:x-large; margin-bottom:10px;">Loading</div>
     <div class="lds-dual-ring"></div>
@@ -196,8 +197,20 @@
     <script>satellitelistloader("selectsatellitewindow");</script></div>
     <div style="max-height:20%;">
           <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#selectsatellitewindow').PopupWindow('Close');">Close</button>
-          <button type="button" style="float:right;" class="btn btn-primary" onclick="addsatellitetoterrain(viewer,terrainobjs);" >Save changes</button>
+          <button type="button" style="float:right;" class="btn btn-primary" onclick="addsatellitetoterrain(viewer,terrainobjs,false);" >Select satellite</button>
     </div>
+</div>
+</div>
+
+<div id="confirmplacingsatelliteafterwarningwindow" style="display:none; height: calc(100% - 25px);">
+  <div style="display: block; margin: auto; text-align:center; height:inherit;">
+  <img style="vertical-align:middle;" src="Resources/warning-icon.png" width="48" height="48">
+  <span id="confirmplacingsatelliteafterwarningmsg" style="font-size: 18px;"></span>
+</div>
+<div style="margin-top:10px">
+  <button type="button" style="float:left" class="btn btn-primary" onclick="$('#confirmplacingsatelliteafterwarningwindow').PopupWindow('Close');" >Cancel</button>
+  <button type="button" style="position:absolute; left: 45%;" class="btn btn-info" onclick="showlogwindow(); " >Show Log</button>
+  <button type="button" style="float:right;" class="btn btn-warning" onclick="addsatellitetoterrain(viewer,terrainobjs,true); $('#confirmplacingsatelliteafterwarningwindow').PopupWindow('Close');" >Continue</button>
 </div>
 </div>
 
@@ -298,7 +311,7 @@
 
   <div style="text-align:center; margin-bottom:8px;">Size: <input type="text" id="adddishsize" placeholder="100"> cm   <span id="adddishsizeerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">Gain: <input type="text" id="adddishgain" placeholder="40.0"> dB  <span id="adddishgainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
-  <div style="text-align:center; margin-bottom:15px; margin-top:15px;"><button type="button"  class="btn btn-primary">Alternative gain calculation</button></div>
+  <div style="text-align:center; margin-bottom:15px; margin-top:15px;"><button type="button" onclick="showmaxgainalternativecalculatorwindow();" class="btn btn-primary">Alternative gain calculation</button></div>
   <div style="text-align:center; margin-bottom:8px;">Efficiency (k): <input type="text" id="adddishefficiencyk" placeholder="70"> %  <span id="adddishefficiencykerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; font-weight: bold;">Usage:</div>
   <div style="text-align:center;">
@@ -334,7 +347,7 @@
 
   <div style="text-align:center; margin-bottom:8px;">Size: <input type="text" id="editdishsize" placeholder="100"> cm   <span id="editdishsizeerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; margin-bottom:8px;">Gain: <input type="text" id="editdishgain" placeholder="40.0"> dB  <span id="editdishgainerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
-  <div style="text-align:center; margin-bottom:15px; margin-top:15px;"><button type="button"  class="btn btn-primary">Alternative gain calculation</button></div>
+  <div style="text-align:center; margin-bottom:15px; margin-top:15px;"><button type="button" onclick="showmaxegainalternativecalculatorwindow();"  class="btn btn-primary">Alternative gain calculation</button></div>
   <div style="text-align:center; margin-bottom:8px;">Efficiency (k): <input type="text" id="editdishefficiencyk" placeholder="70"> %  <span id="editdishefficiencykerror" style="font-weight:bold; padding-left: 3px; color:#fe2f2f"></span></div>
   <div style="text-align:center; font-weight: bold;">Usage:</div>
   <div style="text-align:center;">
@@ -345,7 +358,7 @@
 </div>
 <div>
   <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#editdishwindow').PopupWindow('Close');">Close</button>
-  <button type="button" style="float:right;" class="btn btn-primary" onclick="checkandeditdishinterrain(viewer,terrainobjs);" >Edit dish</button>
+  <button type="button" style="float:right;" class="btn btn-primary" onclick="checkandeditdishinterrain(viewer,terrainobjs);" >Save changes</button>
 </div>
 </div>
 </div>
@@ -367,7 +380,7 @@
     <table id="managedishestable" class="newtable" style="text-align:center; height: 270px; overflow-y: auto; display: block; overflow-x: auto;"></table>
     <div style="max-height:20%;">
           <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#managedisheswindow').PopupWindow('Close');">Close</button>
-          <button type="button" style="float:right;" class="btn btn-primary" onclick="managedishesapplychanges(viewer,terrainobjs);" >Save changes</button>
+          <button type="button" style="float:right;" class="btn btn-primary" onclick="managedishesapplychanges(viewer,terrainobjs);" >Add Dish</button>
     </div>
 </div>
 </div>
@@ -566,6 +579,7 @@
 
       <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetuplinkcalcerror" style="font-weight:bold; color:#fe2f2f"></span></div>
       <div id="linkbudgetuplinkweatherlosses" style="text-align:center; font-weight: bold; font-size: large;  margin-bottom:8px;"> Estimated weather losses: <span id="linkbudgetuplinkweatherlossesvalue">-- dB</span></div>
+      <div id="linkbudgetuplinktec" style="text-align:center; font-weight: bold; font-size: large;  margin-bottom:8px;"> Estimated TEC Value: <span id="linkbudgetuplinktecvalue">-- TECU</span></div>
       <div id="linkbudgetuplinktotalsnr" style="text-align:center; font-weight: bold; font-size: large; padding-left: 4px; padding-right: 4px; border-radius:8px; background-color: #2DB92D; color:white;"> Estimated total uplink SNR: <span id="linkbudgetuplinktotalsnrvalue">--</span> dB</div>
 
 
@@ -616,6 +630,7 @@
 
       <div style="text-align:center; margin-bottom:8px;"><span id="linkbudgetdownlinkcalcerror" style="font-weight:bold; color:#fe2f2f"></span></div>
       <div id="linkbudgetdownlinkweatherlosses" style="text-align:center; font-weight: bold; font-size: large;  margin-bottom:8px;"> Estimated weather losses: <span id="linkbudgetdownlinkweatherlossesvalue">-- dB</span></div>
+      <div id="linkbudgetdownlinktec" style="text-align:center; font-weight: bold; font-size: large;  margin-bottom:8px;"> Estimated TEC Value: <span id="linkbudgetdownlinktecvalue">-- TECU</span></div>
       <div id="linkbudgetdownlinktotalsnr" style="text-align:center; font-weight: bold; font-size: large; padding-left: 4px; padding-right: 4px; border-radius:8px; background-color: #F04A00; color:white;"> Estimated total downlink SNR: <span id="linkbudgetdownlinktotalsnrvalue">--</span> dB</div>
 
   </div>
@@ -709,8 +724,8 @@
   <div style="text-align: center; margin-bottom:8px;">
     <span id="beammaxgainfrequencylamdaerror" style="font-weight:bold; color:#fe2f2f"></span>
   </div>
-  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 1 (ht,Dt):</div>
-  <div style="text-align:center; margin-bottom:8px;"> ht: <input type="text" id="beammaxgainht1" placeholder="0.0000000">,<input type="text" id="beammaxgaindt" placeholder="0.0000000"> :Dt </div>
+  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 1 (hs,Ds):</div>
+  <div style="text-align:center; margin-bottom:8px;"> hs: <input type="text" id="beammaxgainht1" placeholder="0.0000000">,<input type="text" id="beammaxgaindt" placeholder="0.0000000"> :Ds </div>
 
   <div style="text-align: center; margin-bottom:8px;">  <button type="button" class="btn btn-primary" onclick="checkandcalculatemaxgainfromhtdt();" >Calculate</button></div>
   <div style="text-align: center; margin-bottom:8px;">
@@ -719,8 +734,8 @@
   <div style="text-align: center; margin-bottom:8px;">
     <span id="beammaxgaindterror" style="font-weight:bold; color:#fe2f2f"></span>
   </div>
-  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 2 (ht,theta3db):</div>
-  <div style="text-align:center; margin-bottom:8px;"> ht: <input type="text" id="beammaxgainht2" placeholder="0.0000000">,<input type="text" id="beammaxgaintheta3dbt" placeholder="0.0000000"> :Dt </div>
+  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 2 (hs,theta3db):</div>
+  <div style="text-align:center; margin-bottom:8px;"> hs: <input type="text" id="beammaxgainht2" placeholder="0.0000000">,<input type="text" id="beammaxgaintheta3dbt" placeholder="0.0000000"> :theta3db </div>
   <div style="text-align: center; margin-bottom:8px;">  <button type="button" class="btn btn-primary" onclick="checkandcalculatemaxgainfromhttheta3dbt();" >Calculate</button></div>
   <div style="text-align: center; margin-bottom:8px;">
     <span id="beammaxgainht2error" style="font-weight:bold; color:#fe2f2f"></span>
@@ -731,17 +746,61 @@
 
 </div>
 
-<div id="dishmaxgainalternativecalculatorwindow" style="display: none;">
+<div id="maxgainalternativecalculatorwindow" style="display: none;">
   <div style="text-align:center; font-size: x-large; font-weight:bold; margin-bottom:8px;">Alternative calculation methods:</div>
-  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 1 (ht,Dt):</div>
-  <div style="text-align:center; margin-bottom:8px;"> ht: <input type="text" id="dishmaxgainht1" placeholder="0.0000000">,<input type="text" id="dishmaxgaindt" placeholder="0.0000000"> :Dt </div>
-  <div style="text-align: center; margin-bottom:8px;">  <button type="button" class="btn btn-primary" onclick="checkandcalculatemaxgainfromhtdt();" >Calculate</button></div>
+  <div style="text-align: center; margin-bottom:8px;">f(GHz): <input type="text" id="dmaxgainfrequency" placeholder="0.0000000" onkeyup="liveconverttolambad();"> or <input type="text" id="dmaxgainlamda" placeholder="0.0000000" onkeyup="liveconverttofrequencyd();"> :l(mm) </div>
   <div style="text-align: center; margin-bottom:8px;">
-    <span id="dishmaxgainht1error" style="font-weight:bold; color:#fe2f2f"></span>
+    <span id="dmaxgainfrequencylamdaerror" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 1 (he,De):</div>
+  <div style="text-align:center; margin-bottom:8px;"> he: <input type="text" id="dmaxgainht1" placeholder="0.0000000">,<input type="text" id="dmaxgaindt" placeholder="0.0000000"> :De </div>
+
+  <div style="text-align: center; margin-bottom:8px;">  <button type="button" class="btn btn-primary" onclick="checkandcalculatemaxgainfromhtdtd();" >Calculate</button></div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="dmaxgainht1error" style="font-weight:bold; color:#fe2f2f"></span>
   </div>
   <div style="text-align: center; margin-bottom:8px;">
-    <span id="dishmaxgaindterror" style="font-weight:bold; color:#fe2f2f"></span>
+    <span id="dmaxgaindterror" style="font-weight:bold; color:#fe2f2f"></span>
   </div>
+  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 2 (he,theta3db):</div>
+  <div style="text-align:center; margin-bottom:8px;"> he: <input type="text" id="dmaxgainht2" placeholder="0.0000000">,<input type="text" id="dmaxgaintheta3dbt" placeholder="0.0000000"> :theta3db </div>
+  <div style="text-align: center; margin-bottom:8px;">  <button type="button" class="btn btn-primary" onclick="checkandcalculatemaxgainfromhttheta3dbtd();" >Calculate</button></div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="dmaxgainht2error" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align: center;">
+    <span id="dmaxgaintheta3dberror" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+
+</div>
+
+
+<div id="maxegainalternativecalculatorwindow" style="display: none;">
+  <div style="text-align:center; font-size: x-large; font-weight:bold; margin-bottom:8px;">Alternative calculation methods:</div>
+  <div style="text-align: center; margin-bottom:8px;">f(GHz): <input type="text" id="demaxgainfrequency" placeholder="0.0000000" onkeyup="liveconverttolambade();"> or <input type="text" id="demaxgainlamda" placeholder="0.0000000" onkeyup="liveconverttofreqde();"> :l(mm) </div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="demaxgainfrequencylamdaerror" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 1 (he,De):</div>
+  <div style="text-align:center; margin-bottom:8px;"> he: <input type="text" id="demaxgainht1" placeholder="0.0000000">,<input type="text" id="demaxgaindt" placeholder="0.0000000"> :De </div>
+
+  <div style="text-align: center; margin-bottom:8px;">  <button type="button" class="btn btn-primary" onclick="checkandcalculatemaxgainfromhtdtde();" >Calculate</button></div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="demaxgainht1error" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="demaxgaindterror" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align:center; font-weight: bold; margin-bottom:8px;">Method 2 (he,theta3db):</div>
+  <div style="text-align:center; margin-bottom:8px;"> he: <input type="text" id="demaxgainht2" placeholder="0.0000000">,<input type="text" id="demaxgaintheta3dbt" placeholder="0.0000000"> :theta3db </div>
+  <div style="text-align: center; margin-bottom:8px;">  <button type="button" class="btn btn-primary" onclick="checkandcalculatemaxgainfromhttheta3dbtde();" >Calculate</button></div>
+  <div style="text-align: center; margin-bottom:8px;">
+    <span id="demaxgainht2error" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+  <div style="text-align: center;">
+    <span id="demaxgaintheta3dberror" style="font-weight:bold; color:#fe2f2f"></span>
+  </div>
+
 </div>
 
 <div id="rullersemiwindow" class="rullersemiwindow" style="display:none;">
@@ -752,7 +811,7 @@
 </div>
 
 
-<div id="divUpperLeft" style="position:absolute; background:rgba(0,0,0,0); left:10px; top:5px; z-index:2000;">
+<div id="divUpperLeft" style="position:absolute;  background:rgba(0,0,0,0); left:10px; top:5px; z-index:0;">
   <div id="projectdropdown" class="dropdown dropdown-bubble" style="display:inline;"style="display:inline;">
     <button type="button" id="projectbutton" class="btn btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">
     <span class="projecticon" id="projecticon"></span>
@@ -937,6 +996,22 @@
       </script>
 </div>
 
+<script>
+/*function testhandler(){
+  var size=$('#logwindow').PopupWindow("getsize");
+  //alert($('#logwindow').PopupWindow("getsize").height);
+  document.getElementById("logwindow").style.setProperty('height', 'calc(100% - 120px)');
+
+
+}
+$('#logwindow').on("resize.popupwindow", testhandler);
+$('#logwindow').on("open.popupwindow", testhandler);
+$('#logwindow').on("maximize.popupwindow", testhandler);
+*/
+
+
+
+</script>
 
 
 </body>

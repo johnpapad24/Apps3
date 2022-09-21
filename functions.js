@@ -869,15 +869,16 @@ function clearterrainobjects(viewer,terrainobjects){
 
 }
 function openproject(viewer){
-  if(filename==""){
+
+  var projectfile=document.getElementById("openfiledir").value;
+  if(projectfile==""){
     return;
   }
-  var projectfile=document.getElementById("openfiledir").value;
   var searchTxt = ".psav";
   var rgx = RegExp(searchTxt, "gi");
   var strArr = projectfile.split(searchTxt);
   var filename2=strArr[0]+".psav";
-
+  alert(filename2);
   projectloader(filename2,viewer);
 }
 
@@ -1397,7 +1398,7 @@ function findfilename(tablename){
 }
 
 
-function addsatellitetoterrain(viewer,terrainobjects){
+function addsatellitetoterrain(viewer,terrainobjects,ignoreerror){
   var table=document.getElementById('sateliteselect');
   var row=table.getElementsByClassName("selectedtr")[0];
   if(row==null){return;}
@@ -1409,17 +1410,83 @@ function addsatellitetoterrain(viewer,terrainobjects){
   }
   var beamlist=null;
   var beamfilename="/Apps/CSVs/"+filename_sanitizer_js(satname)+"/beams.csv";
+  var satbeamlist=[];
+  var er=0;
+
+  $.ajax({
+             url: beamfilename,
+             type: 'GET',
+             async: false,
+              fail: function (data){
+                writetolog("Adding Satelite in terrain...","FAILED");
+                return;
+              },
+              success: function(data){
+                beamlist=data.split(',');
+              }
+    });
 
 
-  jQuery.get(beamfilename, function(data) {
-    var beamlist=CSVToArray(data,",");
     alert(beamlist);
+    for(var i=0;i<beamlist.length;i++){
+      $.ajax({
+                 url: beamlist[i],
+                 type: 'POST',
+                 async: false,
+                 error:function (xhr, ajaxOptions, thrownError){
+                     if(xhr.status!=200) {
 
-  })
-  .fail(function() {
-    writetolog("Adding Satelite in terrain...","FAILED");
-    return;
-});
+                    writetolog("Loading beam file...","FAILED");
+                    document.getElementById('confirmplacingsatelliteafterwarningmsg').innerHTML='Failed to read beam file: '+beamlist[i]+'<br>The recommended action is to cancel and check the beam file again. <br>You can continue trying to visualize satellite although problems may occur.';
+                    showconfirmplacingsatelliteafterwarningwindow();
+                    if(ignoreerror==false){
+                      er=1;
+                      return;
+                    }
+                  }
+
+                  },
+                  success: function(data) {
+                    alert(data);
+                    if(data=="false"){
+                      writetolog("Loading beam file...","FAILED");
+                      document.getElementById('confirmplacingsatelliteafterwarningmsg').innerHTML='Failed to read beam file: '+beamlist[i]+'<br>The recommended action is to cancel and check the beam file again. <br>You can continue trying to visualize satellite although problems may occur.';
+                      showconfirmplacingsatelliteafterwarningwindow();
+                      if(ignoreerror==false){
+                        er=1;
+                        return;
+                      }
+                    }
+                      else{
+
+                        var tbjs=JSON.parse(data);
+
+                        for(var j=0;j<tbjs.beams.length;j++){
+                          var cbeam=new beam(tbjs.beams[j].id,tbjs.beams[j].name,tbjs.beams[j].satellite,null,tbjs.beams[j].usage,tbjs.beams[j].band,tbjs.beams[j].locationx,tbjs.beams[j].locationy,tbjs.beams[j].maxgain,tbjs.beams[j].mingain,tbjs.beams[j].semimajoraxismaxgain,tbjs.beams[j].eccentricity,tbjs.beams[j].step,tbjs.beams[j].tightness,tbjs.beams[j].rotationangle);
+                          alert(JSON.stringify(cbeam));
+                          satbeamlist.push(cbeam);
+                        }
+                        if(satbeamlist.length==0){
+                          satbeamlist=null;
+                        }
+                        writetolog("Loading beam file...","OK");
+                      }
+
+                    }
+
+                });
+              }
+
+
+
+if(er==1){
+  writetolog("Adding Satelite in terrain...","FAILED");
+  return;
+}
+alert(er);
+if(satbeamlist.length==0){
+  satbeamlist=null;
+}
 
   var tle=gettle(satname);
   alert(tle);
@@ -1546,7 +1613,7 @@ function addsatellitetoterrain(viewer,terrainobjects){
 
   });
   */
-  var satelliteobj=new t_satellite("satellite_"+satname,satname,colorarr[0],satellitemodel,tle.split('\n')[0].trim(),tle.split('\n')[1].trim(),beamlist);
+  var satelliteobj=new t_satellite("satellite_"+satname,satname,colorarr[0],satellitemodel,tle.split('\n')[0].trim(),tle.split('\n')[1].trim(),satbeamlist);
   terrainobjects.getSatellitesInTerrain.push(satelliteobj);
 
   //more later
@@ -2016,7 +2083,7 @@ function CSVToArray(str, strDelimiter ){
 
           // slice from start of text to the first \n index
           // use split to create an array from string by delimiter
-          const headers = str.slice(0, str.indexOf("\n")).split(strDelimiter);
+          //const headers = str.slice(0, str.indexOf("\n")).split(strDelimiter);
 
           // slice from \n index + 1 to the end of the text
           // use split to create an array of each csv value row
@@ -2033,11 +2100,7 @@ function CSVToArray(str, strDelimiter ){
           // the object passed as an element of the array
           const arr = rows.map(function (row) {
             const values = row.split(strDelimiter);
-            const el = headers.reduce(function (object, header, index) {
-              object[header] = values[index];
-              return object;
-            }, {});
-            return el;
+
           });
 
           // return the array
@@ -2266,17 +2329,17 @@ function constructmanagesatellitetable(terrainobjects){
     row.classList="newrow";
     var cell0 = row.insertCell(0);
     var cell1 = row.insertCell(1);
-    var cell2 = row.insertCell(2);
-    var cell3 = row.insertCell(3);
+  //  var cell2 = row.insertCell(2);
+    var cell3 = row.insertCell(2);
     cell0.classList="newtd2";
     cell1.classList="newtd2";
-    cell2.classList="newtd2";
+    //cell2.classList="newtd2";
     cell3.classList="newtd2";
     var tBody = table.getElementsByTagName('tbody')[0];
     tBody.classList="newtbody";
     cell0.innerHTML=(i+1)+")";
     cell1.innerHTML='<img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADJSURBVDhPnZHRDcMgEEMZjVEYpaNklIzSEfLfD4qNnXAJSFWfhO7w2Zc0Tf9QG2rXrEzSUeZLOGm47WoH95x3Hl3jEgilvDgsOQUTqsNl68ezEwn1vae6lceSEEYvvWNT/Rxc4CXQNGadho1NXoJ+9iaqc2xi2xbt23PJCDIB6TQjOC6Bho/sDy3fBQT8PrVhibU7yBFcEPaRxOoeTwbwByCOYf9VGp1BYI1BA+EeHhmfzKbBoJEQwn1yzUZtyspIQUha85MpkNIXB7GizqDEECsAAAAASUVORK5CYII=">'+ terrainobjects.getSatellitesInTerrain[i].name;
-    cell2.innerHTML='  <div id="colordropdown" class="dropdown dropdown-bubble" style="display:inline;"> <button class="btn btn-light" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">  <span style="display:inline-block; height: 32px; vertical-align: top;">Color:</span>  <span class="dot" style="background-color:#8b00ff; margin-top:-4px; margin-left:3px;"></span>  </button> <ul id="colordropdownmenu" class="dropdown-menu" style="margin-top: 10px;"> <li><a href="" style="text-align:center;">Violet<span class="dot" style="background-color:#8b00ff; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Blue<span class="dot" style="background-color:#0000ff; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Aqua<span class="dot" style="background-color:#00ffff; margin-top:0px; margin-left:8px;"></span></a>   <li><a href="" style="text-align:center;">Green<span class="dot" style="background-color:#00ff00; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Yellow<span class="dot" style="background-color:#ffff00; margin-top:0px; margin-left:8px;"></span></a>  <li><a href="" style="text-align:center;">Orange<span class="dot" style="background-color:#ff7f00; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Red<span class="dot" style="background-color:#ff0000; margin-top:0px; margin-left:8px;"></span></a>  </ul>  </div>';
+    //cell2.innerHTML='  <div id="colordropdown" class="dropdown dropdown-bubble" style="display:inline;"> <button class="btn btn-light" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:32px;">  <span style="display:inline-block; height: 32px; vertical-align: top;">Color:</span>  <span class="dot" style="background-color:#8b00ff; margin-top:-4px; margin-left:3px;"></span>  </button> <ul id="colordropdownmenu" class="dropdown-menu" style="margin-top: 10px;"> <li><a href="" style="text-align:center;">Violet<span class="dot" style="background-color:#8b00ff; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Blue<span class="dot" style="background-color:#0000ff; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Aqua<span class="dot" style="background-color:#00ffff; margin-top:0px; margin-left:8px;"></span></a>   <li><a href="" style="text-align:center;">Green<span class="dot" style="background-color:#00ff00; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Yellow<span class="dot" style="background-color:#ffff00; margin-top:0px; margin-left:8px;"></span></a>  <li><a href="" style="text-align:center;">Orange<span class="dot" style="background-color:#ff7f00; margin-top:0px; margin-left:8px;"></span></a> <li><a href="" style="text-align:center;">Red<span class="dot" style="background-color:#ff0000; margin-top:0px; margin-left:8px;"></span></a>  </ul>  </div>';
     cell3.innerHTML='<div> Action: <button id='+'"bid_'+terrainobjects.getSatellitesInTerrain[i].id+'"'+'onclick="changekeepremovebutton('+"'bid_"+terrainobjects.getSatellitesInTerrain[i].id+"'"+');" class="btn btn-info" style="transition: all .3s ease;">Keep</button></td>';
   }
   document.getElementById("msatelliteloading").style.display="none";
@@ -2334,8 +2397,8 @@ function managesatelliteapplychanges(viewer,terrainobjects){
   var table=document.getElementById("managesatellitetable");
   for(var i=0, row; row=table.rows[i];i++){
     var rmd=false;
-    var colorcol=row.cells[2];
-    var removecol=row.cells[3];
+  //  var colorcol=row.cells[2];
+    var removecol=row.cells[2];
     var removebtn=removecol.getElementsByTagName('button')[0];
     alert(removebtn.innerHTML);
     if(removebtn.innerHTML=="Remove"){
@@ -2749,7 +2812,7 @@ function checkandaddsatellite(checksumcheck){
     document.getElementById("addsatellitetle2error").innerHTML='TLE line 2 is required.';
     er=1;
   }
-  if(checksumcheck==true){
+  if(checksumcheck==true && er==0){
     var tle1chars=tle1str.split('');
     var tle2chars=tle2str.split('');
     var lastchartle1=tle1chars[tle1chars.length-1];
@@ -2867,24 +2930,24 @@ function checkandcalculatemaxgainfromhtdt(){
     er=1;
   }
   if(htstr.trim()==""){
-    document.getElementById("beammaxgainht1").setCustomValidity('ht is required.');
-    document.getElementById("beammaxgainht1error").innerHTML='ht is required.';
+    document.getElementById("beammaxgainht1").setCustomValidity('hs is required.');
+    document.getElementById("beammaxgainht1error").innerHTML='hs is required.';
     er=1;
   }
   if(dtstr.trim()==""){
-    document.getElementById("beammaxgaindt").setCustomValidity('Dt is required.');
-    document.getElementById("beammaxgaindterror").innerHTML='Dt is required.';
+    document.getElementById("beammaxgaindt").setCustomValidity('Ds is required.');
+    document.getElementById("beammaxgaindterror").innerHTML='Ds is required.';
     er=1;
   }
 
   if(!isNumber(htstr.trim())){
-    document.getElementById("beammaxgainht1").setCustomValidity('Invalid ht.');
-    document.getElementById("beammaxgainht1error").innerHTML='Invalid ht.';
+    document.getElementById("beammaxgainht1").setCustomValidity('Invalid hs.');
+    document.getElementById("beammaxgainht1error").innerHTML='Invalid hs.';
     er=1;
   }
   if(!isNumber(dtstr.trim())){
-    document.getElementById("beammaxgaindt").setCustomValidity('Invalid dt.');
-    document.getElementById("beammaxgaindterror").innerHTML='Invalid dt.';
+    document.getElementById("beammaxgaindt").setCustomValidity('Invalid ds.');
+    document.getElementById("beammaxgaindterror").innerHTML='Invalid ds.';
     er=1;
   }
   if(er==0){
@@ -2903,7 +2966,7 @@ function checkandcalculatemaxgainfromhtdt(){
     document.getElementById("beammaxgaindterror").innerHTML='';
     document.getElementById("beammaxgainfrequencylamdaerror").innerHTML='';
     document.getElementById("beammaxgainht2error").innerHTML='';
-    document.getElementById("beammaxgaintheta3dbterror").innerHTML='';
+    document.getElementById("beammaxgaintheta3dberror").innerHTML='';
     $("#beammaxgainalternativecalculatorwindow").PopupWindow("close");
 
   }
@@ -2912,29 +2975,31 @@ function checkandcalculatemaxgainfromhtdt(){
 function checkandcalculatemaxgainfromhttheta3dbt(){
   document.getElementById("beammaxgainht2").setCustomValidity('');
   document.getElementById("beammaxgaintheta3dbt").setCustomValidity('');
+  document.getElementById("beammaxgainht2error").innerHTML='';
+  document.getElementById("beammaxgaintheta3dberror").innerHTML='';
 
   var htstr=document.getElementById("beammaxgainht2").value;
   var theta3dbstr=document.getElementById("beammaxgaintheta3dbt").value;
   var er=0;
 
   if(htstr.trim()==""){
-    document.getElementById("beammaxgaindt").setCustomValidity('ht is required.');
-    document.getElementById("beammaxgaintheta3dbterror").innerHTML='ht is required.';
+    document.getElementById("beammaxgainht2").setCustomValidity('hs is required.');
+    document.getElementById("beammaxgainht2error").innerHTML='hs is required.';
     er=1;
   }
   if(theta3dbstr.trim()==""){
-    document.getElementById("beammaxgainht1").setCustomValidity('theta3db is required.');
-    document.getElementById("beammaxgainht1error").innerHTML='theta3db is required.';
+    document.getElementById("beammaxgaintheta3dbt").setCustomValidity('theta3db is required.');
+    document.getElementById("beammaxgaintheta3dberror").innerHTML='theta3db is required.';
     er=1;
   }
   if(!isNumber(htstr.trim())){
-    document.getElementById("beammaxgainht1").setCustomValidity('Invalid ht.');
-    document.getElementById("beammaxgainht1error").innerHTML='Invalid ht.';
+    document.getElementById("beammaxgainht2").setCustomValidity('Invalid hs.');
+    document.getElementById("beammaxgainht2error").innerHTML='Invalid hs.';
     er=1;
   }
   if(!isNumber(theta3dbstr.trim())){
-    document.getElementById("beammaxgaindt").setCustomValidity('Invalid theta3db.');
-    document.getElementById("beammaxgaindterror").innerHTML='Invalid theta3db.';
+    document.getElementById("beammaxgaintheta3dbt").setCustomValidity('Invalid theta3db.');
+    document.getElementById("beammaxgaintheta3dberror").innerHTML='Invalid theta3db.';
     er=1;
   }
   if(er==0){
@@ -2953,11 +3018,260 @@ function checkandcalculatemaxgainfromhttheta3dbt(){
     document.getElementById("beammaxgaindterror").innerHTML='';
     document.getElementById("beammaxgainfrequencylamdaerror").innerHTML='';
     document.getElementById("beammaxgainht2error").innerHTML='';
-    document.getElementById("beammaxgaintheta3dbterror").innerHTML='';
+    document.getElementById("beammaxgaintheta3dberror").innerHTML='';
 
     $("#beammaxgainalternativecalculatorwindow").PopupWindow("close");
   }
 }
+
+function checkandcalculatemaxgainfromhtdtd(){
+  document.getElementById("dmaxgainht1").setCustomValidity('');
+  document.getElementById("dmaxgaindt").setCustomValidity('');
+  document.getElementById("dmaxgainfrequency").setCustomValidity('');
+  document.getElementById("dmaxgainlamda").setCustomValidity('');
+  document.getElementById("dmaxgainht1error").innerHTML='';
+  document.getElementById("dmaxgaindterror").innerHTML='';
+  document.getElementById("dmaxgainfrequencylamdaerror").innerHTML='';
+
+
+
+  var htstr=document.getElementById("dmaxgainht1").value;
+  var dtstr=document.getElementById("dmaxgaindt").value;
+  var er=0;
+  var lamda=document.getElementById("dmaxgainlamda").value;
+  if(lamda==""){
+    document.getElementById("dmaxgainfrequency").setCustomValidity("Frequency is required.");
+    document.getElementById("dmaxgainlamda").setCustomValidity("Lamda is required.");
+
+      document.getElementById("dmaxgainfrequencylamdaerror").innerHTML="Frequency/lamda is required.";
+      er=1;
+  }
+  if(!(isNumber(lamda))){
+    document.getElementById("dmaxgainfrequency").setCustomValidity("Invalid frequency.");
+    document.getElementById("dmaxgainlamda").setCustomValidity("Invalid lamda.");
+
+      document.getElementById("dmaxgainfrequencylamdaerror").innerHTML="Invalid frequency/lamda.";
+    er=1;
+  }
+  if(htstr.trim()==""){
+    document.getElementById("dmaxgainht1").setCustomValidity('he is required.');
+    document.getElementById("dmaxgainht1error").innerHTML='he is required.';
+    er=1;
+  }
+  if(dtstr.trim()==""){
+    document.getElementById("dmaxgaindt").setCustomValidity('De is required.');
+    document.getElementById("dmaxgaindterror").innerHTML='De is required.';
+    er=1;
+  }
+
+  if(!isNumber(htstr.trim())){
+    document.getElementById("dmaxgainht1").setCustomValidity('Invalid he.');
+    document.getElementById("dmaxgainht1error").innerHTML='Invalid he.';
+    er=1;
+  }
+  if(!isNumber(dtstr.trim())){
+    document.getElementById("dmaxgaindt").setCustomValidity('Invalid de.');
+    document.getElementById("dmaxgaindterror").innerHTML='Invalid de.';
+    er=1;
+  }
+  if(er==0){
+    var r1=(Math.PI*dtstr)/(lamda*0.001);
+    r1=htstr*Math.pow(r1,2);
+    r1=10*Math.log10(r1);
+
+    document.getElementById("adddishgain").value=r1;
+    document.getElementById("dmaxgainht1").setCustomValidity('');
+    document.getElementById("dmaxgaindt").setCustomValidity('');
+    document.getElementById("dmaxgainfrequency").setCustomValidity('');
+    document.getElementById("dmaxgainlamda").setCustomValidity('');
+    document.getElementById("dmaxgainht2").setCustomValidity('');
+    document.getElementById("dmaxgaintheta3dbt").setCustomValidity('');
+    document.getElementById("dmaxgainht1error").innerHTML='';
+    document.getElementById("dmaxgaindterror").innerHTML='';
+    document.getElementById("dmaxgainfrequencylamdaerror").innerHTML='';
+    document.getElementById("dmaxgainht2error").innerHTML='';
+    document.getElementById("dmaxgaintheta3dberror").innerHTML='';
+    $("#maxgainalternativecalculatorwindow").PopupWindow("close");
+
+  }
+}
+
+function checkandcalculatemaxgainfromhttheta3dbtd(){
+  document.getElementById("dmaxgainht2").setCustomValidity('');
+  document.getElementById("dmaxgaintheta3dbt").setCustomValidity('');
+  document.getElementById("dmaxgainht2error").innerHTML='';
+  document.getElementById("dmaxgaintheta3dberror").innerHTML='';
+
+  var htstr=document.getElementById("dmaxgainht2").value;
+  var theta3dbstr=document.getElementById("dmaxgaintheta3dbt").value;
+  var er=0;
+
+  if(htstr.trim()==""){
+    document.getElementById("dmaxgainht2").setCustomValidity('he is required.');
+    document.getElementById("dmaxgainht2error").innerHTML='he is required.';
+    er=1;
+  }
+  if(theta3dbstr.trim()==""){
+    document.getElementById("dmaxgaintheta3dbt").setCustomValidity('theta3db is required.');
+    document.getElementById("dmaxgaintheta3dberror").innerHTML='theta3db is required.';
+    er=1;
+  }
+  if(!isNumber(htstr.trim())){
+    document.getElementById("dmaxgainht2").setCustomValidity('Invalid he.');
+    document.getElementById("dmaxgainht2error").innerHTML='Invalid he.';
+    er=1;
+  }
+  if(!isNumber(theta3dbstr.trim())){
+    document.getElementById("dmaxgaintheta3dbt").setCustomValidity('Invalid theta3db.');
+    document.getElementById("dmaxgaintheta3dberror").innerHTML='Invalid theta3db.';
+    er=1;
+  }
+  if(er==0){
+    var r1=(Math.PI*50)/(theta3dbstr);
+    r1=htstr*Math.pow(r1,2);
+    r1=10*Math.log10(htstr*r1);
+
+    document.getElementById("adddishgain").value=r1;
+    document.getElementById("dmaxgainht1").setCustomValidity('');
+    document.getElementById("dmaxgaindt").setCustomValidity('');
+    document.getElementById("dmaxgainfrequency").setCustomValidity('');
+    document.getElementById("dmaxgainlamda").setCustomValidity('');
+    document.getElementById("dmaxgainht2").setCustomValidity('');
+    document.getElementById("dmaxgaintheta3dbt").setCustomValidity('');
+    document.getElementById("dmaxgainht1error").innerHTML='';
+    document.getElementById("dmaxgaindterror").innerHTML='';
+    document.getElementById("dmaxgainfrequencylamdaerror").innerHTML='';
+    document.getElementById("dmaxgainht2error").innerHTML='';
+    document.getElementById("dmaxgaintheta3dberror").innerHTML='';
+
+    $("#maxgainalternativecalculatorwindow").PopupWindow("close");
+  }
+}
+
+function checkandcalculatemaxgainfromhtdtde(){
+  document.getElementById("demaxgainht1").setCustomValidity('');
+  document.getElementById("demaxgaindt").setCustomValidity('');
+  document.getElementById("demaxgainfrequency").setCustomValidity('');
+  document.getElementById("demaxgainlamda").setCustomValidity('');
+  document.getElementById("demaxgainht1error").innerHTML='';
+  document.getElementById("demaxgaindterror").innerHTML='';
+  document.getElementById("demaxgainfrequencylamdaerror").innerHTML='';
+
+
+
+  var htstr=document.getElementById("demaxgainht1").value;
+  var dtstr=document.getElementById("demaxgaindt").value;
+  var er=0;
+  var lamda=document.getElementById("demaxgainlamda").value;
+  if(lamda==""){
+    document.getElementById("demaxgainfrequency").setCustomValidity("Frequency is required.");
+    document.getElementById("demaxgainlamda").setCustomValidity("Lamda is required.");
+
+      document.getElementById("demaxgainfrequencylamdaerror").innerHTML="Frequency/lamda is required.";
+      er=1;
+  }
+  if(!(isNumber(lamda))){
+    document.getElementById("demaxgainfrequency").setCustomValidity("Invalid frequency.");
+    document.getElementById("demaxgainlamda").setCustomValidity("Invalid lamda.");
+
+      document.getElementById("demaxgainfrequencylamdaerror").innerHTML="Invalid frequency/lamda.";
+    er=1;
+  }
+  if(htstr.trim()==""){
+    document.getElementById("demaxgainht1").setCustomValidity('he is required.');
+    document.getElementById("demaxgainht1error").innerHTML='he is required.';
+    er=1;
+  }
+  if(dtstr.trim()==""){
+    document.getElementById("demaxgaindt").setCustomValidity('De is required.');
+    document.getElementById("demaxgaindterror").innerHTML='De is required.';
+    er=1;
+  }
+
+  if(!isNumber(htstr.trim())){
+    document.getElementById("demaxgainht1").setCustomValidity('Invalid he.');
+    document.getElementById("demaxgainht1error").innerHTML='Invalid he.';
+    er=1;
+  }
+  if(!isNumber(dtstr.trim())){
+    document.getElementById("demaxgaindt").setCustomValidity('Invalid de.');
+    document.getElementById("demaxgaindterror").innerHTML='Invalid de.';
+    er=1;
+  }
+  if(er==0){
+    var r1=(Math.PI*dtstr)/(lamda*0.001);
+    r1=htstr*Math.pow(r1,2);
+    r1=10*Math.log10(r1);
+
+    document.getElementById("editdishgain").value=r1;
+    document.getElementById("demaxgainht1").setCustomValidity('');
+    document.getElementById("demaxgaindt").setCustomValidity('');
+    document.getElementById("demaxgainfrequency").setCustomValidity('');
+    document.getElementById("demaxgainlamda").setCustomValidity('');
+    document.getElementById("demaxgainht2").setCustomValidity('');
+    document.getElementById("demaxgaintheta3dbt").setCustomValidity('');
+    document.getElementById("demaxgainht1error").innerHTML='';
+    document.getElementById("demaxgaindterror").innerHTML='';
+    document.getElementById("demaxgainfrequencylamdaerror").innerHTML='';
+    document.getElementById("demaxgainht2error").innerHTML='';
+    document.getElementById("demaxgaintheta3dberror").innerHTML='';
+    $("#maxegainalternativecalculatorwindow").PopupWindow("close");
+
+  }
+}
+
+function checkandcalculatemaxgainfromhttheta3dbtde(){
+  document.getElementById("demaxgainht2").setCustomValidity('');
+  document.getElementById("demaxgaintheta3dbt").setCustomValidity('');
+  document.getElementById("demaxgainht2error").innerHTML='';
+  document.getElementById("demaxgaintheta3dberror").innerHTML='';
+
+  var htstr=document.getElementById("demaxgainht2").value;
+  var theta3dbstr=document.getElementById("demaxgaintheta3dbt").value;
+  var er=0;
+
+  if(htstr.trim()==""){
+    document.getElementById("demaxgainht2").setCustomValidity('he is required.');
+    document.getElementById("demaxgainht2error").innerHTML='he is required.';
+    er=1;
+  }
+  if(theta3dbstr.trim()==""){
+    document.getElementById("demaxgaintheta3dbt").setCustomValidity('theta3db is required.');
+    document.getElementById("demaxgaintheta3dberror").innerHTML='theta3db is required.';
+    er=1;
+  }
+  if(!isNumber(htstr.trim())){
+    document.getElementById("demaxgainht2").setCustomValidity('Invalid ht.');
+    document.getElementById("demaxgainht2error").innerHTML='Invalid ht.';
+    er=1;
+  }
+  if(!isNumber(theta3dbstr.trim())){
+    document.getElementById("demaxgaintheta3dbt").setCustomValidity('Invalid theta3db.');
+    document.getElementById("demaxgaintheta3dberror").innerHTML='Invalid theta3db.';
+    er=1;
+  }
+  if(er==0){
+    var r1=(Math.PI*50)/(theta3dbstr);
+    r1=htstr*Math.pow(r1,2);
+    r1=10*Math.log10(htstr*r1);
+
+    document.getElementById("editdishgain").value=r1;
+    document.getElementById("demaxgainht1").setCustomValidity('');
+    document.getElementById("demaxgaindt").setCustomValidity('');
+    document.getElementById("demaxgainfrequency").setCustomValidity('');
+    document.getElementById("demaxgainlamda").setCustomValidity('');
+    document.getElementById("demaxgainht2").setCustomValidity('');
+    document.getElementById("demaxgaintheta3dbt").setCustomValidity('');
+    document.getElementById("demaxgainht1error").innerHTML='';
+    document.getElementById("demaxgaindterror").innerHTML='';
+    document.getElementById("demaxgainfrequencylamdaerror").innerHTML='';
+    document.getElementById("demaxgainht2error").innerHTML='';
+    document.getElementById("demaxgaintheta3dberror").innerHTML='';
+
+    $("#maxegainalternativecalculatorwindow").PopupWindow("close");
+  }
+}
+
 
 function checkandcalculateuplinktotalsnr(terrainobjects){
   document.getElementById("linkbudgetuplinkbucpower").setCustomValidity('');
@@ -2974,6 +3288,7 @@ function checkandcalculateuplinktotalsnr(terrainobjects){
   document.getElementById("linkbudgetuplinkbandwidtherror").innerHTML='';
   document.getElementById("linkbudgetuplinkcalcerror").innerHTML='';
   document.getElementById("linkbudgetuplinkweatherlosses").style.display="none";
+  document.getElementById("linkbudgetuplinktec").style.display="none";
   document.getElementById("linkbudgetuplinktotalsnr").style.display="none";
 
 
@@ -3074,9 +3389,15 @@ function checkandcalculateuplinktotalsnr(terrainobjects){
         }
         var totalsnr = 10*Math.log10(Number(bucpower))+Number(dishgain)-10*Math.log10(Number(bandwidth))-Number(fspl)-wsiglosses+Number(uplinkdbk)+228.5991672;
         totalsnr=totalsnr.toFixed(2);
-        document.getElementById("linkbudgetuplinkweatherlossesvalue").innerHTML=wsiglosses +"dB";
+
+        var utecvalue=gettecvalue(longitude,latitude);
+
+        var uutecval=Number(utecvalue).toFixed(2);
+        document.getElementById("linkbudgetuplinkweatherlossesvalue").innerHTML=wsiglosses +" dB";
+        document.getElementById("linkbudgetuplinktecvalue").innerHTML=utecval +" TECU";
         document.getElementById("linkbudgetuplinktotalsnrvalue").innerHTML=totalsnr;
         document.getElementById("linkbudgetuplinkweatherlosses").style.display="block";
+        document.getElementById("linkbudgetuplinktec").style.display="block";
         document.getElementById("linkbudgetuplinktotalsnr").style.display="block";
 
 
@@ -3100,6 +3421,7 @@ function checkandcalculatedownlinktotalsnr(terrainobjects){
   document.getElementById("linkbudgetdownlinkotherlosseserror").innerHTML='';
   document.getElementById("linkbudgetdownlinkcalcerror").innerHTML='';
   document.getElementById("linkbudgetdownlinkweatherlosses").style.display="none";
+  document.getElementById("linkbudgetdownlinktec").style.display="none";
   document.getElementById("linkbudgetdownlinktotalsnr").style.display="none";
 
 
@@ -3191,11 +3513,16 @@ function checkandcalculatedownlinktotalsnr(terrainobjects){
         var gt=dishgain-10*Math.log10(atemp);
         var totalsnr = Number(downlinkeirp)-10*Math.log10(Number(bandwidth))-Number(fspl)-wsiglosses+gt+228.5991672;
         totalsnr=totalsnr.toFixed(2);
+        var dtecvalue=gettecvalue(longitude,latitude);
+
+        var ddtecval=Number(dtecvalue).toFixed(2);
+
         document.getElementById("linkbudgetdownlinkweatherlossesvalue").innerHTML=wsiglosses +" dB";
+        document.getElementById("linkbudgetdownlinktecvalue").innerHTML=ddtecval +" TECU";
         document.getElementById("linkbudgetdownlinktotalsnrvalue").innerHTML=totalsnr;
         document.getElementById("linkbudgetdownlinkweatherlosses").style.display="block";
+        document.getElementById("linkbudgetdownlinktec").style.display="block";
         document.getElementById("linkbudgetdownlinktotalsnr").style.display="block";
-
 
       }
 
@@ -3940,6 +4267,88 @@ function liveconverttofrequency(){
   document.getElementById("beammaxgainfrequency").value=c/(document.getElementById("beammaxgainlamda").value*1000000);
 }
 
+function liveconverttolambad(){
+  document.getElementById("dmaxgainfrequency").setCustomValidity("");
+  document.getElementById("dmaxgainlamda").setCustomValidity("");
+  document.getElementById("dmaxgainfrequencylamdaerror").innerHTML='';
+
+  const c=299792458;
+  var frequency=document.getElementById("dmaxgainfrequency").value;
+  if(frequency==""){
+      document.getElementById("dmaxgainlamda").value="";
+      return;
+  }
+  if(!(isNumber(frequency))){
+    document.getElementById("dmaxgainfrequency").setCustomValidity("Invalid frequency.");
+    document.getElementById("dmaxgainlamda").setCustomValidity("Invalid lamda.");
+    document.getElementById("dmaxgainlamda").value="ERROR!";
+    return;
+  }
+  document.getElementById("dmaxgainlamda").value=c/(document.getElementById("dmaxgainfrequency").value*1000000);
+}
+
+function liveconverttofrequencyd(){
+  document.getElementById("dmaxgainfrequency").setCustomValidity("");
+  document.getElementById("dmaxgainlamda").setCustomValidity("");
+  document.getElementById("dmaxgainfrequencylamdaerror").innerHTML='';
+
+
+  const c=299792458;
+  var lamda=document.getElementById("dmaxgainlamda").value;
+  if(lamda==""){
+      document.getElementById("dmaxgainfrequency").value="";
+      return;
+  }
+  if(!(isNumber(lamda))){
+    document.getElementById("dmaxgainfrequency").setCustomValidity("Invalid frequency.");
+    document.getElementById("dmaxgainlamda").setCustomValidity("Invalid lamda.");
+    document.getElementById("dmaxgainfrequency").value="ERROR!";
+    return;
+  }
+  document.getElementById("dmaxgainfrequency").value=c/(document.getElementById("dmaxgainlamda").value*1000000);
+}
+
+function liveconverttolambade(){
+  document.getElementById("demaxgainfrequency").setCustomValidity("");
+  document.getElementById("demaxgainlamda").setCustomValidity("");
+  document.getElementById("demaxgainfrequencylamdaerror").innerHTML='';
+
+  const c=299792458;
+  var frequency=document.getElementById("demaxgainfrequency").value;
+  if(frequency==""){
+      document.getElementById("demaxgainlamda").value="";
+      return;
+  }
+  if(!(isNumber(frequency))){
+    document.getElementById("demaxgainfrequency").setCustomValidity("Invalid frequency.");
+    document.getElementById("demaxgainlamda").setCustomValidity("Invalid lamda.");
+    document.getElementById("demaxgainlamda").value="ERROR!";
+    return;
+  }
+  document.getElementById("demaxgainlamda").value=c/(document.getElementById("demaxgainfrequency").value*1000000);
+}
+
+function liveconverttofreqde(){
+  document.getElementById("demaxgainfrequency").setCustomValidity("");
+  document.getElementById("demaxgainlamda").setCustomValidity("");
+  document.getElementById("demaxgainfrequencylamdaerror").innerHTML='';
+
+
+  const c=299792458;
+  var lamda=document.getElementById("demaxgainlamda").value;
+  if(lamda==""){
+      document.getElementById("demaxgainfrequency").value="";
+      return;
+  }
+  if(!(isNumber(lamda))){
+    document.getElementById("demaxgainfrequency").setCustomValidity("Invalid frequency.");
+    document.getElementById("demaxgainlamda").setCustomValidity("Invalid lamda.");
+    document.getElementById("degainfrequency").value="ERROR!";
+    return;
+  }
+  document.getElementById("demaxgainfrequency").value=c/(document.getElementById("demaxgainlamda").value*1000000);
+}
+
 function activaterullermode(viewer){
   rullermode=true;
   document.getElementById("rullersemiwindow").style.display="block";
@@ -4301,7 +4710,7 @@ function showeditdishwindow(){
 }
 function showbeammaxgainalternativecalculatorwindow(){
   $('#beammaxgainalternativecalculatorwindow').PopupWindow({
-          title: "Add Dish Window",
+          title: "Alternative Gain Calculation",
           autoOpen: false,
           nativeDrag: false,
   	      height              : 450,
@@ -4313,6 +4722,53 @@ function showbeammaxgainalternativecalculatorwindow(){
   	      collapsedWidth      : undefined,
   });
     $("#beammaxgainalternativecalculatorwindow").PopupWindow("open");
+}
+function showmaxgainalternativecalculatorwindow(){
+  $('#maxgainalternativecalculatorwindow').PopupWindow({
+          title: "Alternative Gain Calculation",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 450,
+  	      width               : 640,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 450,
+  	      minWidth            : 640,
+  	      collapsedWidth      : undefined,
+  });
+    $("#maxgainalternativecalculatorwindow").PopupWindow("open");
+}
+
+function showmaxegainalternativecalculatorwindow(){
+  $('#maxegainalternativecalculatorwindow').PopupWindow({
+          title: "Alternative Gain Calculation",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 450,
+  	      width               : 640,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 450,
+  	      minWidth            : 640,
+  	      collapsedWidth      : undefined,
+  });
+    $("#maxegainalternativecalculatorwindow").PopupWindow("open");
+}
+
+function showedishmaxgainalternativecalculatorwindow(){
+  $('#edishmaxgainalternativecalculatorwindow').PopupWindow({
+          title: "Alternative Gain Calculation",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 450,
+  	      width               : 640,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 450,
+  	      minWidth            : 640,
+  	      collapsedWidth      : undefined,
+  });
+    $("#showedishmaxgainalternativecalculatorwindow").PopupWindow("open");
 }
 
 function showaddsatellitewindow(){
@@ -4367,6 +4823,23 @@ function showconfirmaddsatelliteonchecksumerrorwindow(){
     $("#confirmaddsatelliteonchecksumerrorwindow").PopupWindow("open");
 }
 
+function showconfirmplacingsatelliteafterwarningwindow(){
+
+  $('#confirmplacingsatelliteafterwarningwindow').PopupWindow({
+          title: "Beam File Read Error",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 220,
+  	      width               : 700,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 220,
+  	      minWidth            : 700,
+  	      collapsedWidth      : undefined,
+  });
+    $("#confirmplacingsatelliteafterwarningwindow").PopupWindow("open");
+}
+
 
 function showconfirmdeletesatellitewindow(){
   var table=document.getElementById('satellitedelete');
@@ -4407,8 +4880,11 @@ function showweatherwindow(){
 
 function showlinkbudgetcalculatorwindow(){
   document.getElementById("linkbudgetuplinkweatherlosses").style.display="none";
+  document.getElementById("linkbudgetuplinktec").style.display="none";
   document.getElementById("linkbudgetuplinktotalsnr").style.display="none";
   document.getElementById("linkbudgetdownlinkweatherlosses").style.display="none";
+  document.getElementById("linkbudgetdownlinktec").style.display="none";
+
   document.getElementById("linkbudgetdownlinktotalsnr").style.display="none";
   $('#linkbudgetcalculatorwindow').PopupWindow({
           title: "Link budget calculator",
