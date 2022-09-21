@@ -1,0 +1,1 @@
+{ "satellites":[], "dishes":[{"id":"dish_fdfefe","name":"fdfefe","longitude":"-111.52484997909292","latitude":"53.42181256307077","size":"100","gain":"43.92239754060306","efficiencyk":"1","usage":"Downlink"}], "currentbeam": null }

@@ -380,7 +380,7 @@
     <table id="managedishestable" class="newtable" style="text-align:center; height: 270px; overflow-y: auto; display: block; overflow-x: auto;"></table>
     <div style="max-height:20%;">
           <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#managedisheswindow').PopupWindow('Close');">Close</button>
-          <button type="button" style="float:right;" class="btn btn-primary" onclick="managedishesapplychanges(viewer,terrainobjs);" >Add Dish</button>
+          <button type="button" style="float:right;" class="btn btn-primary" onclick="managedishesapplychanges(viewer,terrainobjs);" >Save changes</button>
     </div>
 </div>
 </div>
