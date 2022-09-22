@@ -3350,6 +3350,9 @@ function checkandcalculateuplinktotalsnr(terrainobjects){
         document.getElementById("linkbudgetuplinkotherlosseserror").innerHTML='Invalid other losses.';
         er=1;
       }
+      else{
+        otherlosses=Number(document.getElementById("linkbudgetuplinkotherlosses").value);
+      }
 
       if(er==0){
         var dishgain;
@@ -3387,14 +3390,14 @@ function checkandcalculateuplinktotalsnr(terrainobjects){
         if(band=="Ka"){
           fspl=20*Math.log10(satdistance)+20*Math.log10(20)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
         }
-        var totalsnr = 10*Math.log10(Number(bucpower))+Number(dishgain)-10*Math.log10(Number(bandwidth))-Number(fspl)-wsiglosses+Number(uplinkdbk)+228.5991672;
+        var totalsnr = 10*Math.log10(Number(bucpower))+Number(dishgain)-10*Math.log10(Number(bandwidth))-Number(fspl)-wsiglosses+Number(uplinkdbk)+228.5991672-otherlosses;
         totalsnr=totalsnr.toFixed(2);
 
         var utecvalue=gettecvalue(longitude,latitude);
 
         var uutecval=Number(utecvalue).toFixed(2);
         document.getElementById("linkbudgetuplinkweatherlossesvalue").innerHTML=wsiglosses +" dB";
-        document.getElementById("linkbudgetuplinktecvalue").innerHTML=utecval +" TECU";
+        document.getElementById("linkbudgetuplinktecvalue").innerHTML=uutecval +" TECU";
         document.getElementById("linkbudgetuplinktotalsnrvalue").innerHTML=totalsnr;
         document.getElementById("linkbudgetuplinkweatherlosses").style.display="block";
         document.getElementById("linkbudgetuplinktec").style.display="block";
@@ -3473,6 +3476,9 @@ function checkandcalculatedownlinktotalsnr(terrainobjects){
         document.getElementById("linkbudgetdownlinkotherlosseserror").innerHTML='Invalid other losses.';
         er=1;
       }
+      else{
+        otherlosses=Number(document.getElementById("linkbudgetdownlinkotherlosses").value);
+      }
 
       if(er==0){
         var dishgain;
@@ -3511,7 +3517,7 @@ function checkandcalculatedownlinktotalsnr(terrainobjects){
           fspl=20*Math.log10(satdistance)+20*Math.log10(20)+92.45;//-20*Math.log10(((4*Math.PI)/299792458));
         }
         var gt=dishgain-10*Math.log10(atemp);
-        var totalsnr = Number(downlinkeirp)-10*Math.log10(Number(bandwidth))-Number(fspl)-wsiglosses+gt+228.5991672;
+        var totalsnr = Number(downlinkeirp)-10*Math.log10(Number(bandwidth))-Number(fspl)-wsiglosses+gt+228.5991672-Number(otherlosses);
         totalsnr=totalsnr.toFixed(2);
         var dtecvalue=gettecvalue(longitude,latitude);
 
@@ -4821,6 +4827,23 @@ function showconfirmaddsatelliteonchecksumerrorwindow(){
   	      collapsedWidth      : undefined,
   });
     $("#confirmaddsatelliteonchecksumerrorwindow").PopupWindow("open");
+}
+
+function showconfirmrestaringprogramwarningwindow(){
+
+  $('#confirmrestaringprogramwarningwindow').PopupWindow({
+          title: "Restart program?",
+          autoOpen: false,
+          nativeDrag: false,
+  	      height              : 220,
+  	      width               : 650,
+  	      maxHeight           : undefined,
+  	      maxWidth            : undefined,
+  	      minHeight           : 220,
+  	      minWidth            : 650,
+  	      collapsedWidth      : undefined,
+  });
+    $("#confirmrestaringprogramwarningwindow").PopupWindow("open");
 }
 
 function showconfirmplacingsatelliteafterwarningwindow(){

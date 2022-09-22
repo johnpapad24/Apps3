@@ -6,9 +6,9 @@ $errtr="test";
 $sock = @fsockopen('www.google.com', 80,$errno, $errstr, 30);
 if ($sock){
       @fclose($sock);
-      return true;
+      echo "0";
   }
-  else{  echo strval($errstr); return false; }
+  else{  echo strval($errstr); echo "1"; }
 }
 
 function connectdb($servername, $username, $password){
@@ -23,10 +23,10 @@ function connectdb($servername, $username, $password){
 function checkconnectdb($servername, $username, $password){
   $conn = mysqli_connect($servername, $username, $password);
   if (!$conn){
-    return false;
+    return "1";
   }
   mysqli_close($conn);
-  return true;
+  return "0";
 }
 
 function gettectable($tecfile){
@@ -200,9 +200,9 @@ function statupprogressupdater($processname, $percent){
 function logcreator($logfile){
    $file=fopen($logfile,'w');
    if(!$file){
- return false;}
+  echo "1";}
    fclose($file);
-   return true;
+   echo "0";
 }
 
 function startupprocesserror($message){
@@ -245,18 +245,21 @@ function checkandcreatesettingsfile($settingsfile){
   if(!$file){
      $success=createsettingsfile($settingsfile);
      if(!$success){
-     startupprocesserror("Error! Creation of settings file failed.");
-     die();
+     //startupprocesserror("Error! Creation of settings file failed.");
+     return "1";
     }
+    return "0";
   }
+  return "0";
 
 }
 
 function createsettingsfile($settingsfile){
   $file=fopen($settingsfile,'w');
   if(!$file){ return false;}
-  $test=fwrite($file, 'loadsetting("tempunitswitch",false);'."\r\n".'loadsetting("lengthunitswitch",false);'."\r\n".'loadsetting("eciunitswitch",false);'."\r\n".'loadsetting("xaxischeckbox",false);'."\r\n".'loadsetting("yaxischeckbox",false);'."\r\n".'loadsetting("zaxischeckbox",false);'."\r\n".'loadsetting("darkmodeswitch",false);');
+  $test=fwrite($file, 'loadsetting("tempunitswitch",false,viewer);'."\r\n".'loadsetting("lengthunitswitch",false,viewer);'."\r\n".'loadsetting("xaxischeckbox",false,viewer);'."\r\n".'loadsetting("yaxischeckbox",false,viewer);'."\r\n".'loadsetting("zaxischeckbox",false,viewer);'."\r\n".'loadsetting("primemeridiancheckbox",false,viewer);'."\r\n".'loadsetting("primeparallelcheckbox",false,viewer);'."\r\n".'loadsetting("allmeridianscheckbox",false,viewer);'."\r\n".'loadsetting("allparallelscheckbox",false,viewer);'."\r\n".'loadsetting("darkmodeswitch",false,viewer);');
   fclose($file);
+
   return $test;
 }
 
@@ -368,9 +371,9 @@ function recursivedirdelete($dirname){
 }
 function checktlefile($tlefile){
   if(!file_get_contents($tlefile)) {
-    return false;
+    echo "1";
   }
-  return true;
+  echo "0";
 }
 
 function requesterror($message){

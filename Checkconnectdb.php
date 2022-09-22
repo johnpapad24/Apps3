@@ -1,7 +1,9 @@
 <?php
 require 'Functions.php';
 require 'Credentials.php';
-return checkconnectdb();
+$res=checkconnectdb($servername, $username, $password);
+
+echo $res;
 
 
 ?>
