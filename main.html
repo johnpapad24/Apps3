@@ -138,6 +138,8 @@
 
   <div id="browsefileopennofiles" style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
     <div style="font-weight:bold; font-size:x-large; min-width:max-content;">There are no project files.</div>
+    <button style="margin-top:10px; left: 50%; position: relative; -ms-transform: translate(-50%); transform: translate(-50%); " class="btn btn-danger" onclick="$('#browsefileopenwindow').PopupWindow('Close');">Close</button>
+
   </div>
 
   <div id="browsefileopenmainwindow" style="display:none;">
@@ -146,7 +148,7 @@
     <script>browsefileloader("browsefileopenwindow");</script></div>
     <div style="max-height:20%;">
           <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#browsefileopenwindow').PopupWindow('Close');">Close</button>
-          <button type="button" style="float:right;" class="btn btn-primary" onclick="findfilename('browsefileopentable');" >Select</button>
+          <button type="button" style="float:right;" class="btn btn-primary" onclick="findfilename('browsefileopentable'); $('#browsefileopenwindow').PopupWindow('Close');" >Select</button>
     </div>
 </div>
 </div>
@@ -159,6 +161,7 @@
 
   <div style="margin: 0;  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="browsefilesavenofiles">
     <div style="font-weight:bold; font-size:x-large; min-width:max-content;">There are no project files.</div>
+    <button style="margin-top:10px; left: 50%; position: relative; -ms-transform: translate(-50%); transform: translate(-50%); " class="btn btn-danger" onclick="$('#browsefilesavewindow').PopupWindow('Close');">Close</button>
   </div>
 
   <div id="browsefilesavemainwindow" style="display:none;">
@@ -167,7 +170,7 @@
     <script>browsefileloader("browsefilesavewindow");</script></div>
     <div style="max-height:20%;">
           <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#browsefilesavewindow').PopupWindow('Close');">Close</button>
-          <button type="button" style="float:right;" class="btn btn-primary" onclick="findfilename('browsefilesavetable');" >Select</button>
+          <button type="button" style="float:right;" class="btn btn-primary" onclick="findfilename('browsefilesavetable'); $('#browsefilesavewindow').PopupWindow('Close');" >Select</button>
     </div>
 </div>
 </div>

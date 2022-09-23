@@ -872,7 +872,7 @@ function openproject(viewer){
 
   var projectfile=document.getElementById("openfiledir").value;
   if(projectfile==""){
-    return;
+   return;
   }
   var searchTxt = ".psav";
   var rgx = RegExp(searchTxt, "gi");
@@ -942,7 +942,8 @@ function projectloader(projectfile,viewer){
                       uri : "Resources/10477_Satellite_v1_L3.glb",
                       minimumPixelSize: 96
 
-                    },        });
+                    },
+                          });
                     var beamlist=[];
                     for(var j=0;j<tbjs.satellites[i].beams.length;j++){
                       var cbeam=new beam(tbjs.satellites[i].beams[j].id,tbjs.satellites[i].beams[j].name,tbjs.satellites[i].beams[j].satellite,null,tbjs.satellites[i].beams[j].usage,tbjs.satellites[i].beams[j].band,tbjs.satellites[i].beams[j].locationx,tbjs.satellites[i].beams[j].locationy,tbjs.satellites[i].beams[j].maxgain,tbjs.satellites[i].beams[j].mingain,tbjs.satellites[i].beams[j].semimajoraxismaxgain,tbjs.satellites[i].beams[j].eccentricity,tbjs.satellites[i].beams[j].step,tbjs.satellites[i].beams[j].tightness, tbjs.satellites[i].beams[j].rotationangle);
@@ -1419,6 +1420,7 @@ function addsatellitetoterrain(viewer,terrainobjects,ignoreerror){
              async: false,
               fail: function (data){
                 writetolog("Adding Satelite in terrain...","FAILED");
+                document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot Satellite to terrain.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
                 return;
               },
               success: function(data){
@@ -1489,6 +1491,9 @@ if(satbeamlist.length==0){
 }
 
   var tle=gettle(satname);
+  if(tle==null){
+    return;
+  }
   alert(tle);
   const satrec = satellite.twoline2satrec(
   tle.split('\n')[0].trim(),
@@ -1535,13 +1540,16 @@ if(satbeamlist.length==0){
     var gmst = satellite.gstime(jsDate);
     var p   = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
     var position = Cesium.Cartesian3.fromRadians(p.longitude, p.latitude, p.height * 1000);
+    var tchartographic=new Cesium.Cartographic(p.longitude, p.latitude, p.height * 1000);
+    var cartesianpos=new Cesium.Cartesian3();
+    Cesium.Cartographic.toCartesian(tchartographic,  Cesium.Ellipsoid.WGS84 , cartesianpos);
+    //alert(cartesianpos.x);
+    //var pos=new Cesium.Cartesian3();
+    //var transform=Cesium.Matrix4.fromRotationTranslation(Cesium.Transforms.computeTemeToPseudoFixedMatrix(time));
 
-   var pos=new Cesium.Cartesian3();
-    var transform=Cesium.Matrix4.fromRotationTranslation(Cesium.Transforms.computeTemeToPseudoFixedMatrix(time));
+  //  var pos=Cesium.Matrix4.multiplyByPoint(transform, position, pos);
 
-    var pos=Cesium.Matrix4.multiplyByPoint(transform, position, pos);
-
-    return pos;
+    return cartesianpos;
 
 
 }, false),
@@ -1831,8 +1839,8 @@ function checkandtargetedspotbeaminterrain(viewer,terrainobjects){
       }
       else{
         if(!isNumber(tightness.trim()) || Number(tightness.trim())<0){
-          document.getElementById("targetedspotbeamstep").setCustomValidity('Invalid Tightness.');
-          document.getElementById("targetedspotbeamsteperror").innerHTML='Invalid Tightness.';
+          document.getElementById("targetedspotbeamtightness").setCustomValidity('Invalid Tightness.');
+          document.getElementById("targetedspotbeamtightnesserror").innerHTML='Invalid Tightness.';
           er=1;
         }
       }
@@ -2153,6 +2161,7 @@ function addsatellitetodb(satname,tle1,tle2){
   $.ajax({
                url: '/Apps/Addsatellitetodb.php',
                type: 'POST',
+               async: false,
                data:{
                   satname: satname,
                   tle1:tle1,
@@ -2178,16 +2187,27 @@ function addsatellitetodb(satname,tle1,tle2){
            });
 }
 function deletesatellitefromdb(viewer,terrainobjs){
+
+  document.getElementById("selectsatellitemainwindow").style.display="none";
+  document.getElementById("deletesatellitemainwindow").style.display="none";
+  document.getElementById("deletesatellitewindowtablespan").style.display="none";
+  document.getElementById("selectsatellitewindowtablespan").style.display="none";
+  document.getElementById("deletesatelliteloading").style.display="block";
+  document.getElementById("selectsatelliteloading").style.display="block";
+
   var satname=document.getElementById("sattodelete").innerHTML;
   for(var i=0;i<terrainobjs.getSatellitesInTerrain.length;i++){
     if(terrainobjs.getSatellitesInTerrain[i].getName==satname){
-      viewer.entities.removeById(terrainobjects.getSatellitesInTerrain[i].id);
+      viewer.entities.removeById(terrainobjs.getSatellitesInTerrain[i].id);
+      terrainobjects.getSatellitesInTerrain.splice(i,1);
+      constructmanagedishestable(terrainobjs);
     }
   }
 
   $.ajax({
                url: '/Apps/Deletesatellitefromdb.php',
                type: 'POST',
+               async: false,
                data:{
                   satname: satname
                 },
@@ -2211,14 +2231,12 @@ function deletesatellitefromdb(viewer,terrainobjs){
                }
            });
 
-           document.getElementById("deletesatellitewindowtablespan").style.display="none";
-           document.getElementById("selectsatellitewindowtablespan").style.display="none";
-           document.getElementById("deletesatelliteloading").style.display="block";
-           document.getElementById("selectsatelliteloading").style.display="block";
            document.getElementById("deletesatellitewindowtablespan").innerHTML="";
            document.getElementById("selectsatellitewindowtablespan").innerHTML="";
            document.getElementById("deletesatellitewindowtablespan").innerHTML=satellitelistloader("deletesatellitewindow");
            document.getElementById("selectsatellitewindowtablespan").innerHTML=satellitelistloader("selectsatellitewindow");
+           document.getElementById("selectsatellitemainwindow").style.display="block";
+           document.getElementById("deletesatellitemainwindow").style.display="block";
            document.getElementById("deletesatellitewindowtablespan").style.display="block";
            document.getElementById("selectsatellitewindowtablespan").style.display="block";
            document.getElementById("deletesatelliteloading").style.display="none";
@@ -2395,34 +2413,48 @@ function changekeepremovebutton(keepremovebuttonid){
 
 function managesatelliteapplychanges(viewer,terrainobjects){
   var table=document.getElementById("managesatellitetable");
-  for(var i=0, row; row=table.rows[i];i++){
+
+
+  for(var i=1; i-1<table.rows.length && table.rows.length>0; i++){
+    //alert(i);
+    var row=table.rows[i-1];
     var rmd=false;
   //  var colorcol=row.cells[2];
     var removecol=row.cells[2];
     var removebtn=removecol.getElementsByTagName('button')[0];
-    alert(removebtn.innerHTML);
+    //alert(removebtn.innerHTML);
     if(removebtn.innerHTML=="Remove"){
-      viewer.entities.removeById(terrainobjects.getSatellitesInTerrain[i].id);
-      terrainobjects.getSatellitesInTerrain.splice(i,1);
+      viewer.entities.removeById(terrainobjects.getSatellitesInTerrain[i-1].id);
+      terrainobjects.getSatellitesInTerrain.splice(i-1,1);
+      table.rows[i-1].remove();
       rmd=true;
+      i=0;
+      //alert(table.rows.length);
       generatebeamsdropdownmenu(terrainobjects);
       populatesatdropdownontargetedspotbeam(terrainobjects);
     }
     //also for color
   }
-  constructmanagesatellitetable(terrainobjects);
+  constructmanagesatellitetable(terrainobjs);
 }
 function managedishesapplychanges(viewer,terrainobjects){
   var table=document.getElementById("managedishestable");
-  for(var i=0, row; row=table.rows[i];i++){
+  for(var i=1; i-1<table.rows.length && table.rows.length>0; i++){
+  //  alert(table.rows.length);
+
+  //  alert(i);
+    var row=table.rows[i-1];
     var rmd=false;
+  //  var colorcol=row.cells[2];
     var removecol=row.cells[3];
     var removebtn=removecol.getElementsByTagName('button')[0];
-    alert(removebtn.innerHTML);
+    //alert(removebtn.innerHTML);
     if(removebtn.innerHTML=="Remove"){
-      viewer.entities.removeById(terrainobjects.getDishesInTerrain[i].id);
-      terrainobjects.getDishesInTerrain.splice(i,1);
+      viewer.entities.removeById(terrainobjects.getDishesInTerrain[i-1].id);
+      terrainobjects.getDishesInTerrain.splice(i-1,1);
+      table.rows[i-1].remove();
       rmd=true;
+      i=0;
     }
   }
   constructmanagedishestable(terrainobjects);
@@ -2881,7 +2913,6 @@ function checkandaddsatellite(checksumcheck){
     }
 
   }
- //more checks later
   if(er==0){
     addsatellitetodb(namestr,tle1str,tle2str);
       document.getElementById("deletesatellitewindowtablespan").style.display="none";
@@ -4867,6 +4898,7 @@ function showconfirmplacingsatelliteafterwarningwindow(){
 function showconfirmdeletesatellitewindow(){
   var table=document.getElementById('satellitedelete');
   var row=table.getElementsByClassName("selectedtr")[0];
+  if(row==null){return;}
   var satname=row.cells[0].innerText;
   document.getElementById('confirmdeletesatellitespan').innerHTML="Are you sure to delete satellite "+ satname+"?";
   document.getElementById('sattodelete').innerHTML=satname;
@@ -5035,7 +5067,7 @@ function showgeneratetargetedspotbeamwindow(sattoselect){
           title: "Generate Targeted Spotbeam",
           autoOpen: false,
           nativeDrag: false,
-          height              : 655,
+          height              : 720,
           width               : 720,
           maxHeight           : undefined,
           maxWidth            : undefined,

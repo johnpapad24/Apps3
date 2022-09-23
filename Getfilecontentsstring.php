@@ -1,9 +1,10 @@
 <?php
+require 'Credentials.php';
 
 $filename=$_POST['filename'];
 
 
-$buf=file_get_contents($filename);
+$buf=file_get_contents($projectsdir.$filename);
 
 if($buf==false){
   echo "false";
