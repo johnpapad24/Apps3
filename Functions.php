@@ -56,16 +56,16 @@ while (!feof($file)){
   $name=trim(fgets($file));
   $tle1=trim(fgets($file));
   $tle2=trim(fgets($file));
+  $dirname="CSVs/".filename_satinizer($name);
   $existsq= mysqli_query($conn, 'SELECT count(*) as exist from Satellite where Name='."\"".$name."\"".';');
   $res=$existsq->fetch_assoc();
   if($res["exist"]<1){
-    $insertq= $conn->query('insert into Satellite (Name, Tleline1, Tleline2, BeamCSV) Values ('."\"".$name."\", \"".$tle1."\", \"".$tle2."\", ".'"/CSVs/'.$name.'.csv");');
+    $insertq= $conn->query('insert into Satellite (Name, Tleline1, Tleline2, BeamCSV) Values ('."\"".$name."\", \"".$tle1."\", \"".$tle2."\", ".'"/'.$dirname.'");');
   }
   else{
     $updatq=$conn->query('UPDATE Satellite SET Tleline1='.'"'.$tle1.'"'.', Tleline2='.'"'.$tle2.'"'. ' Where Name='.'"'.$name.'";');
   }
 
-  $dirname="CSVs/".filename_satinizer($name);
   $cfile=$dirname."/beams.csv";
   if(!is_dir($dirname)){
     $dirmade=mkdir($dirname,0777,true);
@@ -316,9 +316,9 @@ function addsatellite($conn,$name,$tle1,$tle2){
   $conn->query("USE Satellites");
   $existsq= mysqli_query($conn, 'SELECT count(*) as exist from Satellite where Name='."\"".$name."\"".';');
   $res=$existsq->fetch_assoc();
+  $dirname="CSVs/".filename_satinizer($name);
   if($res["exist"]<1){
-    $insertq= $conn->query('insert into Satellite (Name, Tleline1, Tleline2, BeamCSV) Values ('."\"".$name."\", \"".$tle1."\", \"".$tle2."\", ".'"/CSVs/'.$name.'.csv");');
-
+    $insertq= $conn->query('insert into Satellite (Name, Tleline1, Tleline2, BeamCSV) Values ('."\"".$name."\", \"".$tle1."\", \"".$tle2."\", ".'"/'.$dirname.'");');
   }
   else{
     $updatq=$conn->query('UPDATE Satellite SET Tleline1='.'"'.$tle1.'"'.', Tleline2='.'"'.$tle2.'"'. ' Where Name='.'"'.$name.'";');

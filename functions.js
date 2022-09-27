@@ -757,7 +757,7 @@ function browsefileloader(windowname){
                   }
               },
               success: function(data) {
-                alert(data);
+                //alert(data);
                if(windowname=="browsefileopenwindow"){
                   document.getElementById('browsefileopentablespan').innerHTML=data;
                   var table = document.getElementById("browsefileopentable");
@@ -796,12 +796,12 @@ function projectsaver(filename,terrainobjects){
     return;
   }
   var psav=terrainobjects.jsonfyterrainobjects;
-  alert(psav);
+  //alert(psav);
   var searchTxt = ".psav";
   var rgx = RegExp(searchTxt, "gi");
   var strArr = filename.split(searchTxt);
   var filename2=strArr[0]+".psav";
-  alert(filename2);
+  //alert(filename2);
   $.ajax({
              url: '/Apps/Savefilecreator.php',
              type: 'POST',
@@ -810,6 +810,7 @@ function projectsaver(filename,terrainobjects){
               error:function (xhr, ajaxOptions, thrownError){
                   if(xhr.status!=200) {
                     document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot save file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
+                    writetolog("Saving Project...","FAILED");
                     showerrorwindow();
                   }
               },
@@ -817,6 +818,8 @@ function projectsaver(filename,terrainobjects){
                 currentsavefile=filename2;
                 browsefileloader("browsefileopenwindow");
                 browsefileloader("browsefilesavewindow");
+                writetolog("Saving Project...","OK");
+
              }
          });
 }
@@ -878,9 +881,10 @@ function openproject(viewer){
   var rgx = RegExp(searchTxt, "gi");
   var strArr = projectfile.split(searchTxt);
   var filename2=strArr[0]+".psav";
-  alert(filename2);
+  //alert(filename2);
   projectloader(filename2,viewer);
 }
+
 
 function projectloader(projectfile,viewer){
   $.ajax({
@@ -897,7 +901,7 @@ function projectloader(projectfile,viewer){
 
                 },
                 success: function(data) {
-                  alert(data);
+                //  alert(data);
                   if(data=="false"){
                     writetolog("Loading project file...","FAILED");
                     document.getElementById('errorwindow').innerHTML='<div style="display: block; margin: auto; text-align:center;">  <img style="vertical-align:middle;" src="Resources/error-icon.png" width="48" height="48">  <span style="color: red; font-size: 18px; font-weight: bold;">Cannot load project file.</span> </div>   <div style="text-align:center;"> <button onclick="showlogwindow();" style="margin:auto; text-align:center;" class="btn btn-info">Show Log</button> </div>';
@@ -927,14 +931,10 @@ function projectloader(projectfile,viewer){
                       var gmst = satellite.gstime(jsDate);
                       var p   = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
                       var position = Cesium.Cartesian3.fromRadians(p.longitude, p.latitude, p.height * 1000);
-
-                     var pos=new Cesium.Cartesian3();
-                      var transform=Cesium.Matrix4.fromRotationTranslation(Cesium.Transforms.computeTemeToPseudoFixedMatrix(time));
-
-                      var pos=Cesium.Matrix4.multiplyByPoint(transform, position, pos);
-
-                      return pos;
-
+                      var tchartographic=new Cesium.Cartographic(p.longitude, p.latitude, p.height * 1000);
+                      var cartesianpos=new Cesium.Cartesian3();
+                      Cesium.Cartographic.toCartesian(tchartographic,  Cesium.Ellipsoid.WGS84 , cartesianpos);
+                      return cartesianpos;
 
                   }, false),
                     description: "Orbit of Satellite: "+tbjs.satellites[i].name,
@@ -942,12 +942,11 @@ function projectloader(projectfile,viewer){
                       uri : "Resources/10477_Satellite_v1_L3.glb",
                       minimumPixelSize: 96
 
-                    },
-                          });
+                    },        });
                     var beamlist=[];
                     for(var j=0;j<tbjs.satellites[i].beams.length;j++){
                       var cbeam=new beam(tbjs.satellites[i].beams[j].id,tbjs.satellites[i].beams[j].name,tbjs.satellites[i].beams[j].satellite,null,tbjs.satellites[i].beams[j].usage,tbjs.satellites[i].beams[j].band,tbjs.satellites[i].beams[j].locationx,tbjs.satellites[i].beams[j].locationy,tbjs.satellites[i].beams[j].maxgain,tbjs.satellites[i].beams[j].mingain,tbjs.satellites[i].beams[j].semimajoraxismaxgain,tbjs.satellites[i].beams[j].eccentricity,tbjs.satellites[i].beams[j].step,tbjs.satellites[i].beams[j].tightness, tbjs.satellites[i].beams[j].rotationangle);
-                      alert(JSON.stringify(cbeam));
+                      //alert(JSON.stringify(cbeam));
                       beamlist.push(cbeam);
                     }
                     if(beamlist.length==0){
@@ -987,9 +986,7 @@ function projectloader(projectfile,viewer){
 
 
     });
-
 }
-
 
 function loadsetting(setting,value,viewer){
   document.getElementById(setting).checked=value;
@@ -1424,15 +1421,19 @@ function addsatellitetoterrain(viewer,terrainobjects,ignoreerror){
                 return;
               },
               success: function(data){
-                beamlist=data.split(',');
+                if(data!=''){
+                  beamlist=data.split(',');
+                }
               }
     });
 
 
-    alert(beamlist);
+    //alert(beamlist);
+    if(beamlist!=null){
     for(var i=0;i<beamlist.length;i++){
+      var trbmls=beamlist[i].replace(/['"]+/g, '')
       $.ajax({
-                 url: beamlist[i],
+                 url: trbmls,
                  type: 'POST',
                  async: false,
                  error:function (xhr, ajaxOptions, thrownError){
@@ -1449,7 +1450,7 @@ function addsatellitetoterrain(viewer,terrainobjects,ignoreerror){
 
                   },
                   success: function(data) {
-                    alert(data);
+                  //  alert(data);
                     if(data=="false"){
                       writetolog("Loading beam file...","FAILED");
                       document.getElementById('confirmplacingsatelliteafterwarningmsg').innerHTML='Failed to read beam file: '+beamlist[i]+'<br>The recommended action is to cancel and check the beam file again. <br>You can continue trying to visualize satellite although problems may occur.';
@@ -1465,7 +1466,7 @@ function addsatellitetoterrain(viewer,terrainobjects,ignoreerror){
 
                         for(var j=0;j<tbjs.beams.length;j++){
                           var cbeam=new beam(tbjs.beams[j].id,tbjs.beams[j].name,tbjs.beams[j].satellite,null,tbjs.beams[j].usage,tbjs.beams[j].band,tbjs.beams[j].locationx,tbjs.beams[j].locationy,tbjs.beams[j].maxgain,tbjs.beams[j].mingain,tbjs.beams[j].semimajoraxismaxgain,tbjs.beams[j].eccentricity,tbjs.beams[j].step,tbjs.beams[j].tightness,tbjs.beams[j].rotationangle);
-                          alert(JSON.stringify(cbeam));
+                          //alert(JSON.stringify(cbeam));
                           satbeamlist.push(cbeam);
                         }
                         if(satbeamlist.length==0){
@@ -1479,13 +1480,13 @@ function addsatellitetoterrain(viewer,terrainobjects,ignoreerror){
                 });
               }
 
-
+            }
 
 if(er==1){
   writetolog("Adding Satelite in terrain...","FAILED");
   return;
 }
-alert(er);
+//alert(er);
 if(satbeamlist.length==0){
   satbeamlist=null;
 }
@@ -1494,7 +1495,7 @@ if(satbeamlist.length==0){
   if(tle==null){
     return;
   }
-  alert(tle);
+  //alert(tle);
   const satrec = satellite.twoline2satrec(
   tle.split('\n')[0].trim(),
   tle.split('\n')[1].trim()
@@ -1505,7 +1506,7 @@ if(satbeamlist.length==0){
   var position = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
   var start = Cesium.JulianDate.fromDate(new Date());
   var colorarr=colorrand();
-  alert(colorarr);
+  //alert(colorarr);
   var starttime;
 
 
@@ -1812,12 +1813,13 @@ function checkandtargetedspotbeaminterrain(viewer,terrainobjects){
         er=1;
       }
       else{
-        if(!isNumber(eccentricity.trim()) || Number(eccentricity.trim())<0){
+        if(!isNumber(eccentricity.trim()) || Number(eccentricity.trim())<0 || Number(eccentricity.trim())>=1){
           document.getElementById("targetedspotbeameccentricity").setCustomValidity('Invalid eccentricity.');
           document.getElementById("targetedspotbeameccentricityerror").innerHTML='Invalid eccentricity.';
           er=1;
         }
       }
+
 
       if(step.trim()==""){
         document.getElementById("targetedspotbeamstep").setCustomValidity('Step is required.');
@@ -1916,6 +1918,7 @@ function TargetedSpotbeamGenerator(viewer,terrainobjects,beamname,usage,band,loc
   }
   var stepsrequired=Math.ceil((maxgain-mingain)/step)+1;
   var currentgain=maxgain;
+  //alert(stepsrequired);
   for(var i=0;i<stepsrequired;i++){
     var semimajoraxis=Number(semimajoraxismaxgain)+ i*(Number(semimajoraxismaxgain)/Number(tightness));
     var semiminoraxis=semimajoraxis*Math.sqrt(1-(eccentricity*eccentricity));
@@ -2098,7 +2101,7 @@ function CSVToArray(str, strDelimiter ){
 
           const rows = str.slice(str.indexOf("\n") + 1).split("\n");
 
-          alert(rows);
+        //  alert(rows);
           return null;
 
           // Map the rows
@@ -2458,6 +2461,7 @@ function managedishesapplychanges(viewer,terrainobjects){
     }
   }
   constructmanagedishestable(terrainobjects);
+  fillandactivatelinkbudgetwindow(terrainobjects);
 }
 
 function isNumber(n){
@@ -3680,7 +3684,7 @@ function getweather(){
          return;
      }
 
-     alert(JSON.stringify(data));
+     //alert(JSON.stringify(data));
      document.getElementById("currentweatherloc").innerHTML=cityloc;
      document.getElementById("Estimatedweathersiglosses").value=data;
      getcurrentdayweatherdata(data);
@@ -3721,7 +3725,7 @@ function getweather(){
          return;
      }
 
-     alert(JSON.stringify(data));
+    // alert(JSON.stringify(data));
      document.getElementById("currentweatherloc").innerHTML=data.name + "," + data.sys.country;
      longitude=data.coord.lon;
      latitude=data.coord.lat;
@@ -3736,7 +3740,7 @@ function getweather(){
           return;
       }
 
-      alert(JSON.stringify(data));
+      //alert(JSON.stringify(data));
       document.getElementById("Estimatedweathersiglosses").value=data;
       getcurrentdayweatherdata(data);
       getmultipledayweatherdata(data,5);
@@ -3838,7 +3842,7 @@ function calculatedsiglosses(data){
      totalatt=totalatt+0.07504*(Math.pow(parseFloat(rain1h),1.0995))*5;
    }
   }
-  alert(totalatt);
+  //alert(totalatt);
   return totalatt.toFixed(2)+"dB";
 
 
@@ -3865,7 +3869,7 @@ function calculatedsiglosseslite(data,band){
      totalatt=totalatt+0.07504*(Math.pow(parseFloat(rain1h)^1.0995))*5;
    }
   }
-  alert(totalatt);
+  //alert(totalatt);
   return totalatt.toFixed(2);
 
 
@@ -4611,7 +4615,7 @@ const fromJSON = any => parse($stringify(any));
 function showlogwindow(){
 
   $.ajax({
-             url: '/Apps/loggetter.php',
+             url: '/Apps/Loggetter.php',
              type: 'GET',
              success: function(data) {
                document.getElementById("logtextarea").value=data;

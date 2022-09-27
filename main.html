@@ -113,7 +113,7 @@
 </div>
 <div style="margin-top:10px">
   <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#openprojectwindow').PopupWindow('Close');">Close</button>
-  <button type="button" style="float:right;" class="btn btn-primary" onclick="openproject(viewer);" >Open</button>
+  <button type="button" style="float:right;" class="btn btn-primary" onclick="openproject(viewer); $('#openprojectwindow').PopupWindow('Close');" >Open</button>
 </div>
 </div>
 
@@ -126,7 +126,7 @@
 </div>
 <div style="margin-top:10px">
   <button type="button" style="float:left;" class="btn btn-danger" onclick="$('#saveprojectwindow').PopupWindow('Close');">Close</button>
-  <button type="button" style="float:right;" class="btn btn-primary" onclick="projectsaver(document.getElementById('savefiledir').value,terrainobjs);" >Save</button>
+  <button type="button" style="float:right;" class="btn btn-primary" onclick="projectsaver(document.getElementById('savefiledir').value,terrainobjs); $('#saveprojectwindow').PopupWindow('Close');" >Save</button>
 </div>
 </div>
 
@@ -685,7 +685,7 @@
 </div>
 
 <div id="generatetargetedspotbeamwindow" style="display: none;">
-  <div style="text-align:center; font-size: x-large; font-weight:bold; margin-bottom:8px;">Generate tageted spotbeam:</div>
+  <div style="text-align:center; font-size: x-large; font-weight:bold; margin-bottom:8px;">Generate targeted spotbeam:</div>
 
 
   <div style="text-align:center;   margin-bottom:8px;">Name:

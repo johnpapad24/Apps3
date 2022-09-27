@@ -4,6 +4,6 @@ require 'Credentials.php';
 
 $message=$_POST['message'];
 $status=$_POST['status'];
-checkandlogonstartup2($logfile, $message, $status);
-
+$ret=checkandlogonstartup2($logfile, $message, $status);
+return $ret;
 ?>

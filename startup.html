@@ -9,6 +9,7 @@
   <title>Hello World!</title>
   <link href="popupwindow.css" rel="stylesheet">
   <link href="bootstrap.min.css" rel="stylesheet">
+  <link href="program.css" rel="stylesheet">
 	<script src="jquery-3.6.0.min.js"></script>
   <script src="bootstrap.min.js"></script>
 	<script src="popupwindow.js"></script>
@@ -463,7 +464,6 @@ function updatedbstep(){
              async:false,
              type: 'POST',
              success: function(data) {
-
                if(data==0){
                     check=logonstartup("Updating database...","OK");
                     if(check==false){
