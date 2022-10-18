@@ -1,122 +1,62 @@
-[2022/09/25 15:31:30] : Starting initialization...
-[2022/09/25 15:31:30] : Checking internet connection... : OK
-[2022/09/25 15:31:51] : Checking TLE file... : OK
-[2022/09/25 15:31:51] : Connecting to database... : OK
-[2022/09/25 15:32:30] : Updating database... : OK
-[2022/09/25 15:32:30] : Checking/creating settings file... : OK
-[2022/09/25 15:32:30] : Started Cesium environment Load...
-[2022/09/25 15:32:43] : Loading satellite list... : OK
-[2022/09/25 15:32:43] : Loading satellite list... : OK
-[2022/09/25 15:32:43] : Loading settings file... : OK
-[2022/09/25 15:32:52] : Updating settings file... : OK
-[2022/09/25 15:32:52] : Saving Settings... : OK
-[2022/09/25 15:32:53] : Updating settings file... : OK
-[2022/09/25 15:32:53] : Saving Settings... : OK
-[2022/09/25 15:32:54] : Updating settings file... : OK
-[2022/09/25 15:32:54] : Saving Settings... : OK
-[2022/09/25 15:33:10] : Loading beam file... : FAILED
-[2022/09/25 15:33:10] : Adding Satelite in terrain... : FAILED
-[2022/09/25 15:33:12] : Loading beam file... : FAILED
-[2022/09/25 15:33:12] : Getting TLE... : OK
-[2022/09/25 15:33:13] : Adding Satelite in terrain... : OK
-[2022/09/25 15:37:15] : Loading satellite list... : OK
-[2022/09/25 15:37:15] : Loading satellite list... : OK
-[2022/09/25 15:37:15] : Loading settings file... : OK
-[2022/09/25 15:37:26] : Loading beam file... : FAILED
-[2022/09/25 15:37:26] : Adding Satelite in terrain... : FAILED
-[2022/09/25 15:37:27] : Loading beam file... : FAILED
-[2022/09/25 15:37:27] : Getting TLE... : OK
-[2022/09/25 15:37:28] : Adding Satelite in terrain... : OK
-[2022/09/25 15:42:49] : Loading satellite list... : OK
-[2022/09/25 15:42:49] : Loading satellite list... : OK
-[2022/09/25 15:42:49] : Loading settings file... : OK
-[2022/09/25 15:42:55] : Loading beam file... : FAILED
-[2022/09/25 15:42:55] : Adding Satelite in terrain... : FAILED
-[2022/09/25 15:42:57] : Loading beam file... : FAILED
-[2022/09/25 15:42:57] : Getting TLE... : OK
-[2022/09/25 15:42:58] : Adding Satelite in terrain... : OK
-[2022/09/25 15:44:44] : Loading satellite list... : OK
-[2022/09/25 15:44:44] : Loading satellite list... : OK
-[2022/09/25 15:44:44] : Loading settings file... : OK
-[2022/09/25 15:44:56] : Loading beam file... : FAILED
-[2022/09/25 15:44:56] : Adding Satelite in terrain... : FAILED
-[2022/09/25 15:44:58] : Loading beam file... : FAILED
-[2022/09/25 15:44:58] : Adding Satelite in terrain... : FAILED
-[2022/09/25 15:44:59] : Loading beam file... : FAILED
-[2022/09/25 15:44:59] : Getting TLE... : OK
-[2022/09/25 15:45:01] : Adding Satelite in terrain... : OK
-[2022/09/25 15:47:45] : Loading satellite list... : OK
-[2022/09/25 15:47:45] : Loading satellite list... : OK
-[2022/09/25 15:47:45] : Loading settings file... : OK
-[2022/09/25 15:48:05] : Loading beam file... : FAILED
-[2022/09/25 15:48:05] : Adding Satelite in terrain... : FAILED
-[2022/09/25 15:48:08] : Loading beam file... : FAILED
-[2022/09/25 15:48:09] : Getting TLE... : OK
-[2022/09/25 15:48:11] : Adding Satelite in terrain... : OK
-[2022/09/25 15:50:20] : Loading satellite list... : OK
-[2022/09/25 15:50:20] : Loading satellite list... : OK
-[2022/09/25 15:50:20] : Loading settings file... : OK
-[2022/09/25 16:23:58] : Loading satellite list... : OK
-[2022/09/25 16:23:58] : Loading satellite list... : OK
-[2022/09/25 16:23:58] : Loading settings file... : OK
-[2022/09/27 14:21:15] : Loading satellite list... : OK
-[2022/09/27 14:21:15] : Loading settings file... : OK
-[2022/09/27 14:21:15] : Loading satellite list... : OK
-[2022/09/27 14:21:18] : Updating settings file... : OK
-[2022/09/27 14:21:18] : Saving Settings... : OK
-[2022/09/27 14:21:19] : Updating settings file... : OK
-[2022/09/27 14:21:19] : Saving Settings... : OK
-[2022/09/27 14:21:20] : Updating settings file... : OK
-[2022/09/27 14:21:20] : Saving Settings... : OK
-[2022/09/27 14:21:21] : Updating settings file... : OK
-[2022/09/27 14:21:21] : Saving Settings... : OK
-[2022/09/27 14:21:25] : Loading satellite list... : OK
-[2022/09/27 14:21:25] : Loading satellite list... : OK
-[2022/09/27 14:21:25] : Loading settings file... : OK
-[2022/09/27 14:21:33] : Loading beam file... : FAILED
-[2022/09/27 14:21:33] : Adding Satelite in terrain... : FAILED
-[2022/09/27 14:21:34] : Loading beam file... : FAILED
-[2022/09/27 14:21:34] : Getting TLE... : OK
-[2022/09/27 14:21:34] : Adding Satelite in terrain... : OK
-[2022/09/27 14:23:52] : Saving Project... : OK
-[2022/09/27 14:24:08] : Loading project file... : OK
-[2022/09/27 14:24:15] : Loading project file... : OK
-[2022/09/27 14:24:23] : Loading project file... : OK
-[2022/09/27 14:24:23] : Loading project file... : OK
-[2022/09/27 14:24:25] : Loading project file... : OK
-[2022/09/27 14:25:43] : Loading satellite list... : OK
-[2022/09/27 14:25:43] : Loading satellite list... : OK
-[2022/09/27 14:25:43] : Loading settings file... : OK
-[2022/09/27 14:25:51] : Loading project file... : OK
-[2022/09/27 14:26:26] : Saving Project... : OK
-[2022/09/27 14:26:31] : Loading satellite list... : OK
-[2022/09/27 14:26:31] : Loading satellite list... : OK
-[2022/09/27 14:26:31] : Loading settings file... : OK
-[2022/09/27 14:26:38] : Loading project file... : OK
-[2022/09/27 14:26:55] : Loading project file... : OK
-[2022/09/27 14:27:06] : Loading project file... : OK
-[2022/09/27 14:27:14] : Loading project file... : OK
-[2022/09/27 14:27:24] : Loading project file... : OK
-[2022/09/27 14:27:37] : Loading project file... : OK
-[2022/09/27 14:27:44] : Loading satellite list... : OK
-[2022/09/27 14:27:44] : Loading satellite list... : OK
-[2022/09/27 14:27:44] : Loading settings file... : OK
-[2022/09/27 14:33:42] : Loading satellite list... : OK
-[2022/09/27 14:33:42] : Loading satellite list... : OK
-[2022/09/27 14:33:43] : Loading settings file... : OK
-[2022/09/27 14:33:55] : Loading project file... : OK
-[2022/09/27 14:35:02] : Loading satellite list... : OK
-[2022/09/27 14:35:02] : Loading satellite list... : OK
-[2022/09/27 14:35:02] : Loading settings file... : OK
-[2022/09/27 14:35:13] : Loading project file... : OK
-[2022/09/27 14:36:11] : Loading satellite list... : OK
-[2022/09/27 14:36:11] : Loading satellite list... : OK
-[2022/09/27 14:36:11] : Loading settings file... : OK
-[2022/09/27 14:36:44] : Loading satellite list... : OK
-[2022/09/27 14:36:44] : Loading satellite list... : OK
-[2022/09/27 14:36:45] : Loading settings file... : OK
-[2022/09/27 14:37:00] : Loading project file... : OK
-[2022/09/27 14:37:10] : Loading satellite list... : OK
-[2022/09/27 14:37:10] : Loading satellite list... : OK
-[2022/09/27 14:37:10] : Loading settings file... : OK
-[2022/09/27 14:37:17] : Loading project file... : OK
+[2022/10/02 22:24:22] : Starting initialization...
+[2022/10/02 22:24:22] : Checking internet connection... : OK
+[2022/10/02 22:24:36] : Checking TLE file... : OK
+[2022/10/02 22:24:36] : Connecting to database... : OK
+[2022/10/02 22:25:15] : Updating database... : OK
+[2022/10/02 22:25:15] : Checking/creating settings file... : OK
+[2022/10/02 22:25:15] : Started Cesium environment Load...
+[2022/10/02 22:25:17] : Loading satellite list... : OK
+[2022/10/02 22:25:17] : Loading satellite list... : OK
+[2022/10/02 22:25:17] : Loading settings file... : OK
+[2022/10/02 23:28:39] : Loading project file... : OK
+[2022/10/02 23:28:51] : Loading project file... : OK
+[2022/10/02 23:29:51] : Updating settings file... : OK
+[2022/10/02 23:29:51] : Saving Settings... : OK
+[2022/10/02 23:29:52] : Updating settings file... : OK
+[2022/10/02 23:29:52] : Saving Settings... : OK
+[2022/10/02 23:29:53] : Updating settings file... : OK
+[2022/10/02 23:29:53] : Saving Settings... : OK
+[2022/10/02 23:31:55] : Saving Project... : OK
+[2022/10/02 23:32:05] : Loading project file... : OK
+[2022/10/02 23:32:09] : Updating settings file... : OK
+[2022/10/02 23:32:09] : Saving Settings... : OK
+[2022/10/02 23:32:10] : Updating settings file... : OK
+[2022/10/02 23:32:10] : Saving Settings... : OK
+[2022/10/02 23:32:11] : Updating settings file... : OK
+[2022/10/02 23:32:11] : Saving Settings... : OK
+[2022/10/02 23:32:13] : Updating settings file... : OK
+[2022/10/02 23:32:13] : Saving Settings... : OK
+[2022/10/02 23:32:13] : Updating settings file... : OK
+[2022/10/02 23:32:13] : Saving Settings... : OK
+[2022/10/02 23:32:14] : Updating settings file... : OK
+[2022/10/02 23:32:14] : Saving Settings... : OK
+[2022/10/02 23:32:14] : Updating settings file... : OK
+[2022/10/02 23:32:14] : Saving Settings... : OK
+[2022/10/02 23:32:26] : Updating settings file... : OK
+[2022/10/02 23:32:26] : Saving Settings... : OK
+[2022/10/02 23:32:32] : Updating settings file... : OK
+[2022/10/02 23:32:32] : Saving Settings... : OK
+[2022/10/03 08:07:38] : Updating settings file... : OK
+[2022/10/03 08:07:38] : Saving Settings... : OK
+[2022/10/03 08:07:48] : Updating settings file... : OK
+[2022/10/03 08:07:48] : Saving Settings... : OK
+[2022/10/03 08:07:52] : Updating settings file... : OK
+[2022/10/03 08:07:52] : Saving Settings... : OK
+[2022/10/03 08:07:53] : Updating settings file... : OK
+[2022/10/03 08:07:53] : Saving Settings... : OK
+[2022/10/03 08:07:58] : Updating settings file... : OK
+[2022/10/03 08:07:58] : Saving Settings... : OK
+[2022/10/03 08:07:59] : Updating settings file... : OK
+[2022/10/03 08:07:59] : Saving Settings... : OK
+[2022/10/03 08:07:59] : Updating settings file... : OK
+[2022/10/03 08:07:59] : Saving Settings... : OK
+[2022/10/03 08:08:00] : Updating settings file... : OK
+[2022/10/03 08:08:00] : Saving Settings... : OK
+[2022/10/03 08:08:01] : Updating settings file... : OK
+[2022/10/03 08:08:01] : Saving Settings... : OK
+[2022/10/04 07:17:05] : Loading satellite list... : OK
+[2022/10/04 07:17:05] : Loading satellite list... : OK
+[2022/10/04 07:17:05] : Loading settings file... : OK
+[2022/10/04 12:45:40] : Loading satellite list... : OK
+[2022/10/04 12:45:41] : Loading satellite list... : OK
+[2022/10/04 12:45:41] : Loading settings file... : OK

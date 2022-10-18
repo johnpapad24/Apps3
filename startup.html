@@ -550,12 +550,14 @@ var totalsteps=6;
 var check=true;
 var percent=0;
 var step=0;
+
 check=createlogstep(step,totalsteps);
 
 if(check==true){
  step=step+1;
  startupprogessor(step,totalsteps,"Checking internet connection...");
  check=checkinginternetconnectionstep(step,totalsteps);
+
 }
 if(check==true){
   step=step+1;
@@ -572,11 +574,13 @@ if(check==true){
   step=step+1;
   startupprogessor(step,totalsteps,"Updating database...");
   check=updatedbstep();
+
 }
 if(check==true){
   step=step+1;
   startupprogessor(step,totalsteps,"Checking/creating settings file...");
   check=settingsfilecreatorstep();
+
 }
 if(check==true){
   step=step+1;
