@@ -1,0 +1,1 @@
+{ "satellites":[], "dishes":[{"id":"dish_33","name":"33","longitude":"-115.56666603716118","latitude":"32.97178387981153","size":"22","gain":"11","efficiencyk":"22","usage":"Downlink"}], "currentbeam": null }

@@ -1,0 +1,1 @@
+{ "satellites":[{"id":"satellite_CALSPHERE 4A",  "name":"CALSPHERE 4A",  "color":"Green",  "czml": null, "tle1":"1 01520U 65065H   22265.86017624  .00000092  00000+0  16006-3 0  9997", "tle2":"2 01520  89.9856 130.0937 0069340 350.3722  22.2412 13.35904860780661", "beams": null}], "dishes":[], "currentbeam": null }

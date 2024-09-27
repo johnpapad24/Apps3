@@ -1,0 +1,2 @@
+{ "terrainobjects":{ "satellites":[ {"id":"satellite_TEMPSAT 1",  "name":"TEMPSAT 1",  "color":"Orange",  "czml": null, "tle":"1 01512U 65065E   22150.92819160  .00000033  00000+0  46327-4 0  9998
+2 01512  89.9146 218.8056 0071981  80.2140  93.1968 13.33450693763031", "beams": null}], "dishes":[[]], "currentbeam":"beams":[{"id":"satname:_TEMPSAT 1_beamname:_fedfe",  "name":"fedfe",  "satellite":"TEMPSAT 1", "data": null, "dataczml": undefined}]}
